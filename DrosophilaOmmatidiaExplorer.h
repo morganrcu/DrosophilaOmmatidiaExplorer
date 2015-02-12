@@ -1,22 +1,79 @@
-#ifndef DROSOPHILAOMMATIDIAEXPLORER_H
-#define DROSOPHILAOMMATIDIAEXPLORER_H
+/*=========================================================================
 
+  Program:   Visualization Toolkit
+  Module:    SimpleView.h
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright 2009 Sandia Corporation.
+  Under the terms of Contract DE-AC04-94AL85000, there is a non-exclusive
+  license for use of this work by or on behalf of the
+  U.S. Government. Redistribution and use in source and binary forms, with
+  or without modification, are permitted provided that this Notice and any
+  statement of authorship are reproduced on all copies.
+
+=========================================================================*/
+#ifndef DrosophilaOmmatidiaExplorer_H
+#define DrosophilaOmmatidiaExplorer_H
+
+#include <vtkSmartPointer.h>    // Required for smart pointer internal ivars.
+#include <vtkRenderer.h>
 #include <QMainWindow>
 
-namespace Ui {
-class DrosophilaOmmatidiaExplorer;
-}
+#include <DrosophilaOmmatidiaJSONProject.h>
+
+
+// Forward Qt class declarations
+class Ui_DrosophilaOmmatidiaExplorer;
+
+// Forward VTK class declarations
+class vtkQtTableView;
+
 
 class DrosophilaOmmatidiaExplorer : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    explicit DrosophilaOmmatidiaExplorer(QWidget *parent = 0);
-    ~DrosophilaOmmatidiaExplorer();
+
+  // Constructor/Destructor
+  DrosophilaOmmatidiaExplorer();
+  ~DrosophilaOmmatidiaExplorer();
+
+public slots:
+
+  virtual void slotOpenProject();
+  virtual void slotExit();
+
+  virtual void slotFrameChanged(int);
+
+  virtual void slotShowDeconvolutedChanged(bool);
+  virtual void slotShowOriginalChanged(bool);
+  virtual void slotShowMotionFieldChanged(bool);
+
+  virtual void slotShowOriginalModeChanged(const QString &);
+  virtual void slotShowDeconvolutedModeChanged(const QString &);
+protected:
+
+protected slots:
 
 private:
-    Ui::DrosophilaOmmatidiaExplorer *ui;
+
+  void DrawFrame(int frame);
+  vtkSmartPointer<vtkRenderer> m_Renderer;
+  // Designer form
+  Ui_DrosophilaOmmatidiaExplorer *m_pUI;
+
+  enum VolumeVisualizationType{VOLUME,SLICE};
+
+  VolumeVisualizationType m_ShowOriginalVolumeMode;
+  VolumeVisualizationType m_ShowDeconvolutedVolumeMode;
+
+  int m_CurrentFrame;
+  QString m_ProjectPath;
+
+  DrosophilaOmmatidiaJSONProject m_Project;
 };
 
-#endif // DROSOPHILAOMMATIDIAEXPLORER_H
+#endif // DrosophilaOmmatidiaExplorer_H

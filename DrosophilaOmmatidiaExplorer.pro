@@ -12,9 +12,11 @@ TARGET = DrosophilaOmmatidiaExplorer
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        drosophilaommatidiaexplorer.cpp
+SOURCES += main.cpp \
+    DrosophilaOmmatidiaExplorer.cpp
 
-HEADERS  += drosophilaommatidiaexplorer.h
+HEADERS  += \
+    DrosophilaOmmatidiaExplorer.h
 
-FORMS    += drosophilaommatidiaexplorer.ui
+FORMS    += \
+    DrosophilaOmmatidiaExplorer.ui

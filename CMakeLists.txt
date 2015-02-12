@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.8.8)
 
+add_definitions("-std=c++11 -fpermissive -g")
+
 project(DrosophilaOmmatidiaExplorer)
 include(CPack)
+find_package(ITK REQUIRED)
+INCLUDE(${ITK_USE_FILE})
 find_package(VTK COMPONENTS
   vtkCommonCore
   vtkFiltersCore
@@ -9,6 +13,7 @@ find_package(VTK COMPONENTS
   vtkInteractionStyle
   vtkRenderingFreeType${VTK_RENDERING_BACKEND}
   vtkViewsQt
+  vtkjsoncpp
 )
 include(${VTK_USE_FILE})
 
@@ -23,7 +28,7 @@ include_directories(
 )
 
 # Set your files and resources here
-set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaProject.cpp )
+set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp )
 
 set( Hdrs DrosophilaOmmatidiaExplorer.h )
 
@@ -58,7 +63,7 @@ set(CMAKE_AUTOMOC ON)
   add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE
     ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs})
   qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
-  target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES})
+  target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 install(TARGETS DrosophilaOmmatidiaExplorer RUNTIME DESTINATION bin)
 
