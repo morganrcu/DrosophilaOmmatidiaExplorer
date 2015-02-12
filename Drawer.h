@@ -33,7 +33,10 @@ protected:
 	 * vtkRenderer object where the different drawers paint.
 	 */
 	vtkSmartPointer<vtkRenderer> m_Renderer;
-	Drawer();
+    Drawer(){
+
+    }
+
 public:
 
 	/**

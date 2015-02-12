@@ -23,12 +23,11 @@
 
 #include <DrosophilaOmmatidiaJSONProject.h>
 
+#include "MinMaxVolumeDrawer.h"
+#include "MotionFieldVolumeDrawer.h"
 
 // Forward Qt class declarations
 class Ui_DrosophilaOmmatidiaExplorer;
-
-// Forward VTK class declarations
-class vtkQtTableView;
 
 
 class DrosophilaOmmatidiaExplorer : public QMainWindow
@@ -74,6 +73,12 @@ private:
   QString m_ProjectPath;
 
   DrosophilaOmmatidiaJSONProject m_Project;
+
+  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::OriginalImageType> m_OriginalDrawer;
+  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::DeconvolutedImageType> m_DeconvolutedDrawer;
+
+  MotionFieldVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::MotionImageType>  m_MotionVolumeDrawer;
+
 };
 
 #endif // DrosophilaOmmatidiaExplorer_H

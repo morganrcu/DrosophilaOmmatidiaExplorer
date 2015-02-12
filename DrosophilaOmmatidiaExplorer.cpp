@@ -41,7 +41,11 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
 
   // Place the table view in the designer form
   //this->ui->tableFrame->layout()->addWidget(this->TableView->GetWidget());
+    this->m_Renderer=vtkSmartPointer<vtkRenderer>::New();
+    // VTK/Qt wedded
+    this->m_pUI->qvtkWidget->GetRenderWindow()->AddRenderer(this->m_Renderer);
 
+#if 0
   // Geometry
   VTK_CREATE(vtkVectorText, text);
   text->SetText("Drosophila Ommatidia Explorer");
@@ -58,15 +62,10 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
   // Actor in scene
   VTK_CREATE(vtkActor, actor);
   actor->SetMapper(mapper);
-
-
-    this->m_Renderer=vtkSmartPointer<vtkRenderer>::New();
-
   // Add Actor to renderer
   this->m_Renderer->AddActor(actor);
+#endif
 
-  // VTK/Qt wedded
-  this->m_pUI->qvtkWidget->GetRenderWindow()->AddRenderer(this->m_Renderer);
 
   //Set up combo boxes
 
@@ -81,9 +80,20 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
   connect(this->m_pUI->actionOpenFile, SIGNAL(triggered()), this, SLOT(slotOpenProject()));
   connect(this->m_pUI->actionExit, SIGNAL(triggered()), this, SLOT(slotExit()));
   connect(this->m_pUI->frameSlider,SIGNAL(valueChanged(int)),this,SLOT(slotFrameChanged(int)));
+
+  connect(this->m_pUI->showOriginalGroupBox,SIGNAL(toggled(bool)),this,SLOT(slotShowOriginalChanged(bool)));
   connect(this->m_pUI->showDeconvolutedGroupBox,SIGNAL(toggled(bool)),this,SLOT(slotShowDeconvolutedChanged(bool)));
+  connect(this->m_pUI->showMotionFieldGroupBox,SIGNAL(toggled(bool)),this,SLOT(slotShowMotionFieldChanged(bool)));
+
   connect(this->m_pUI->showOriginalComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowOriginalModeChanged(QString)));
   connect(this->m_pUI->showDeconvolutedComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowDeconvolutedModeChanged(QString)));
+
+
+
+  m_DeconvolutedDrawer.SetRenderer(this->m_Renderer);
+  m_OriginalDrawer.SetRenderer(this->m_Renderer);
+  m_MotionVolumeDrawer.SetRenderer(this->m_Renderer);
+
 }
 
 void DrosophilaOmmatidiaExplorer::slotShowOriginalModeChanged(const QString & mode){
@@ -94,6 +104,7 @@ void DrosophilaOmmatidiaExplorer::slotShowOriginalModeChanged(const QString & mo
 }
 
 void DrosophilaOmmatidiaExplorer::slotShowDeconvolutedModeChanged(const QString & mode){
+
     if(mode=="Volume"){
         this->m_ShowDeconvolutedVolumeMode=VOLUME;
     }
@@ -101,18 +112,20 @@ void DrosophilaOmmatidiaExplorer::slotShowDeconvolutedModeChanged(const QString 
 }
 
 void DrosophilaOmmatidiaExplorer::slotShowDeconvolutedChanged(bool value){
-    //TODO update drawer state
-      this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
+    m_DeconvolutedDrawer.SetVisibility(value);
+    this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
 }
 
 void DrosophilaOmmatidiaExplorer::slotShowOriginalChanged(bool value){
-    //TODO update drawer state
-      this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
+    m_OriginalDrawer.SetVisibility(value);
+    this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
 }
 
 void DrosophilaOmmatidiaExplorer::slotShowMotionFieldChanged(bool value){
-    //TODO update drawer state
 
+    m_MotionVolumeDrawer.SetVisibility(value);
     this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
 }
 
@@ -128,6 +141,12 @@ void DrosophilaOmmatidiaExplorer::slotFrameChanged(int frame){
 
     this->m_CurrentFrame=frame;
 
+    if(this->m_CurrentFrame==m_Project.GetNumFrames()-1){
+        this->m_pUI->showMotionFieldGroupBox->setEnabled(false);
+    }else{\
+        this->m_pUI->showMotionFieldGroupBox->setEnabled(true);
+    }
+
     this->DrawFrame(this->m_CurrentFrame);
 }
 
@@ -136,7 +155,36 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
     //ttt::ScalarDrawer deconvolutedDrawer;
     //ttt::VectorFieldDrawer deconvolutedDrawer;
     //this->Draw
-    m_Renderer->RemoveAllViewProps();
+
+    this->m_Renderer->RemoveAllViewProps();
+    m_OriginalDrawer.SetImage(m_Project.GetOriginalImage(frame));
+    m_OriginalDrawer.Draw();
+    m_OriginalDrawer.SetVisibility(this->m_pUI->showOriginalGroupBox->isChecked());
+
+
+
+
+
+    m_DeconvolutedDrawer.SetImage(m_Project.GetDeconvolutedImage(frame));
+    m_DeconvolutedDrawer.Draw();
+    m_DeconvolutedDrawer.SetVisibility(this->m_pUI->showDeconvolutedGroupBox->isChecked());
+
+    if(frame!=this->m_Project.GetNumFrames()-1){
+        typename DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer motionImage = m_Project.GetMotionImage(frame);
+        m_MotionVolumeDrawer.SetMotionImage(motionImage);
+        m_MotionVolumeDrawer.Draw();
+        m_MotionVolumeDrawer.SetVisibility(this->m_pUI->showMotionFieldGroupBox->isChecked());
+
+        this->m_Renderer->Render();
+    }else{
+        m_MotionVolumeDrawer.Reset();
+    }
+
+        this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
+
+#if 0
+
     typedef itk::ImageToVTKImageFilter<DrosophilaOmmatidiaJSONProject::MotionImageType> MotionToVTKImageFilterType;
 
     MotionToVTKImageFilterType::Pointer motionToVTK = MotionToVTKImageFilterType::New();
@@ -167,7 +215,7 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
 
       this->m_Renderer->AddActor(sgridActor);
       this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
-
+#endif
     }
 
 
@@ -192,12 +240,16 @@ void DrosophilaOmmatidiaExplorer::slotOpenProject()
             this->m_pUI->visualizationDock->setEnabled(true);
 
             this->m_pUI->frameSlider->blockSignals(true);
+            this->m_pUI->frameSlider->setEnabled(true);
             this->m_pUI->frameSlider->setMinimum(0);
-            this->m_pUI->frameSlider->setMaximum(this->m_Project.GetNumFrames());
+            this->m_pUI->frameSlider->setMaximum(this->m_Project.GetNumFrames()-1);
             this->m_pUI->frameSlider->setValue(0);
             this->m_pUI->frameSlider->setTickInterval(1);
             this->m_pUI->frameSlider->blockSignals(false);
+
         }else{
+
+
             std::cout << "Error: " << std::endl;
             QMessageBox errorMessage(this);
             errorMessage.setText("Unable to Open Project");

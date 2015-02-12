@@ -43,13 +43,33 @@ public:
     }
 
     typename OriginalImageType::Pointer GetOriginalImage(int frame);
+
     typename DeconvolutedImageType::Pointer GetDeconvolutedImage(int frame);
+
     typename MotionImageType::Pointer GetMotionImage(int frame);
 
 
 
 private:
 
+    template<class T> void ReadFrame(typename T::Pointer & result,const std::string & name);
+
+    template<class T> void WriteFrame(const typename T::Pointer & image,const std::string & name);
+#if 0
+{
+
+        std::stringstream buffer { };
+        buffer << directory << "/" << prefix <<   sufix << "." << fileType;
+        typedef itk::ImageFileWriter<T> WriterType;
+
+        typename WriterType::Pointer writer = WriterType::New();
+
+        std::cout << buffer.str() << std::endl;
+        writer->SetFileName(buffer.str());
+        writer->SetInput(image);
+        writer->Update();
+    }
+#endif
     std::string m_ProjectPath;
 
     int m_FirstFrame;

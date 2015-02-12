@@ -16,9 +16,11 @@ namespace ttt {
 
 template<class TImage> class ScalarVolumeDrawer : public Drawer{
 
+protected:
+        typename TImage::Pointer m_Image;
 private:
 
-	typename TImage::Pointer m_Image;
+
 
 	vtkSmartPointer<vtkVolume> m_Volume;
 

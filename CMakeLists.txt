@@ -12,6 +12,7 @@ find_package(VTK COMPONENTS
   vtkInfovisCore
   vtkInteractionStyle
   vtkRenderingFreeType${VTK_RENDERING_BACKEND}
+  vtkRenderingVolume${VTK_RENDERING_BACKEND}
   vtkViewsQt
   vtkjsoncpp
 )
@@ -30,7 +31,7 @@ include_directories(
 # Set your files and resources here
 set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp )
 
-set( Hdrs DrosophilaOmmatidiaExplorer.h )
+set( Hdrs DrosophilaOmmatidiaExplorer.h  )
 
 set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h )
 
@@ -60,8 +61,8 @@ set(CMAKE_AUTOMOC ON)
     ${QRC_Srcs}
   )
 
-  add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE
-    ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs})
+  add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs})
+
   qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
   target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 

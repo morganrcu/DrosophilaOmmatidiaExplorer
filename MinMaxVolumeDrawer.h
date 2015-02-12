@@ -1,8 +1,8 @@
 /** \addtogroup TTTDrawers
  *  @{
  */
-#ifndef DIFFUSED_IMAGE_DRAWER_H
-#define DIFFUSED_IMAGE_DRAWER_H
+#ifndef MINMAX_VOLUME_DRAWER_H
+#define MINMAX_VOLUME_DRAWER_H
 
 
 #include "ScalarVolumeDrawer.h"
@@ -10,24 +10,24 @@
 #include <vtkPiecewiseFunction.h>
 #include <vtkColorTransferFunction.h>
 #include <itkMinimumMaximumImageCalculator.h>
-namespace ttt{
+
 /**
  * \brief Draws a \link DiffusedImageDrawer::DiffusedImageType \endlink image into the renderer
  */
-class DeconvolutedImageDrawer : public ScalarVolumeDrawer<itk::Image<double,3> > {
+template<class ImageType> class MinMaxVolumeDrawer : public ttt::ScalarVolumeDrawer<ImageType > {
 
-    typedef itk::Image<double,3> DeconvolutedImageType;
+    typedef ImageType DeconvolutedImageType;
 
 public:
-    DeconvolutedImageDrawer(){
+    MinMaxVolumeDrawer(){
 
     }
 
 protected:
     virtual vtkSmartPointer<vtkVolumeProperty> GetVolumeProperty(){
-        typedef itk::MinimumMaximumImageCalculator<DeconvolutedImageType> MinimumMaximumType;
+        typedef itk::MinimumMaximumImageCalculator<ImageType> MinimumMaximumType;
 
-        MinimumMaximumType::Pointer minimumMaximum = MinimumMaximumType::New();
+        typename MinimumMaximumType::Pointer minimumMaximum = MinimumMaximumType::New();
         minimumMaximum->SetImage(this->m_Image);
         minimumMaximum->Compute();
 
@@ -42,7 +42,7 @@ protected:
         vtkSmartPointer<vtkPiecewiseFunction> compositeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
 
         compositeOpacity->AddPoint(minimum, 0.0);
-        compositeOpacity->AddPoint(minimum+0.3*range, 1.0);
+        compositeOpacity->AddPoint(minimum+0.2*range, 1.0);
         //compositeOpacity->AddPoint(minimumMaximum->GetMinimum()+0.31minimumMaximum->GetMaximum(), 1.0);
         compositeOpacity->AddPoint(maximum, 1.0);
 
@@ -58,6 +58,5 @@ protected:
         return volumeProperty;
     }
 };
-}
 #endif
 /** @}*/
