@@ -26,6 +26,7 @@
 #include "MinMaxVolumeDrawer.h"
 #include "MotionFieldVolumeDrawer.h"
 
+
 // Forward Qt class declarations
 class Ui_DrosophilaOmmatidiaExplorer;
 
@@ -48,11 +49,17 @@ public slots:
   virtual void slotFrameChanged(int);
 
   virtual void slotShowDeconvolutedChanged(bool);
+  virtual void slotShowDeconvolutedModeChanged(const QString &);
+  virtual void slotShowDeconvolutedOpacityChanged(int);
+
   virtual void slotShowOriginalChanged(bool);
+  virtual void slotShowOriginalModeChanged(const QString &);
+  virtual void slotShowOriginalOpacityChanged(int);
+
   virtual void slotShowMotionFieldChanged(bool);
 
-  virtual void slotShowOriginalModeChanged(const QString &);
-  virtual void slotShowDeconvolutedModeChanged(const QString &);
+
+
 protected:
 
 protected slots:

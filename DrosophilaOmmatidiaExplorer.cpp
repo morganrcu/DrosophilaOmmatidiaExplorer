@@ -69,11 +69,11 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
 
   //Set up combo boxes
 
-  this->m_pUI->showDeconvolutedComboBox->insertItem(0,"Volume");
-  this->m_pUI->showDeconvolutedComboBox->setCurrentIndex(0);
+  this->m_pUI->showDeconvolutedModeComboBox->insertItem(0,"Volume");
+  this->m_pUI->showDeconvolutedModeComboBox->setCurrentIndex(0);
 
-  this->m_pUI->showOriginalComboBox->insertItem(0,"Volume");
-  this->m_pUI->showOriginalComboBox->setCurrentIndex(0);
+  this->m_pUI->showOriginalModeComboBox->insertItem(0,"Volume");
+  this->m_pUI->showOriginalModeComboBox->setCurrentIndex(0);
 
 
   // Set up action signals and slots
@@ -85,8 +85,12 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
   connect(this->m_pUI->showDeconvolutedGroupBox,SIGNAL(toggled(bool)),this,SLOT(slotShowDeconvolutedChanged(bool)));
   connect(this->m_pUI->showMotionFieldGroupBox,SIGNAL(toggled(bool)),this,SLOT(slotShowMotionFieldChanged(bool)));
 
-  connect(this->m_pUI->showOriginalComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowOriginalModeChanged(QString)));
-  connect(this->m_pUI->showDeconvolutedComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowDeconvolutedModeChanged(QString)));
+  connect(this->m_pUI->showOriginalModeComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowOriginalModeChanged(QString)));
+  connect(this->m_pUI->showDeconvolutedModeComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowDeconvolutedModeChanged(QString)));
+
+  connect(this->m_pUI->showDeconvolutedOpacitySlider,SIGNAL(valueChanged(int)),SLOT(slotShowDeconvolutedOpacityChanged(int)));
+  connect(this->m_pUI->showOriginalOpacitySlider,SIGNAL(valueChanged(int)),SLOT(slotShowOriginalOpacityChanged(int)));
+
 
 
 
@@ -109,6 +113,27 @@ void DrosophilaOmmatidiaExplorer::slotShowDeconvolutedModeChanged(const QString 
         this->m_ShowDeconvolutedVolumeMode=VOLUME;
     }
     //TODO Update signal
+}
+
+void DrosophilaOmmatidiaExplorer::slotShowDeconvolutedOpacityChanged(int opacity){
+    double value=double(opacity)/1000000.0;
+
+    this->m_DeconvolutedDrawer.SetOpacity(value);
+
+    this->m_DeconvolutedDrawer.Draw();
+    this->m_DeconvolutedDrawer.SetVisibility(this->m_pUI->showDeconvolutedGroupBox->isChecked());
+
+    this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
+}
+void DrosophilaOmmatidiaExplorer::slotShowOriginalOpacityChanged(int opacity){
+    double value = double(opacity)/1000000;
+    this->m_OriginalDrawer.SetOpacity(value);
+    this->m_OriginalDrawer.Draw();
+    this->m_OriginalDrawer.SetVisibility(this->m_pUI->showOriginalGroupBox->isChecked());
+
+    this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
 }
 
 void DrosophilaOmmatidiaExplorer::slotShowDeconvolutedChanged(bool value){
@@ -158,6 +183,7 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
 
     this->m_Renderer->RemoveAllViewProps();
     m_OriginalDrawer.SetImage(m_Project.GetOriginalImage(frame));
+    m_OriginalDrawer.SetOpacity(double(this->m_pUI->showOriginalOpacitySlider->value())/1000000.0);
     m_OriginalDrawer.Draw();
     m_OriginalDrawer.SetVisibility(this->m_pUI->showOriginalGroupBox->isChecked());
 
@@ -166,8 +192,10 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
 
 
     m_DeconvolutedDrawer.SetImage(m_Project.GetDeconvolutedImage(frame));
+    m_DeconvolutedDrawer.SetOpacity(double(this->m_pUI->showDeconvolutedOpacitySlider->value())/1000000.0);
     m_DeconvolutedDrawer.Draw();
     m_DeconvolutedDrawer.SetVisibility(this->m_pUI->showDeconvolutedGroupBox->isChecked());
+
 
     if(frame!=this->m_Project.GetNumFrames()-1){
         typename DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer motionImage = m_Project.GetMotionImage(frame);
@@ -183,39 +211,6 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
         this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
 
 
-#if 0
-
-    typedef itk::ImageToVTKImageFilter<DrosophilaOmmatidiaJSONProject::MotionImageType> MotionToVTKImageFilterType;
-
-    MotionToVTKImageFilterType::Pointer motionToVTK = MotionToVTKImageFilterType::New();
-    typename DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer motionImage=m_Project.GetMotionImage(frame);
-    motionToVTK->SetInput(motionImage);
-    motionToVTK->Update();
-    vtkSmartPointer<vtkImageData> motionField = motionToVTK->GetOutput();
-    std::cout << motionField->GetNumberOfScalarComponents() << std::endl;
-
-      // Create the structured grid.
-      //vtkSmartPointer<vtkStructuredGrid> sgrid =
-      //  vtkSmartPointer<vtkStructuredGrid>::New();
-      //CreateData(sgrid);
-
-      // We create a simple pipeline to display the data.
-      vtkSmartPointer<vtkHedgeHog> hedgehog =
-        vtkSmartPointer<vtkHedgeHog>::New();
-
-      hedgehog->SetInputData(motionField);
-      hedgehog->SetScaleFactor(0.1);
-
-      vtkSmartPointer<vtkPolyDataMapper> sgridMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-      sgridMapper->SetInputConnection(hedgehog->GetOutputPort());
-
-      vtkSmartPointer<vtkActor> sgridActor =   vtkSmartPointer<vtkActor>::New();
-      sgridActor->SetMapper(sgridMapper);
-      sgridActor->GetProperty()->SetColor(1.0,1.0,1.0);
-
-      this->m_Renderer->AddActor(sgridActor);
-      this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
-#endif
     }
 
 

@@ -18,9 +18,14 @@ template<class ImageType> class MinMaxVolumeDrawer : public ttt::ScalarVolumeDra
 
     typedef ImageType DeconvolutedImageType;
 
+private:
+    typename ImageType::PixelType m_Opacity;
 public:
     MinMaxVolumeDrawer(){
 
+    }
+    void SetOpacity(const typename ImageType::PixelType & opacity ){
+        m_Opacity  = opacity;
     }
 
 protected:
@@ -42,7 +47,7 @@ protected:
         vtkSmartPointer<vtkPiecewiseFunction> compositeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
 
         compositeOpacity->AddPoint(minimum, 0.0);
-        compositeOpacity->AddPoint(minimum+0.2*range, 1.0);
+        compositeOpacity->AddPoint(minimum+m_Opacity*range, 1.0);
         //compositeOpacity->AddPoint(minimumMaximum->GetMinimum()+0.31minimumMaximum->GetMaximum(), 1.0);
         compositeOpacity->AddPoint(maximum, 1.0);
 
