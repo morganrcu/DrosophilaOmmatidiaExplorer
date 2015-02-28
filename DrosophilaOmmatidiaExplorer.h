@@ -19,13 +19,26 @@
 
 #include <vtkSmartPointer.h>    // Required for smart pointer internal ivars.
 #include <vtkRenderer.h>
+#include <QVTKInteractor.h>
 #include <QMainWindow>
 
+#include <vtkEventQtSlotConnect.h>
+#include <vtkPointWidget.h>
 #include <DrosophilaOmmatidiaJSONProject.h>
-
 #include "MinMaxVolumeDrawer.h"
+
+#include "VertexLocationsDrawer.h"
+#include "EdgesDrawer.h"
 #include "MotionFieldVolumeDrawer.h"
 
+#include "AJGraph.h"
+#include "AJVertex.h"
+
+
+
+#include "EdgeListDockWidget.h"
+#include "VertexListDockWidget.h"
+#include "GraphPlotterDockWidget.h"
 
 // Forward Qt class declarations
 class Ui_DrosophilaOmmatidiaExplorer;
@@ -34,6 +47,35 @@ class Ui_DrosophilaOmmatidiaExplorer;
 class DrosophilaOmmatidiaExplorer : public QMainWindow
 {
   Q_OBJECT
+
+private:
+
+    class vtkMoveVertexCallback : public vtkCommand
+    {
+    public:
+      static vtkMoveVertexCallback *New()
+      {
+        return new vtkMoveVertexCallback;
+      }
+      virtual void Execute(vtkObject *caller, unsigned long, void*)
+      {
+        vtkPointWidget *pointWidget = reinterpret_cast<vtkPointWidget*>(caller);
+        //pointWidget->GetPolyData(this->PolyData);
+        double position[3];
+        pointWidget->GetPosition(position);
+        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::PointType pointPosition;
+        pointPosition[0]=position[0];
+        pointPosition[1]=position[1];
+        pointPosition[2]=position[2];
+        m_AJVertex->SetPosition(pointPosition);
+        m_pDrawer->UpdateAJVertex(m_AJVertexHandler);
+      }
+      vtkMoveVertexCallback(){}
+      DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::Pointer m_AJVertex;
+      DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler m_AJVertexHandler;
+      VertexLocationsDrawer<DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> * m_pDrawer;
+
+    };
 
 public:
 
@@ -48,9 +90,29 @@ public slots:
 
   virtual void slotFrameChanged(int);
 
+  virtual void slotVertexAdditionToggled(bool);
+  virtual void slotVertexSelectionToggled(bool);
+    virtual void slotVertexMoveToggled(bool);
+  virtual void slotVertexMD();
+
+  virtual void slotEdgeAdditionToggled(bool);
+  virtual void slotEdgeSelectionToggled(bool);
+
+  virtual void slotDoVertexLocation();
+  virtual void slotDoVertexTracking();
+
+  virtual void slotDoVertexMolecularDistribution();
+  virtual void slotDoEdgeMolecularDistribution();
+
+
+  virtual void slotDeleteVertex();
+  virtual void slotDeleteEdge();
+
   virtual void slotShowDeconvolutedChanged(bool);
   virtual void slotShowDeconvolutedModeChanged(const QString &);
   virtual void slotShowDeconvolutedOpacityChanged(int);
+
+
 
   virtual void slotShowOriginalChanged(bool);
   virtual void slotShowOriginalModeChanged(const QString &);
@@ -58,33 +120,119 @@ public slots:
 
   virtual void slotShowMotionFieldChanged(bool);
 
+  virtual void slotShowVertexLocationsChanged(bool);
+
+  virtual void slotShowPlatenessChanged(bool);
+  virtual void slotShowPlatenessOpacityChanged(int);
+
+  virtual void slotShowMolecularChanged(bool);
+  virtual void slotShowMolecularOpacityChanged(int);
+
+  virtual void slotVertexTableSelectionChanged(AJGraph<AJVertex>::AJVertexHandler );
+  virtual void slotEdgeTableSelectionChanged(AJGraph<AJVertex>::AJEdgeHandler );
 
 
-protected:
+
+  virtual void slotLeftClickVertexSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotRightClickVertexSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+
+
+  virtual void slotLeftClickEdgeSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotRightClickEdgeSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+
+
+  virtual void slotLeftClickAddMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+
+
+  virtual void slotFirstLeftClickAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotSecondLeftClickAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotMouseMoveAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+
+  virtual void slotRightClickAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+
+
+  virtual void slotPlotEdgeLength(const AJGraph<AJVertex>::AJEdgeHandler & edge);
+
+
+
+  //virtual void slotShowEdges(bool);
+  //virtual void slotLeftClickSelectEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+
 
 protected slots:
 
 private:
 
   void DrawFrame(int frame);
+
+  void SetSelectedVertex(const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler & );
+  void ClearSelectedVertex();
+
+  void SetSelectedEdge(const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler & );
+  void ClearSelectedEdge();
+
   vtkSmartPointer<vtkRenderer> m_Renderer;
-  // Designer form
+  vtkSmartPointer<QVTKInteractor> m_RenderWindowInteractor;
+
   Ui_DrosophilaOmmatidiaExplorer *m_pUI;
-
-  enum VolumeVisualizationType{VOLUME,SLICE};
-
-  VolumeVisualizationType m_ShowOriginalVolumeMode;
-  VolumeVisualizationType m_ShowDeconvolutedVolumeMode;
 
   int m_CurrentFrame;
   QString m_ProjectPath;
 
   DrosophilaOmmatidiaJSONProject m_Project;
 
+
   MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::OriginalImageType> m_OriginalDrawer;
   MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::DeconvolutedImageType> m_DeconvolutedDrawer;
+  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::PlatenessImageType> m_PlatenessDrawer;
+  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::VertexnessImageType> m_VertexnessDrawer;
+  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::MolecularImageType> m_MolecularImageDrawer;
+  VertexLocationsDrawer<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> m_VertexLocationsDrawer;
+
+  EdgesDrawer<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> m_EdgesDrawer;
 
   MotionFieldVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::MotionImageType>  m_MotionVolumeDrawer;
+
+  typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer m_CurrentAJGraph;
+
+  typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler m_SelectedVertex;
+
+  bool m_IsSelectedEdge;
+  typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler m_SelectedEdge;
+
+
+  typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler  m_AddingEdgeSource;
+
+  enum VolumeVisualizationType{VOLUME,SLICE};
+
+  VolumeVisualizationType m_ShowOriginalVolumeMode;
+  VolumeVisualizationType m_ShowDeconvolutedVolumeMode;
+
+
+  vtkSmartPointer<vtkEventQtSlotConnect> m_QtToVTKConnections;
+
+
+  typedef struct{
+     vtkSmartPointer<vtkLineSource> lineSource;
+     vtkSmartPointer<vtkPolyDataMapper> lineMapper;
+     vtkSmartPointer<vtkActor> lineActor;
+  } TemporaryRenderedLineStruct;
+
+  TemporaryRenderedLineStruct * m_pTemporaryLineStruct;
+
+  vtkSmartPointer<vtkPointWidget> m_PointWidget;
+  //this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+
+
+  //vtkSmartPointer<AJGraphSelectionInteractorStyle<VertexLocationsDrawer<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> >  > m_VertexSelectionInteractorStyle;
+  //vtkSmartPointer<AJGraphSelectionInteractorStyle> m_VertexSelectionInteractorStyle;
+
+
+  EdgeListDockWidget * m_pEdgeListDockWidget;
+  VertexListDockWidget * m_pVertexListDockWidget;
+
+  GraphPlotterDockWidget * m_pGraphPlotterDockWidget;
+
 
 };
 

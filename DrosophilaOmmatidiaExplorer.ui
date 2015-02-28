@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>649</width>
-    <height>486</height>
+    <width>868</width>
+    <height>631</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -91,7 +91,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>649</width>
+     <width>868</width>
      <height>25</height>
     </rect>
    </property>
@@ -104,7 +104,16 @@
     <addaction name="actionHelp"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionShowVisualization"/>
+    <addaction name="actionShowVertices"/>
+    <addaction name="actionShowEdges"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -125,7 +134,22 @@
    </attribute>
    <addaction name="actionOpenFile"/>
    <addaction name="separator"/>
+   <addaction name="actionDetectVertices"/>
+   <addaction name="actionSelectVertex"/>
+   <addaction name="actionAddVertices"/>
+   <addaction name="actionDeleteVertex"/>
+   <addaction name="actionMoveVertex"/>
+   <addaction name="separator"/>
+   <addaction name="actionSelectEdge"/>
+   <addaction name="actionAddEdge"/>
+   <addaction name="actionDeleteEdge"/>
+   <addaction name="separator"/>
+   <addaction name="actionTrackVertices"/>
+   <addaction name="separator"/>
    <addaction name="actionHelp"/>
+   <addaction name="actionPlotEdge"/>
+   <addaction name="actionVertexMolecularDistribution"/>
+   <addaction name="actionEdgeMolecularDistribution"/>
   </widget>
   <widget class="QDockWidget" name="visualizationDock">
    <property name="enabled">
@@ -178,7 +202,10 @@
            <number>1000000</number>
           </property>
           <property name="value">
-           <number>1000</number>
+           <number>0</number>
+          </property>
+          <property name="sliderPosition">
+           <number>0</number>
           </property>
           <property name="tracking">
            <bool>false</bool>
@@ -225,6 +252,9 @@
           <property name="maximum">
            <number>1000000</number>
           </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
           <property name="value">
            <number>1000</number>
           </property>
@@ -239,7 +269,7 @@
        </layout>
       </widget>
      </item>
-     <item row="2" column="0" colspan="2">
+     <item row="3" column="0" colspan="2">
       <widget class="QGroupBox" name="showMotionFieldGroupBox">
        <property name="title">
         <string>Motion Field</string>
@@ -250,6 +280,109 @@
        <property name="checked">
         <bool>false</bool>
        </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="QCheckBox" name="showAJVerticesGroupBox">
+       <property name="text">
+        <string>AJ Vertices</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="2">
+      <widget class="QGroupBox" name="showPlatenessGroupBox">
+       <property name="title">
+        <string>Plateness</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <layout class="QFormLayout" name="formLayout_4">
+        <item row="0" column="0">
+         <widget class="QLabel" name="showPlatenessModeLabel">
+          <property name="text">
+           <string>Mode:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="showPlatenessModeComboBox"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="showPlatenessOpacityLabel">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSlider" name="showPlatenessOpacitySlider">
+          <property name="maximum">
+           <number>1000000</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="tracking">
+           <bool>false</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QGroupBox" name="showMolecularChannelGroupBox">
+       <property name="title">
+        <string>Molecular channel</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <layout class="QFormLayout" name="formLayout_5">
+        <item row="0" column="0">
+         <widget class="QLabel" name="showMolecularChannelModeLabel">
+          <property name="text">
+           <string>Mode:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="showMolecularChannelModeComboBox"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="showMolecularChannelOpacityLabel">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSlider" name="showMolecularChannelOpacitySlider">
+          <property name="maximum">
+           <number>1000000</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="tracking">
+           <bool>false</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
@@ -279,6 +412,180 @@
    </property>
    <property name="text">
     <string>Help</string>
+   </property>
+  </action>
+  <action name="actionDetectVertices">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/vertex-detection.png</normaloff>:/Icons/vertex-detection.png</iconset>
+   </property>
+   <property name="text">
+    <string>Detect Vertices...</string>
+   </property>
+   <property name="toolTip">
+    <string>Detect Vertices</string>
+   </property>
+  </action>
+  <action name="actionSelectVertex">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/select_vertex.png</normaloff>:/Icons/select_vertex.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Vertex</string>
+   </property>
+   <property name="toolTip">
+    <string>Select Vertex</string>
+   </property>
+  </action>
+  <action name="actionShowVisualization">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Visualization</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Visualization</string>
+   </property>
+  </action>
+  <action name="actionShowVertices">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Vertices</string>
+   </property>
+  </action>
+  <action name="actionTrackVertices">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/tracking.png</normaloff>:/Icons/tracking.png</iconset>
+   </property>
+   <property name="text">
+    <string>Track Vertices</string>
+   </property>
+   <property name="toolTip">
+    <string>Track Vertices</string>
+   </property>
+  </action>
+  <action name="actionAddVertices">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/vertex-create.png</normaloff>:/Icons/vertex-create.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Vertices</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Vertices</string>
+   </property>
+  </action>
+  <action name="actionDeleteVertex">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/vertex-delete.png</normaloff>:/Icons/vertex-delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Vertex</string>
+   </property>
+  </action>
+  <action name="actionSelectEdge">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/edges-create.png</normaloff>:/Icons/edges-create.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Edge</string>
+   </property>
+   <property name="toolTip">
+    <string>Select Edge</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionAddEdge">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Add Edge</string>
+   </property>
+  </action>
+  <action name="actionDeleteEdge">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Delete Edge</string>
+   </property>
+  </action>
+  <action name="actionMoveVertex">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Move Vertex</string>
+   </property>
+   <property name="toolTip">
+    <string>Move Vertex</string>
+   </property>
+  </action>
+  <action name="actionPlotEdge">
+   <property name="text">
+    <string>Plot edge</string>
+   </property>
+  </action>
+  <action name="actionShowEdges">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Edges</string>
+   </property>
+  </action>
+  <action name="actionVertexMolecularDistribution">
+   <property name="text">
+    <string>Vertex MD</string>
+   </property>
+  </action>
+  <action name="actionEdgeMolecularDistribution">
+   <property name="text">
+    <string>Edge MD</string>
    </property>
   </action>
  </widget>

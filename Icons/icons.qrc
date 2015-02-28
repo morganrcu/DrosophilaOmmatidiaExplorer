@@ -1,12 +1,14 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
-  <qresource prefix="/Icons">
-    <!-- Typical file operations. -->
-    <file>fileopen.png</file>
-    <file>filesave.png</file>
-    <file>print.png</file>
-
-    <!-- Help -->
-    <file>help.png</file>
-  </qresource>
+<RCC>
+    <qresource prefix="/Icons">
+        <file>fileopen.png</file>
+        <file>filesave.png</file>
+        <file>print.png</file>
+        <file>help.png</file>
+        <file>vertex-detection.png</file>
+        <file>select_vertex.png</file>
+        <file>vertex-create.png</file>
+        <file>vertex-delete.png</file>
+        <file>edges-create.png</file>
+        <file>tracking.png</file>
+    </qresource>
 </RCC>

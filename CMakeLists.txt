@@ -11,10 +11,14 @@ find_package(VTK COMPONENTS
   vtkFiltersCore
   vtkInfovisCore
   vtkInteractionStyle
+
   vtkRenderingFreeType${VTK_RENDERING_BACKEND}
   vtkRenderingVolume${VTK_RENDERING_BACKEND}
   vtkViewsQt
   vtkjsoncpp
+  vtkChartsCore
+  vtkRenderingContext${VTK_RENDERING_BACKEND}
+  vtkViewsContext2D
 )
 include(${VTK_USE_FILE})
 
@@ -29,13 +33,13 @@ include_directories(
 )
 
 # Set your files and resources here
-set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp )
+set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp  DetectVerticesDialog.cpp ShowVolumeGroupBox.cpp VertexListDockWidget.cpp EdgeListDockWidget.cpp GraphPlotterDockWidget.cpp)
 
-set( Hdrs DrosophilaOmmatidiaExplorer.h  )
+set( Hdrs DrosophilaOmmatidiaExplorer.h   DetectVerticesDialog.h VertexListDockWidget.h EdgeListDockWidget.h  GraphPlotterDockWidget.h )#AJGraphSelectionInteractorStyle.h)
 
-set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h )
+set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h DetectVerticesDialog.h VertexListDockWidget.h  EdgeListDockWidget.h GraphPlotterDockWidget.h)#AJGraphSelectionInteractorStyle.h)
 
-set( UIs DrosophilaOmmatidiaExplorer.ui )
+set( UIs DrosophilaOmmatidiaExplorer.ui DetectVerticesDialog.ui ShowVolumeGroupBox.ui VertexListDockWidget.ui  EdgeListDockWidget.ui  GraphPlotterDockWidget.ui)
 
 set( QRCs Icons/icons.qrc )
 
@@ -45,6 +49,7 @@ set(CMAKE_AUTOMOC ON)
 
   # We have ui files, this will bring in the macro: qt5_wrap_ui
   find_package(Qt5Widgets REQUIRED QUIET)
+
   qt5_wrap_ui(UI_Srcs ${UIs})
   qt5_add_resources(QRC_Srcs ${QRCs} )
 
@@ -61,10 +66,14 @@ set(CMAKE_AUTOMOC ON)
     ${QRC_Srcs}
   )
 
-  add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs})
+add_executable(VertexMolecularDistributionTest VertexMolecularDistributionTest.cpp  )
+  target_link_libraries(VertexMolecularDistributionTest ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+
+  add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
 
   qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
   target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+
 
 install(TARGETS DrosophilaOmmatidiaExplorer RUNTIME DESTINATION bin)
 
