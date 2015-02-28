@@ -887,6 +887,7 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
         this->m_MolecularImageDrawer.Reset();
     }
 
+
     this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
 
 }
