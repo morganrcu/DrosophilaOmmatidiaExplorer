@@ -64,14 +64,16 @@ public:
             if (Lambda3 >= 0.0 || Lambda2 >= 0.0 || Lambda1 >= 0.0 ) {
                 return 0;
             } else {
+                double Lambda1Sqr = vnl_math_sqr(Lambda1);
+                double Lambda2Sqr = vnl_math_sqr(Lambda2);
+                double Lambda3Sqr = vnl_math_sqr(Lambda3);
 
+            	return vnl_math_sqrt(Lambda1Sqr+ Lambda2Sqr+ Lambda3Sqr);
+#if 0
                 double Lambda1Abs = vnl_math_abs(Lambda1);
                 double Lambda2Abs = vnl_math_abs(Lambda2);
                 double Lambda3Abs = vnl_math_abs(Lambda3);
 
-                double Lambda1Sqr = vnl_math_sqr(Lambda1);
-                double Lambda2Sqr = vnl_math_sqr(Lambda2);
-                double Lambda3Sqr = vnl_math_sqr(Lambda3);
 
                 double AlphaSqr = vnl_math_sqr(m_Alpha);
                 double BetaSqr = vnl_math_sqr(m_Beta);
@@ -103,9 +105,9 @@ public:
                     result=vesselnessMeasure;
                 }
 #endif
+
                 return result;
-
-
+#endif
 
 
     }

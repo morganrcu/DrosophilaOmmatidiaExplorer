@@ -5,7 +5,8 @@
 #include <queue>
 #include <utility>
 #include <itkArray.h>
-
+#include <memory>
+#include <FeatureDescriptor.h>
 template<class TMolecularImage> class SeedBasedMolecularDistributionDescriptor : public itk::Object{
 public:
 	typedef SeedBasedMolecularDistributionDescriptor Self;
@@ -20,8 +21,6 @@ public:
 	typedef unsigned short ClusterDescriptor;
 	virtual void Compute()=0;
 
-	typedef itk::Array<double> DescriptorType;
-
 	itkGetObjectMacro(MolecularImage,MolecularImageType)
     itkSetObjectMacro(MolecularImage,MolecularImageType)
 
@@ -29,12 +28,12 @@ protected:
 	typedef typename MolecularImageType::PointType PointType;
 	typedef typename MolecularImageType::IndexType IndexType;
 
-	virtual void SetSeed(const IndexType & index, const ClusterDescriptor & cluster);
+	virtual void SetSeed(IndexType & index, const ClusterDescriptor & cluster);
 	virtual void SetBanned(const IndexType & index);
 	SeedBasedMolecularDistributionDescriptor();
 	~SeedBasedMolecularDistributionDescriptor();
 
-	virtual DescriptorType ComputeDescriptor();
+	virtual itk::Array<double> ComputeDescriptor();
 
 	virtual void Init();
 	virtual void Reset();

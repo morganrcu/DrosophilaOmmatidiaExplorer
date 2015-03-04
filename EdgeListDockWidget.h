@@ -4,6 +4,7 @@
 #include <QDockWidget>
 #include <AJGraph.h>
 #include <AJVertex.h>
+#include <AJEdge.h>
 #include <QPoint>
 namespace Ui {
 class EdgeListDockWidget;
@@ -14,7 +15,7 @@ class EdgeListDockWidget : public QDockWidget
     Q_OBJECT
 
 private:
-    typedef AJGraph<AJVertex> EdgeContainer;
+    typedef AJGraph<AJVertex,AJEdge> EdgeContainer;
     typename EdgeContainer::Pointer m_EdgesContainer;
 
     typename std::map<int,typename EdgeContainer::AJEdgeHandler> m_RowToEdge;
@@ -34,8 +35,8 @@ public slots:
     void slotEdgeTableSelectionChanged();
     void slotDisplayMenu(const QPoint &pos);
 signals:
-    void SelectedEdgeChanged(AJGraph<AJVertex>::AJEdgeHandler);
-    void DrawEdgeRequested(AJGraph<AJVertex>::AJEdgeHandler);
+    void SelectedEdgeChanged(AJGraph<AJVertex,AJEdge>::AJEdgeHandler);
+    void DrawEdgeRequested(AJGraph<AJVertex,AJEdge>::AJEdgeHandler);
 private:
     Ui::EdgeListDockWidget *m_pUI;
 

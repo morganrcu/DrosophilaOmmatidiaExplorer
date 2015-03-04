@@ -24,9 +24,10 @@ template<class TAJGraph, class TMolecularImage> void VertexMolecularDistribution
     //Foreach vertex
 	this->Init();
 
+
     for(auto it=this->m_AJGraph->VerticesBegin();it!=this->m_AJGraph->VerticesEnd();it++){
 
-    	this->Reset();
+
         //1. Initialize levelset to compute bisector planes
 
         AJVertexHandler vertexHandler=*it;
@@ -34,6 +35,7 @@ template<class TAJGraph, class TMolecularImage> void VertexMolecularDistribution
         if(this->m_AJGraph->AJVertexDegree(vertexHandler)!=3){
             continue;
         }
+        this->Reset();
 
 
         PointType origin = this->m_AJGraph->GetAJVertex(vertexHandler)->GetPosition();
@@ -88,7 +90,8 @@ template<class TAJGraph, class TMolecularImage> void VertexMolecularDistribution
         this->SetSeed(indexCA,2);
 
         m_CurrentOrigin=origin;
-        m_ComputedFeatures[vertexHandler]=this->ComputeDescriptor();
+        m_AJGraph->GetAJVertex(vertexHandler)->SetDescriptor(this->ComputeDescriptor());
+
 
     }
 }

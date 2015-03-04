@@ -50,6 +50,7 @@ public:
 		return new VertexLocationsDrawer;
 	}
 
+
     VertexLocationsDrawer(){
         //m_Spacing.Fill(1);
     }
@@ -85,7 +86,7 @@ public:
     void DeemphasizeAJVertex(const typename TVerticesContainer::AJVertexHandler & vertexHandler){
         vtkSmartPointer<vtkActor> actor=m_VerticesToActors[vertexHandler];
         assert(actor);
-        actor->GetProperty()->SetColor(1.0, 0.0, 0.0);
+        actor->GetProperty()->SetColor(1.0, 1.0, 0.0);
     }
 
     virtual void Show(){
@@ -128,7 +129,7 @@ public:
         sphereSource->SetCenter(vertex->GetPosition()[0] ,vertex->GetPosition()[1] ,vertex->GetPosition()[2]);
 
         //sphereSource->SetRadius(2 * m_Spacing[0]);
-        sphereSource->SetRadius(0.001);
+        sphereSource->SetRadius(0.0005);
 
         sphereSource->Update();
 
@@ -144,7 +145,16 @@ public:
         m_Renderer->AddActor(sphereActor);
         sphereActor->VisibilityOff();
         sphereActor->PickableOff();
-        sphereActor->GetProperty()->SetColor(1.0,0.0,0.0);
+
+		vtkSmartPointer<vtkLookupTable> colorMap = vtkSmartPointer<vtkLookupTable>::New(); // hot color map
+
+		colorMap->SetRange( 0.0, m_VertexLocations->GetNumVertices() );
+		//colorMap->SetHueRange( 0.0, 0.1 );
+		//colorMap->SetValueRange( 0.4, 0.8 );
+		colorMap->Build();
+		double color[3];
+		colorMap->GetColor(vertexHandler,color);
+        sphereActor->GetProperty()->SetColor(color[0],color[1],color[2]);
 
         this->m_ActorsToVertices[sphereActor]=vertexHandler;
         this->m_VerticesToActors[vertexHandler]=sphereActor;

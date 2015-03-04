@@ -52,6 +52,7 @@ template<class TAJGraph, class TMolecularImage> void EdgeMolecularDistributionDe
 	VectorType upDir;
 	upDir.Fill(0);
 	upDir[2]=1;
+
     for(auto it=this->m_AJGraph->EdgesBegin();it!=this->m_AJGraph->EdgesEnd();it++){
 
     	this->Reset();
@@ -94,13 +95,10 @@ template<class TAJGraph, class TMolecularImage> void EdgeMolecularDistributionDe
 
         }
 
-
-
-
         this->m_Point0=source + m_Radius*vnormal;
         this->m_Point1=target - m_Radius*vnormal;
+        m_AJGraph->GetAJEdge(edgeHandler)->SetDescriptor(this->ComputeDescriptor());
 
-        m_ComputedFeatures[edgeHandler]=this->ComputeDescriptor();
 
     }
 }

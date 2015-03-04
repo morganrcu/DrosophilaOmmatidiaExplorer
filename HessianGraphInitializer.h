@@ -67,6 +67,7 @@ public:
             for (position[1] =  0; position[1] < size[1]; position[1]++) {
                 for (position[2] = 0; position[2]  < size[2]; position[2]++) {
 
+
                     typename EigenValueImageType::PixelType centerValue = eigenImage->GetPixel(position);
 
                     if(centerValue[0]>=0 || centerValue[1]>=0 || centerValue[2]>=0) continue;

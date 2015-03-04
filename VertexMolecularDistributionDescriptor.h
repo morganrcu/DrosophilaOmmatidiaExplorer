@@ -7,7 +7,7 @@
 #include <itkArray.h>
 
 #include "SeedBasedMolecularDistributionDescriptor.h"
-
+#include "FeatureContainer.h"
 template<class TAJGraph,class TMolecularImage> class VertexMolecularDistributionDescriptor : public SeedBasedMolecularDistributionDescriptor<TMolecularImage>{
 public:
 
@@ -25,7 +25,7 @@ public:
     typedef  typename TMolecularImage::IndexType IndexType;
     typedef  typename TMolecularImage::IndexType OffsetType;
 
-    typedef typename SeedBasedMolecularDistributionDescriptor<TMolecularImage>::DescriptorType DescriptorType;
+
 
     virtual bool PointInRegion(const PointType & point);
 
@@ -42,11 +42,6 @@ public:
     itkSetMacro(Radius,double)
 
 
-	typedef std::map<typename AJGraphType::AJVertexHandler,DescriptorType> FeatureMapType;
-
-
-    itkGetMacro(ComputedFeatures,FeatureMapType)
-
 protected:
 
     VertexMolecularDistributionDescriptor();
@@ -56,8 +51,6 @@ protected:
 
 private:
 
-
-    FeatureMapType m_ComputedFeatures;
 
     typename AJGraphType::Pointer m_AJGraph;
 

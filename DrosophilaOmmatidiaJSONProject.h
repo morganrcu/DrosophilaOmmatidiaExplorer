@@ -8,7 +8,9 @@
 #include <AdherensJunctionVerticesContainer.h>
 #include <AJGraph.h>
 #include <AJVertex.h>
+#include <AJEdge.h>
 #include <itkArray.h>
+#include <FeatureContainer.h>
 /**
  * @brief The DrosophilaOmmatidiaJSONProject class encapsulates the IO operations with the filesystem
  */
@@ -55,11 +57,11 @@ public:
 
     //typedef AdherensJunctionVerticesContainer<AdherensJunctionVertex<3> > AdherensJunctionVerticesContainerType;
 
-    typedef AJGraph<AJVertex> AdherensJunctionGraphType;
+    typedef AJGraph<AJVertex,AJEdge> AdherensJunctionGraphType;
 
-    typedef std::map<typename AdherensJunctionGraphType::AJVertexHandler,itk::Array<double> > VertexMolecularFeatureMapType;
 
-    typedef std::map<typename AdherensJunctionGraphType::AJEdgeHandler,itk::Array<double> > EdgeMolecularFeatureMapType;
+
+
 
     /**
      * @brief DrosophilaOmmatidiaJSONProject Class constructor. Does nothing
@@ -74,7 +76,7 @@ public:
     bool Open(const std::string & fileName);
 
 
-    inline int GetNumFrames(){
+    inline int GetNumberOfFrames(){
         return m_NumFrames;
     }
 
@@ -96,11 +98,11 @@ public:
 
     void SetAJGraph(int frame,const typename AdherensJunctionGraphType::Pointer & ajVertices);
 
-    void SetVertexMolecularDistribution(int frame,const VertexMolecularFeatureMapType & vertexMolecularDistribution);
-    VertexMolecularFeatureMapType GetVertexMolecularDistribution(int frame);
+    //void SetVertexMolecularDistribution(int frame,const VertexMolecularFeatureMapType::Pointer & vertexMolecularDistribution);
+    //typename VertexMolecularFeatureMapType::Pointer GetVertexMolecularDistribution(int frame);
 
-    void SetEdgeMolecularDistribution(int frame, const EdgeMolecularFeatureMapType &edgeMolecularDistribution, const DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & graph);
-    EdgeMolecularFeatureMapType GetEdgeMolecularDistribution(int frame,const typename AdherensJunctionGraphType::Pointer & ajGraph);
+    //void SetEdgeMolecularDistribution(int frame, const EdgeMolecularFeatureMapType::Pointer &edgeMolecularDistribution, const DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & graph);
+    //EdgeMolecularFeatureMapType::Pointer GetEdgeMolecularDistribution(int frame,const typename AdherensJunctionGraphType::Pointer & ajGraph);
 
     typename AdherensJunctionGraphType::Pointer GetAJGraph(int frame);
 

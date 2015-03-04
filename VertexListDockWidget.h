@@ -4,6 +4,7 @@
 #include <QDockWidget>
 #include "AJGraph.h"
 #include "AJVertex.h"
+#include "AJEdge.h"
 namespace Ui {
 class VertexListDockWidget;
 }
@@ -12,7 +13,7 @@ class VertexListDockWidget : public QDockWidget
 {
     Q_OBJECT
 public:
-    typedef AJGraph<AJVertex> VertexContainer;
+    typedef AJGraph<AJVertex,AJEdge> VertexContainer;
 private:
 
     typename VertexContainer::Pointer m_VertexContainer;
@@ -31,7 +32,7 @@ public:
 public slots:
     void slotVertexTableSelectionChanged();
 signals:
-    void SelectedVertexChanged(AJGraph<AJVertex>::AJVertexHandler);
+    void SelectedVertexChanged(AJGraph<AJVertex,AJEdge>::AJVertexHandler);
 
 private:
     Ui::VertexListDockWidget *m_pUI;

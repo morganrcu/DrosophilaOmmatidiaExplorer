@@ -7,6 +7,7 @@
 #include <itkArray.h>
 
 #include "SeedBasedMolecularDistributionDescriptor.h"
+#include "FeatureContainer.h"
 
 template<class TAJGraph,class TMolecularImage> class EdgeMolecularDistributionDescriptor : public SeedBasedMolecularDistributionDescriptor<TMolecularImage>{
 public:
@@ -25,8 +26,6 @@ public:
     typedef  typename TMolecularImage::IndexType IndexType;
     typedef  typename TMolecularImage::IndexType OffsetType;
 
-    typedef typename SeedBasedMolecularDistributionDescriptor<TMolecularImage>::DescriptorType DescriptorType;
-
     virtual bool PointInRegion(const PointType & point);
 
     virtual void Compute();
@@ -43,10 +42,6 @@ public:
     itkGetMacro(NumberOfSegments,unsigned int)
     itkSetMacro(NumberOfSegments,unsigned int)
 
-    typedef std::map<typename AJGraphType::AJEdgeHandler,DescriptorType> FeatureMapType;
-    itkGetMacro(ComputedFeatures,FeatureMapType)
-
-
 
 
 protected:
@@ -58,7 +53,6 @@ protected:
 
 private:
 
-    FeatureMapType m_ComputedFeatures;
 
     typename AJGraphType::Pointer m_AJGraph;
 

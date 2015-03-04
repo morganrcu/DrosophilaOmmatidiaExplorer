@@ -18,7 +18,7 @@ VertexListDockWidget::VertexListDockWidget(QWidget *parent) :
 
 void VertexListDockWidget::slotVertexTableSelectionChanged(){
 
-    emit SelectedVertexChanged(static_cast<const AJGraph<AJVertex>::AJVertexHandler>(this->m_pUI->verticesTableWidget->selectionModel()->currentIndex().row()));
+    emit SelectedVertexChanged(static_cast<const AJGraph<AJVertex,AJEdge>::AJVertexHandler>(this->m_pUI->verticesTableWidget->selectionModel()->currentIndex().row()));
 }
 
 VertexListDockWidget::~VertexListDockWidget()

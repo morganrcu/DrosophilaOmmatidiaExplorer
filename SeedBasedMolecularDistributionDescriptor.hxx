@@ -9,7 +9,7 @@
 #define SEEDBASEDMOLECULARDISTRIBUTIONDESCRIPTOR_HXX_
 
 #include "SeedBasedMolecularDistributionDescriptor.h"
-
+#include "FeatureDescriptor.h"
 template<class TMolecularImage> SeedBasedMolecularDistributionDescriptor<TMolecularImage>::SeedBasedMolecularDistributionDescriptor(){
 
 }
@@ -35,12 +35,28 @@ template<class TMolecularImage> void SeedBasedMolecularDistributionDescriptor<TM
     this->m_ClusterImage->CopyInformation(this->m_MolecularImage);
     this->m_ClusterImage->Allocate();
 }
-template<class TMolecularImage> void SeedBasedMolecularDistributionDescriptor<TMolecularImage>::SetSeed(const IndexType & index, const ClusterDescriptor & cluster){
+template<class TMolecularImage> void SeedBasedMolecularDistributionDescriptor<TMolecularImage>::SetSeed(IndexType & index, const ClusterDescriptor & cluster){
+
+		typename TMolecularImage::RegionType region=this->m_LabelImage->GetLargestPossibleRegion();
+
+		if(!region.IsInside(index)){
+			for(int i=0;i<3;i++){
+				if(index[i]<region.GetIndex(i)){
+					index[i]=region.GetIndex(i);
+				}
+				if(region.GetIndex(i)+region.GetSize(i)<index[i]){
+					index[i]=region.GetIndex(i)+region.GetSize(i)-1;
+				}
+			}
+
+		}
+
 	   this->m_LabelImage->SetPixel(index,InitialTrialPoint);
 	   this->m_LevelSetImage->SetPixel(index,0);
 	   this->m_ClusterImage->SetPixel(index,cluster);
 
        LevelSetNodeType node;
+
 
        node.SetIndex(index);
        node.SetValue(0);
@@ -61,7 +77,7 @@ template<class TMolecularImage> void SeedBasedMolecularDistributionDescriptor<TM
     this->m_ClusterImage->FillBuffer(itk::NumericTraits<unsigned short>::max());
 }
 
-template<class TMolecularImage> typename SeedBasedMolecularDistributionDescriptor<TMolecularImage>::DescriptorType SeedBasedMolecularDistributionDescriptor<TMolecularImage>::ComputeDescriptor(){
+template<class TMolecularImage> itk::Array<double> SeedBasedMolecularDistributionDescriptor<TMolecularImage>::ComputeDescriptor(){
 
 
 
@@ -104,6 +120,7 @@ template<class TMolecularImage> typename SeedBasedMolecularDistributionDescripto
           visitedRegion.push_back(node.GetIndex());
           unsigned char label;
 
+          assert(m_ClusterImage->GetBufferedRegion().IsInside(centerIndex));
           unsigned short centerCluster = m_ClusterImage->GetPixel(centerIndex);
 
           itk::Offset<3> offset;
@@ -134,6 +151,8 @@ template<class TMolecularImage> typename SeedBasedMolecularDistributionDescripto
                             if(newValue<oldValue){
 								this->m_LabelImage->SetPixel(neighIndex,AlivePoint);
 								this->m_LevelSetImage->SetPixel(neighIndex,newValue);
+
+								assert(m_ClusterImage->GetBufferedRegion().IsInside(neighIndex));
 								this->m_ClusterImage->SetPixel(neighIndex,centerCluster);
 
 								LevelSetNodeType node;
@@ -153,10 +172,14 @@ template<class TMolecularImage> typename SeedBasedMolecularDistributionDescripto
       }
     }
 
-    DescriptorType distribution(m_NumberOfClusters);
+
+    itk::Array<double> distribution(m_NumberOfClusters);
 	itk::Array<int> volume(m_NumberOfClusters);
 
-    distribution.Fill(0);
+	for(int i=0;i<distribution.size();i++){
+		distribution[i]=0;
+	}
+
     volume.Fill(0);
 	for(IndexType index : visitedRegion) {
     	unsigned short cluster=this->m_ClusterImage->GetPixel(index);
@@ -166,10 +189,8 @@ template<class TMolecularImage> typename SeedBasedMolecularDistributionDescripto
     for(int i=0;i<m_NumberOfClusters;i++){
     	distribution[i]=distribution[i]/volume[i];
     }
-    std::cout << volume << std::endl;
-    std::cout << distribution << std::endl;
 
-    return distribution;
+return distribution;
 
 }
 

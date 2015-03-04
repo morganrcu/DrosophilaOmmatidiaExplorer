@@ -6,8 +6,9 @@
 #include <itkObjectFactory.h>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
-
-template<class TAJVertex> class AJGraph : public itk::DataObject {
+#include "FeatureDescriptor.h"
+#include <itkArray.h>
+template<class TAJVertex,class TAJEdge> class AJGraph : public itk::DataObject {
 
 
 private:
@@ -16,21 +17,30 @@ private:
         typedef boost::vertex_property_tag kind;
     };
 
-    typedef boost::property<AJVertexPropertyTag, typename TAJVertex::Pointer,boost::property<boost::vertex_index_t, int> >  VertexProperty;
-    typedef boost::property<boost::edge_index_t,int> EdgeProperty;
+    struct AJEdgePropertyTag {
+                typedef boost::edge_property_tag kind;
+    };
 
-    typedef boost::adjacency_list<boost::vecS,boost::vecS,boost::undirectedS,VertexProperty,EdgeProperty> BoostGraphType;
+    typedef boost::property<AJVertexPropertyTag, typename TAJVertex::Pointer,
+
+			boost::property<boost::vertex_index_t, int> >   VertexProperty;
+
+    typedef boost::property<AJEdgePropertyTag,typename TAJEdge::Pointer,
+    		boost::property<boost::edge_index_t,int> > EdgeProperty;
+
+    typedef boost::adjacency_list<boost::vecS,boost::vecS,boost::undirectedS,VertexProperty,EdgeProperty,boost::no_property> BoostGraphType;
 
 
     BoostGraphType m_Graph;
 public:
 
-    typedef AJGraph<TAJVertex> Self;
+    typedef AJGraph<TAJVertex,TAJEdge> Self;
     typedef itk::DataObject Superclass;
     typedef itk::SmartPointer<Self> Pointer;
 
 
     typedef TAJVertex AJVertexType;
+    typedef TAJEdge AJEdgeType;
 
 
     typedef typename boost::graph_traits<BoostGraphType>::vertex_descriptor AJVertexHandler;
@@ -51,6 +61,7 @@ public:
         return boost::edge(source,target,m_Graph).first;
 
     }
+
 
     virtual AJVertexHandler GetAJEdgeTarget(const AJEdgeHandler & target){
         return boost::target(target,m_Graph);
@@ -92,7 +103,15 @@ public:
 
 
     virtual AJEdgeHandler AddAJEdge(const AJVertexHandler & a, const AJVertexHandler & b){
-        return boost::add_edge(a,b,m_Graph).first;
+        AJEdgeHandler result= boost::add_edge(a,b,m_Graph).first;
+        boost::get(AJEdgePropertyTag(),m_Graph,result)=AJEdgeType::New();
+        return result;
+    }
+
+    virtual typename AJEdgeType::Pointer GetAJEdge(const AJEdgeHandler & edge){
+    	return boost::get(AJEdgePropertyTag(),m_Graph,edge);
+
+
     }
 
     unsigned long GetNumVertices(){

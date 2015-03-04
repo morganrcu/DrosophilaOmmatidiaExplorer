@@ -5,6 +5,7 @@
 #include <fstream>
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
+#include <FeatureContainer.h>
 DrosophilaOmmatidiaJSONProject::DrosophilaOmmatidiaJSONProject(){
 }
 
@@ -106,45 +107,13 @@ typename DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer DrosophilaOmma
     this->ReadFrame<MotionImageType>(motionImage,fileName);
     return motionImage;
 }
-typename DrosophilaOmmatidiaJSONProject::VertexMolecularFeatureMapType DrosophilaOmmatidiaJSONProject::GetVertexMolecularDistribution(int frame){
+#if 0
+typename DrosophilaOmmatidiaJSONProject::VertexMolecularFeatureMapType::Pointer DrosophilaOmmatidiaJSONProject::GetVertexMolecularDistribution(int frame){
 
 
-    Json::Reader reader;
-    Json::Value root;
-
-    std::stringstream fileNameStream;
-    fileNameStream << this->m_ProjectPath << "/" << "verticesMolecules" << m_FirstFrame+frame << ".json";
-
-    std::string ajVerticesFile;
-    fileNameStream >> ajVerticesFile;
-
-    std::cout << ajVerticesFile << std::endl;
-
-    std::ifstream jsonAJVerticesFile(ajVerticesFile.c_str());
-    reader.parse(jsonAJVerticesFile, root);
-
-    typename AdherensJunctionGraphType::Pointer ajGraph = AdherensJunctionGraphType::New();
-
-    int numvertices = root["Molecules"].size();
-
-    VertexMolecularFeatureMapType descriptors;
-    for (int i = 0; i < numvertices; i++) {
-
-        typename AdherensJunctionGraphType::AJVertexHandler vertex =root["Molecules"][i]["vertex"].asUInt64();
-
-        unsigned int length=root["Molecules"][i]["length"].asUInt();
-        itk::Array<double>  descriptor(length);
-
-        for(int l=0;l<length;l++){
-            descriptor[l]=root["Molecules"][i]["descriptor"][l].asDouble();
-        }
-
-        descriptors[vertex]=descriptor;
-    }
-    return descriptors;
 }
 
-typename DrosophilaOmmatidiaJSONProject::EdgeMolecularFeatureMapType DrosophilaOmmatidiaJSONProject::GetEdgeMolecularDistribution(int frame,const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & ajGraph){
+typename DrosophilaOmmatidiaJSONProject::EdgeMolecularFeatureMapType::Pointer DrosophilaOmmatidiaJSONProject::GetEdgeMolecularDistribution(int frame,const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & ajGraph){
 
     Json::Reader reader;
     Json::Value root;
@@ -159,32 +128,43 @@ typename DrosophilaOmmatidiaJSONProject::EdgeMolecularFeatureMapType DrosophilaO
     std::ifstream jsonAJVerticesFile(ajVerticesFile.c_str());
     reader.parse(jsonAJVerticesFile, root);
 
-    int numvertices = root["Molecules"].size();
+    int numedges = root["Molecules"].size();
 
-    EdgeMolecularFeatureMapType descriptors;
-    for (int i = 0; i < numvertices; i++) {
+    typename EdgeMolecularFeatureMapType::Pointer descriptors=EdgeMolecularFeatureMapType::New();
+    for (int i = 0; i < numedges; i++) {
 
 
         typename AdherensJunctionGraphType::AJVertexHandler source =root["Molecules"][i]["source"].asUInt64();
         typename AdherensJunctionGraphType::AJVertexHandler target =root["Molecules"][i]["target"].asUInt64();
 
-        typename AdherensJunctionGraphType::AJEdgeHandler edge = ajGraph->GetAJEdgeHandler(source,target);
+        //typename AdherensJunctionGraphType::AJEdgeHandler edge = ajGraph->GetAJEdgeHandler(source,target);
         unsigned int length=root["Molecules"][i]["length"].asUInt();
-        itk::Array<double>  descriptor(length);
+        typedef itk::Array<double> DescriptorType;
+        DescriptorType  distribution(length);
+
 
         for(int l=0;l<length;l++){
-            descriptor[l]=root["Molecules"][i]["descriptor"][l].asDouble();
+        	distribution[l]=root["Molecules"][i]["descriptor"][l].asDouble();
         }
+        unsigned long edgeNumber=ajGraph->GetAJEdgeNumber(source,target);
+        std::cout << edgeNumber << std::endl;
+        typename FeatureDescriptor< DescriptorType>::Pointer descriptor = FeatureDescriptor< DescriptorType>::New();
+        descriptor->SetValue(distribution);
+        descriptors->AddFeature(edgeNumber,descriptor);
 
-        descriptors[edge]=descriptor;
     }
+#if 0
+    for(auto it = descriptors.begin();it!=descriptors.end();it++){
+    	//std::cout << it->first << " " << it->second << std::endl;
+    }
+#endif
     return descriptors;
 
 
 }
 
 
-void DrosophilaOmmatidiaJSONProject::SetVertexMolecularDistribution(int frame, const VertexMolecularFeatureMapType & vertexMolecularDistribution){
+void DrosophilaOmmatidiaJSONProject::SetVertexMolecularDistribution(int frame, const VertexMolecularFeatureMapType::Pointer & vertexMolecularDistribution){
 
 
     Json::StyledWriter writer;
@@ -197,14 +177,16 @@ void DrosophilaOmmatidiaJSONProject::SetVertexMolecularDistribution(int frame, c
 
     int i=0;
 
-    for(auto elem : vertexMolecularDistribution){
-        AdherensJunctionGraphType::AJVertexHandler vertex= elem.first;
-        itk::Array<double> descriptor = elem.second;
+    for(auto it = vertexMolecularDistribution->FeaturesBegin();it!=vertexMolecularDistribution->FeaturesEnd();it++){
+        AdherensJunctionGraphType::AJVertexHandler vertex= it->first;
+        typedef itk::Array<double> DistributionType;
+        typename FeatureDescriptor< DistributionType>::Pointer descriptor =  it->second;
         root["Molecules"][i]["vertex"]=static_cast<Json::UInt64>(vertex);
-        root["Molecules"][i]["length"]=descriptor.Size();
-        for(int l=0;l<descriptor.Size();l++){
-            root["Molecules"][i]["descriptor"][l]=descriptor[l];
+        root["Molecules"][i]["length"]=static_cast<Json::UInt64>(descriptor->GetValue().size());
+        for(int l=0;l<descriptor->GetValue().size();l++){
+            root["Molecules"][i]["descriptor"][l]=descriptor->GetValue()[l];
         }
+        i++;
     }
 
     std::string jsoncontent = writer.write(root);
@@ -217,7 +199,7 @@ void DrosophilaOmmatidiaJSONProject::SetVertexMolecularDistribution(int frame, c
 
 }
 
-void DrosophilaOmmatidiaJSONProject::SetEdgeMolecularDistribution(int frame, const EdgeMolecularFeatureMapType &edgeMolecularDistribution, const DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & graph){
+void DrosophilaOmmatidiaJSONProject::SetEdgeMolecularDistribution(int frame, const EdgeMolecularFeatureMapType::Pointer & edgeMolecularDistribution, const DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & graph){
 
     Json::StyledWriter writer;
     Json::Value root;
@@ -229,15 +211,20 @@ void DrosophilaOmmatidiaJSONProject::SetEdgeMolecularDistribution(int frame, con
 
     int i=0;
 
-    for(auto elem : edgeMolecularDistribution){
-        AdherensJunctionGraphType::AJEdgeHandler edge= elem.first;
-        itk::Array<double> descriptor = elem.second;
+    for(auto it = edgeMolecularDistribution->FeaturesBegin();it!=edgeMolecularDistribution->FeaturesEnd();it++){
+
+    	AdherensJunctionGraphType::AJEdgeHandler edge= graph->GetAJEdgeHandelerFromNumber(it->first);
+        typedef itk::Array<double> DistributionType;
+        typename FeatureDescriptor< DistributionType>::Pointer descriptor =  it->second;
+
+
         root["Molecules"][i]["source"]=(Json::UInt64)graph->GetAJEdgeSource(edge);
         root["Molecules"][i]["target"]=(Json::UInt64)graph->GetAJEdgeTarget(edge);
-        root["Molecules"][i]["length"]=descriptor.Size();
-        for(int l=0;l<descriptor.Size();l++){
-            root["Molecules"][i]["descriptor"][l]=descriptor[l];
+        root["Molecules"][i]["length"]=(Json::UInt64)descriptor->GetValue().size();
+        for(int l=0;l<descriptor->GetValue().size();l++){
+            root["Molecules"][i]["descriptor"][l]=descriptor->GetValue()[l];
         }
+        i++;
     }
 
     std::string jsoncontent = writer.write(root);
@@ -249,6 +236,7 @@ void DrosophilaOmmatidiaJSONProject::SetEdgeMolecularDistribution(int frame, con
     file.close();
 
 }
+#endif
 
 bool DrosophilaOmmatidiaJSONProject::IsMolecularImage(int frame){
     std::stringstream fileNameStream;
@@ -311,9 +299,19 @@ void DrosophilaOmmatidiaJSONProject::SetAJGraph(int frame,const typename Drosoph
     for(auto it =ajVertices->VerticesBegin();it!=ajVertices->VerticesEnd();it++){
 
         typename AdherensJunctionGraphType::AJVertexType::PointType position = ajVertices->GetAJVertex((*it))->GetPosition();
+        typename AdherensJunctionGraphType::AJVertexType::VectorType velocity = ajVertices->GetAJVertex((*it))->GetVelocity();
         root["Vertices"][i]["x"] =  position[0];
         root["Vertices"][i]["y"] =  position[1];
         root["Vertices"][i]["z"] =  position[2];
+
+        root["Vertices"][i]["dx"]=velocity[0];
+        root["Vertices"][i]["dy"]=velocity[1];
+        root["Vertices"][i]["dz"]=velocity[2];
+
+        itk::Array<double > descriptor=ajVertices->GetAJVertex((*it))->GetDescriptor();
+        for(int l=0;l<descriptor.size();l++){
+        	root["Vertices"][i]["descriptor"][l]=descriptor[l];
+        }
         i++;
     }
     i=0;
@@ -324,6 +322,11 @@ void DrosophilaOmmatidiaJSONProject::SetAJGraph(int frame,const typename Drosoph
 
         root["Edges"][i]["s"] =  (Json::UInt64)source;
         root["Edges"][i]["t"] =  (Json::UInt64)target;
+
+        itk::Array<double > descriptor=ajVertices->GetAJEdge((*it))->GetDescriptor();
+        for(int l=0;l<descriptor.size();l++){
+        	root["Edges"][i]["descriptor"][l]=descriptor[l];
+        }
 
         i++;
     }
@@ -367,6 +370,26 @@ typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer Dros
             position[1] = root["Vertices"][i]["y"].asDouble();
             position[2] = root["Vertices"][i]["z"].asDouble();
             newVertex->SetPosition(position);
+            typename AdherensJunctionGraphType::AJVertexType::VectorType velocity;
+            if(root["Vertices"][i].isMember("dx")){
+            	velocity[0] = root["Vertices"][i]["dx"].asDouble();
+            	velocity[1] = root["Vertices"][i]["dy"].asDouble();
+            	velocity[2] = root["Vertices"][i]["dz"].asDouble();
+            	newVertex->SetVelocity(velocity);
+            }
+
+
+
+
+            unsigned int length=root["Vertices"][i]["descriptor"].size();
+            typedef itk::Array<double> DescriptorType;
+            DescriptorType  distribution(length);
+
+            for(int l=0;l<length;l++){
+            	distribution[l]=root["Vertices"][i]["descriptor"][l].asDouble();
+            }
+
+            newVertex->SetDescriptor(distribution);
 
             ajGraph->AddAJVertex(newVertex);
         }
@@ -379,9 +402,46 @@ typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer Dros
             source = root["Edges"][i]["s"].asUInt64();
             target = root["Edges"][i]["t"].asUInt64();
 
-            ajGraph->AddAJEdge(source,target);
+            unsigned int length=root["Edges"][i]["descriptor"].size();
+            typedef itk::Array<double> DescriptorType;
+            DescriptorType  distribution(length);
+            for(int l=0;l<length;l++){
+            	distribution[l]=root["Edges"][i]["descriptor"][l].asDouble();
+            }
+            auto edgeHandler=ajGraph->AddAJEdge(source,target);
+            typename AJEdge::Pointer edge=ajGraph->GetAJEdge(edgeHandler);
+            edge->SetDescriptor(distribution);
         }
 
         return ajGraph;
 
+#if 0
+
+         std::stringstream fileNameStream;
+        fileNameStream << this->m_ProjectPath << "/" << "verticesMolecules_T" << m_FirstFrame+frame << ".json";
+
+        std::string ajVerticesFile;
+        fileNameStream >> ajVerticesFile;
+
+        std::cout << ajVerticesFile << std::endl;
+
+        std::ifstream jsonAJVerticesFile(ajVerticesFile.c_str());
+        reader.parse(jsonAJVerticesFile, root);
+
+
+        int numvertices = root["Molecules"].size();
+
+        VertexMolecularFeatureMapType::Pointer descriptors=VertexMolecularFeatureMapType::New();
+        for (int i = 0; i < numvertices; i++) {
+
+            typename AdherensJunctionGraphType::AJVertexHandler vertex =root["Molecules"][i]["vertex"].asUInt64();
+
+
+
+            typename FeatureDescriptor< DescriptorType>::Pointer descriptor = FeatureDescriptor< DescriptorType>::New();
+            descriptor->SetValue(distribution);
+            descriptors->AddFeature(vertex,descriptor);
+        }
+        return descriptors;
+#endif
 }

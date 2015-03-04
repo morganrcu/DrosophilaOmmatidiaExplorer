@@ -66,8 +66,8 @@ set(CMAKE_AUTOMOC ON)
     ${QRC_Srcs}
   )
 
-add_executable(VertexMolecularDistributionTest VertexMolecularDistributionTest.cpp  )
-  target_link_libraries(VertexMolecularDistributionTest ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+#add_executable(VertexMolecularDistributionTest VertexMolecularDistributionTest.cpp  )
+#  target_link_libraries(VertexMolecularDistributionTest ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
   add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
 

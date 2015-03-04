@@ -15,7 +15,7 @@ int main(int argc,char ** argv){
     typedef itk::ImageFileWriter<MolecularImageType> WriterType;
 
 
-    typedef AJGraph<AJVertex> AJGraphType;
+    typedef AJGraph<AJVertex,AJEDGE> AJGraphType;
 
 
     typename ReaderType::Pointer reader = ReaderType::New();

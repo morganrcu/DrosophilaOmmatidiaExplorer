@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>868</width>
-    <height>631</height>
+    <width>1074</width>
+    <height>636</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -91,7 +91,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>868</width>
+     <width>1074</width>
      <height>25</height>
     </rect>
    </property>
@@ -146,8 +146,11 @@
    <addaction name="separator"/>
    <addaction name="actionTrackVertices"/>
    <addaction name="separator"/>
+   <addaction name="actionExportMovie"/>
    <addaction name="actionHelp"/>
    <addaction name="actionPlotEdge"/>
+   <addaction name="actionPlotEdgeDistribution"/>
+   <addaction name="actionPlotVertexDistribution"/>
    <addaction name="actionVertexMolecularDistribution"/>
    <addaction name="actionEdgeMolecularDistribution"/>
   </widget>
@@ -334,10 +337,13 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="showPlatenessSliceSpinBox"/>
+        </item>
        </layout>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="6" column="0">
       <widget class="QGroupBox" name="showMolecularChannelGroupBox">
        <property name="title">
         <string>Molecular channel</string>
@@ -383,6 +389,13 @@
          </widget>
         </item>
        </layout>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QCheckBox" name="showVertexMotionCBox">
+       <property name="text">
+        <string>Vertex Motion</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -510,6 +523,9 @@
    <property name="text">
     <string>Delete Vertex</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
   </action>
   <action name="actionSelectEdge">
    <property name="checkable">
@@ -567,7 +583,7 @@
   </action>
   <action name="actionPlotEdge">
    <property name="text">
-    <string>Plot edge</string>
+    <string>Plot edge length</string>
    </property>
   </action>
   <action name="actionShowEdges">
@@ -586,6 +602,24 @@
   <action name="actionEdgeMolecularDistribution">
    <property name="text">
     <string>Edge MD</string>
+   </property>
+  </action>
+  <action name="actionPlotEdgeDistribution">
+   <property name="text">
+    <string>Plot Edge Distribution</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot Edge Distribution</string>
+   </property>
+  </action>
+  <action name="actionPlotVertexDistribution">
+   <property name="text">
+    <string>Plot Vertex Distribution</string>
+   </property>
+  </action>
+  <action name="actionExportMovie">
+   <property name="text">
+    <string>Export Movie</string>
    </property>
   </action>
  </widget>

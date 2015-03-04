@@ -30,6 +30,7 @@
 #include "VertexLocationsDrawer.h"
 #include "EdgesDrawer.h"
 #include "MotionFieldVolumeDrawer.h"
+#include "VertexMotionsDrawer.h"
 
 #include "AJGraph.h"
 #include "AJVertex.h"
@@ -39,6 +40,7 @@
 #include "EdgeListDockWidget.h"
 #include "VertexListDockWidget.h"
 #include "GraphPlotterDockWidget.h"
+
 
 // Forward Qt class declarations
 class Ui_DrosophilaOmmatidiaExplorer;
@@ -93,7 +95,7 @@ public slots:
   virtual void slotVertexAdditionToggled(bool);
   virtual void slotVertexSelectionToggled(bool);
     virtual void slotVertexMoveToggled(bool);
-  virtual void slotVertexMD();
+
 
   virtual void slotEdgeAdditionToggled(bool);
   virtual void slotEdgeSelectionToggled(bool);
@@ -104,6 +106,7 @@ public slots:
   virtual void slotDoVertexMolecularDistribution();
   virtual void slotDoEdgeMolecularDistribution();
 
+  virtual void slotExportMovie();
 
   virtual void slotDeleteVertex();
   virtual void slotDeleteEdge();
@@ -119,17 +122,22 @@ public slots:
   virtual void slotShowOriginalOpacityChanged(int);
 
   virtual void slotShowMotionFieldChanged(bool);
+  virtual void slotShowVertexMotionChanged(bool);
 
   virtual void slotShowVertexLocationsChanged(bool);
 
   virtual void slotShowPlatenessChanged(bool);
+
+  virtual void slotShowPlatenessModeChanged(const QString &);
   virtual void slotShowPlatenessOpacityChanged(int);
+
+  virtual void slotShowPlatenessSliceChanged(int);
 
   virtual void slotShowMolecularChanged(bool);
   virtual void slotShowMolecularOpacityChanged(int);
 
-  virtual void slotVertexTableSelectionChanged(AJGraph<AJVertex>::AJVertexHandler );
-  virtual void slotEdgeTableSelectionChanged(AJGraph<AJVertex>::AJEdgeHandler );
+  virtual void slotVertexTableSelectionChanged(AJGraph<AJVertex,AJEdge>::AJVertexHandler );
+  virtual void slotEdgeTableSelectionChanged(AJGraph<AJVertex,AJEdge>::AJEdgeHandler );
 
 
 
@@ -151,8 +159,9 @@ public slots:
   virtual void slotRightClickAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
 
 
-  virtual void slotPlotEdgeLength(const AJGraph<AJVertex>::AJEdgeHandler & edge);
-
+  virtual void slotPlotEdgeLength(const AJGraph<AJVertex,AJEdge>::AJEdgeHandler & edge);
+  virtual void slotPlotEdgeMolecularDistribution();
+  virtual void slotPlotVertexMolecularDistribution();
 
 
   //virtual void slotShowEdges(bool);
@@ -162,7 +171,7 @@ public slots:
 protected slots:
 
 private:
-
+  void PlotDescriptor(const std::vector<itk::Array<double> > & descriptors);
   void DrawFrame(int frame);
 
   void SetSelectedVertex(const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler & );
@@ -182,11 +191,23 @@ private:
   DrosophilaOmmatidiaJSONProject m_Project;
 
 
-  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::OriginalImageType> m_OriginalDrawer;
-  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::DeconvolutedImageType> m_DeconvolutedDrawer;
-  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::PlatenessImageType> m_PlatenessDrawer;
-  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::VertexnessImageType> m_VertexnessDrawer;
-  MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::MolecularImageType> m_MolecularImageDrawer;
+  typedef MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::OriginalImageType> OriginalDrawerType;
+  OriginalDrawerType m_OriginalDrawer;
+  typedef MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::OriginalImageType> DeconvolutedDrawerType;
+  DeconvolutedDrawerType m_DeconvolutedDrawer;
+
+  typedef MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::OriginalImageType> PlatenessDrawerType;
+  PlatenessDrawerType m_PlatenessDrawer;
+
+  typedef MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::OriginalImageType> VertexnessDrawerType;
+  VertexnessDrawerType m_VertexnessDrawer;
+
+  typedef MinMaxVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::OriginalImageType> MolecularDrawerType;
+  MolecularDrawerType m_MolecularImageDrawer;
+
+  typedef VertexMotionsDrawer<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> VertexMotionsDrawerType;
+  VertexMotionsDrawerType m_VertexMotionsDrawer;
+
   VertexLocationsDrawer<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> m_VertexLocationsDrawer;
 
   EdgesDrawer<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> m_EdgesDrawer;
