@@ -268,6 +268,19 @@ typename DrosophilaOmmatidiaJSONProject::HessianImageType::Pointer DrosophilaOmm
 }
 
 
+
+typename DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer DrosophilaOmmatidiaJSONProject::GetVertexnessImage(int frame){
+
+    typename VertexnessImageType::Pointer vertexnessImage{};
+
+    std::stringstream buffer("");
+    buffer << "vertexness_T" << m_FirstFrame+frame <<".mha";
+
+    std::string fileName=buffer.str();
+    this->ReadFrame<VertexnessImageType>(vertexnessImage,fileName);
+    return vertexnessImage;
+}
+
 void DrosophilaOmmatidiaJSONProject::SetVertexnessImage(int frame, typename VertexnessImageType::Pointer & vertexnessImage){
 
     std::stringstream buffer("");

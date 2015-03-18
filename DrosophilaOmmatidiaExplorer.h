@@ -87,81 +87,101 @@ public:
 
 public slots:
 
+   //Project handling
   virtual void slotOpenProject();
   virtual void slotExit();
 
-  virtual void slotFrameChanged(int);
-
-  virtual void slotVertexAdditionToggled(bool);
-  virtual void slotVertexSelectionToggled(bool);
-    virtual void slotVertexMoveToggled(bool);
-
-
-  virtual void slotEdgeAdditionToggled(bool);
-  virtual void slotEdgeSelectionToggled(bool);
-
+  //Algorithms
   virtual void slotDoVertexLocation();
-  virtual void slotDoVertexTracking();
+  virtual void slotDoRefineVertexLocation();
 
+  virtual void slotDoVertexTracking();
   virtual void slotDoVertexMolecularDistribution();
   virtual void slotDoEdgeMolecularDistribution();
+  virtual void slotDoExportMovie();
 
-  virtual void slotExportMovie();
+  // Visualization slots
 
-  virtual void slotDeleteVertex();
-  virtual void slotDeleteEdge();
-
-  virtual void slotShowDeconvolutedChanged(bool);
-  virtual void slotShowDeconvolutedModeChanged(const QString &);
-  virtual void slotShowDeconvolutedOpacityChanged(int);
-
+  virtual void slotFrameChanged(int);
 
 
   virtual void slotShowOriginalChanged(bool);
   virtual void slotShowOriginalModeChanged(const QString &);
   virtual void slotShowOriginalOpacityChanged(int);
 
+  virtual void slotShowDeconvolutedChanged(bool);
+  virtual void slotShowDeconvolutedModeChanged(const QString &);
+  virtual void slotShowDeconvolutedOpacityChanged(int);
+
   virtual void slotShowMotionFieldChanged(bool);
+
   virtual void slotShowVertexMotionChanged(bool);
 
   virtual void slotShowVertexLocationsChanged(bool);
 
   virtual void slotShowPlatenessChanged(bool);
-
   virtual void slotShowPlatenessModeChanged(const QString &);
   virtual void slotShowPlatenessOpacityChanged(int);
-
   virtual void slotShowPlatenessSliceChanged(int);
+
+  virtual void slotShowVertexnessChanged(bool);
+  virtual void slotShowVertexnessOpacityChanged(int);
 
   virtual void slotShowMolecularChanged(bool);
   virtual void slotShowMolecularOpacityChanged(int);
 
-  virtual void slotVertexTableSelectionChanged(AJGraph<AJVertex,AJEdge>::AJVertexHandler );
-  virtual void slotEdgeTableSelectionChanged(AJGraph<AJVertex,AJEdge>::AJEdgeHandler );
 
 
 
+
+  //Vertex interaction
+  virtual void slotVertexSelectionToggled(bool);
   virtual void slotLeftClickVertexSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
   virtual void slotRightClickVertexSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
 
+  virtual void slotVertexAdditionToggled(bool);
+  virtual void slotDeleteVertex();
 
-  virtual void slotLeftClickEdgeSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
-  virtual void slotRightClickEdgeSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotLeftClickVertexAddMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotRightClickVertexAddMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+
+  virtual void slotVertexMoveToggled(bool);
+  virtual void slotRightClickVertexMoveMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
 
 
-  virtual void slotLeftClickAddMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotVertexTableSelectionChanged(AJGraph<AJVertex,AJEdge>::AJVertexHandler );
 
+
+
+
+
+  //Edge interaction
+
+  virtual void slotEdgeAdditionToggled(bool);
+  virtual void slotEdgeSelectionToggled(bool);
 
   virtual void slotFirstLeftClickAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
   virtual void slotSecondLeftClickAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
   virtual void slotMouseMoveAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotDeleteEdge();
+  virtual void slotEdgeTableSelectionChanged(AJGraph<AJVertex,AJEdge>::AJEdgeHandler );
 
   virtual void slotRightClickAddEdgeMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotLeftClickEdgeSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
+  virtual void slotRightClickEdgeSelectionMode(vtkObject*, unsigned long, void*,void*,vtkCommand*);
 
+//Interaction
 
+  // Charting slots
   virtual void slotPlotEdgeLength(const AJGraph<AJVertex,AJEdge>::AJEdgeHandler & edge);
-  virtual void slotPlotEdgeMolecularDistribution();
-  virtual void slotPlotVertexMolecularDistribution();
+  virtual void slotPlotSelectedEdgeLength();
+
+  virtual void slotPlotSelectedEdgeMolecularDistribution();
+  virtual void slotPlotEdgeMolecularDistribution(const AJGraph<AJVertex,AJEdge>::AJEdgeHandler & edge);
+
+  virtual void slotPlotSelectedVertexMolecularDistribution();
+  virtual void slotPlotVertexMolecularDistribution(const AJGraph<AJVertex,AJEdge>::AJVertexHandler & vertex);
+
 
 
   //virtual void slotShowEdges(bool);
@@ -181,6 +201,7 @@ private:
   void ClearSelectedEdge();
 
   vtkSmartPointer<vtkRenderer> m_Renderer;
+  vtkSmartPointer<vtkRenderWindow> m_RenderWindow;
   vtkSmartPointer<QVTKInteractor> m_RenderWindowInteractor;
 
   Ui_DrosophilaOmmatidiaExplorer *m_pUI;
@@ -224,11 +245,12 @@ private:
 
   typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler  m_AddingEdgeSource;
 
+#if 0
   enum VolumeVisualizationType{VOLUME,SLICE};
 
   VolumeVisualizationType m_ShowOriginalVolumeMode;
   VolumeVisualizationType m_ShowDeconvolutedVolumeMode;
-
+#endif
 
   vtkSmartPointer<vtkEventQtSlotConnect> m_QtToVTKConnections;
 
@@ -242,16 +264,10 @@ private:
   TemporaryRenderedLineStruct * m_pTemporaryLineStruct;
 
   vtkSmartPointer<vtkPointWidget> m_PointWidget;
-  //this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-
-
-  //vtkSmartPointer<AJGraphSelectionInteractorStyle<VertexLocationsDrawer<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> >  > m_VertexSelectionInteractorStyle;
-  //vtkSmartPointer<AJGraphSelectionInteractorStyle> m_VertexSelectionInteractorStyle;
 
 
   EdgeListDockWidget * m_pEdgeListDockWidget;
   VertexListDockWidget * m_pVertexListDockWidget;
-
   GraphPlotterDockWidget * m_pGraphPlotterDockWidget;
 
 

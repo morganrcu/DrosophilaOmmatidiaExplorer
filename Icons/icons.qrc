@@ -4,11 +4,22 @@
         <file>filesave.png</file>
         <file>print.png</file>
         <file>help.png</file>
-        <file>vertex-detection.png</file>
         <file>select_vertex.png</file>
-        <file>vertex-create.png</file>
-        <file>vertex-delete.png</file>
         <file>edges-create.png</file>
         <file>tracking.png</file>
+        <file>edge-remove.png</file>
+        <file>edge-add.png</file>
+        <file>edge-select.png</file>
+        <file>edge-detection.png</file>
+        <file>select-vertex.png</file>
+        <file>vertex-detection.png</file>
+        <file>vertex-addition.png</file>
+        <file>vertex-remove.png</file>
+        <file>vertex-move.png</file>
+        <file>begin.png</file>
+        <file>next.png</file>
+        <file>end.png</file>
+        <file>previous.png</file>
+        <file>play.png</file>
     </qresource>
 </RCC>

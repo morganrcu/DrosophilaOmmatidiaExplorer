@@ -93,7 +93,7 @@ public:
     typename MolecularImageType::Pointer GetMolecularImage(int frame);
 
 
-
+    typename VertexnessImageType::Pointer GetVertexnessImage(int frame);
     void SetVertexnessImage(int frame,typename VertexnessImageType::Pointer & vertexnessImage);
 
     void SetAJGraph(int frame,const typename AdherensJunctionGraphType::Pointer & ajVertices);
@@ -113,7 +113,7 @@ public:
     bool IsVertexnessImage(int frame);
     bool IsPlatenessImage(int frame);
 
-    bool IsAJVertices(int frame);\
+    bool IsAJVertices(int frame);
 
     bool IsMolecularImage(int frame);
 

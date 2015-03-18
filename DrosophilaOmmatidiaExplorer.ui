@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1074</width>
-    <height>636</height>
+    <width>1334</width>
+    <height>735</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,29 +55,105 @@
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="frameSlider">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="invertedAppearance">
-           <bool>false</bool>
-          </property>
-          <property name="tickPosition">
-           <enum>QSlider::TicksBelow</enum>
-          </property>
-          <property name="tickInterval">
-           <number>1</number>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="currentFrameLabel">
-          <property name="text">
-           <string/>
-          </property>
+         <widget class="QWidget" name="widget" native="true">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QPushButton" name="firstButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="Icons/icons.qrc">
+               <normaloff>:/Icons/begin.png</normaloff>:/Icons/begin.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="previousButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="Icons/icons.qrc">
+               <normaloff>:/Icons/previous.png</normaloff>:/Icons/previous.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="playButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="Icons/icons.qrc">
+               <normaloff>:/Icons/play.png</normaloff>:/Icons/play.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="nextButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="Icons/icons.qrc">
+               <normaloff>:/Icons/next.png</normaloff>:/Icons/next.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="lastButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="Icons/icons.qrc">
+               <normaloff>:/Icons/end.png</normaloff>:/Icons/end.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="currentFrameLabel">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="frameSlider">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="invertedAppearance">
+              <bool>false</bool>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TicksBelow</enum>
+             </property>
+             <property name="tickInterval">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -91,7 +167,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1074</width>
+     <width>1334</width>
      <height>25</height>
     </rect>
    </property>
@@ -108,9 +184,9 @@
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionShowVisualization"/>
+    <addaction name="actionShowCharts"/>
     <addaction name="actionShowVertices"/>
-    <addaction name="actionShowEdges"/>
+    <addaction name="actionShowEdgeList"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -139,6 +215,7 @@
    <addaction name="actionAddVertices"/>
    <addaction name="actionDeleteVertex"/>
    <addaction name="actionMoveVertex"/>
+   <addaction name="actionRefineVertices"/>
    <addaction name="separator"/>
    <addaction name="actionSelectEdge"/>
    <addaction name="actionAddEdge"/>
@@ -147,12 +224,12 @@
    <addaction name="actionTrackVertices"/>
    <addaction name="separator"/>
    <addaction name="actionExportMovie"/>
-   <addaction name="actionHelp"/>
-   <addaction name="actionPlotEdge"/>
+   <addaction name="actionPlotSelectedEdgeLength"/>
    <addaction name="actionPlotEdgeDistribution"/>
    <addaction name="actionPlotVertexDistribution"/>
    <addaction name="actionVertexMolecularDistribution"/>
    <addaction name="actionEdgeMolecularDistribution"/>
+   <addaction name="actionHelp"/>
   </widget>
   <widget class="QDockWidget" name="visualizationDock">
    <property name="enabled">
@@ -272,7 +349,7 @@
        </layout>
       </widget>
      </item>
-     <item row="3" column="0" colspan="2">
+     <item row="4" column="0" colspan="2">
       <widget class="QGroupBox" name="showMotionFieldGroupBox">
        <property name="title">
         <string>Motion Field</string>
@@ -285,14 +362,20 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0" colspan="2">
+     <item row="5" column="0" colspan="2">
       <widget class="QCheckBox" name="showAJVerticesGroupBox">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>AJ Vertices</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="2">
+     <item row="3" column="0" colspan="2">
       <widget class="QGroupBox" name="showPlatenessGroupBox">
        <property name="title">
         <string>Plateness</string>
@@ -340,10 +423,17 @@
         <item row="2" column="1">
          <widget class="QSpinBox" name="showPlatenessSliceSpinBox"/>
         </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Slice:</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
-     <item row="6" column="0">
+     <item row="7" column="0">
       <widget class="QGroupBox" name="showMolecularChannelGroupBox">
        <property name="title">
         <string>Molecular channel</string>
@@ -368,7 +458,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="showMolecularChannelOpacityLabel">
           <property name="text">
-           <string>TextLabel</string>
+           <string>Opacity:</string>
           </property>
          </widget>
         </item>
@@ -391,11 +481,55 @@
        </layout>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="6" column="0">
       <widget class="QCheckBox" name="showVertexMotionCBox">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>Vertex Motion</string>
        </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QGroupBox" name="showVertexnessGroupBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="title">
+        <string>Vertexness</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <layout class="QFormLayout" name="formLayout_6">
+        <item row="0" column="0">
+         <widget class="QLabel" name="showVertexnessOpacityLabel">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSlider" name="showVertexnessOpacitySlider">
+          <property name="maximum">
+           <number>1000000</number>
+          </property>
+          <property name="tracking">
+           <bool>false</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
@@ -419,6 +553,9 @@
    </property>
   </action>
   <action name="actionHelp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="Icons/icons.qrc">
      <normaloff>:/Icons/help.png</normaloff>:/Icons/help.png</iconset>
@@ -451,7 +588,7 @@
    </property>
    <property name="icon">
     <iconset resource="Icons/icons.qrc">
-     <normaloff>:/Icons/select_vertex.png</normaloff>:/Icons/select_vertex.png</iconset>
+     <normaloff>:/Icons/select-vertex.png</normaloff>:/Icons/select-vertex.png</iconset>
    </property>
    <property name="text">
     <string>Select Vertex</string>
@@ -460,15 +597,15 @@
     <string>Select Vertex</string>
    </property>
   </action>
-  <action name="actionShowVisualization">
+  <action name="actionShowCharts">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Visualization</string>
+    <string>Show Charts</string>
    </property>
    <property name="toolTip">
-    <string>Show Visualization</string>
+    <string>Show Charts</string>
    </property>
   </action>
   <action name="actionShowVertices">
@@ -481,7 +618,7 @@
   </action>
   <action name="actionTrackVertices">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="Icons/icons.qrc">
@@ -503,7 +640,7 @@
    </property>
    <property name="icon">
     <iconset resource="Icons/icons.qrc">
-     <normaloff>:/Icons/vertex-create.png</normaloff>:/Icons/vertex-create.png</iconset>
+     <normaloff>:/Icons/vertex-addition.png</normaloff>:/Icons/vertex-addition.png</iconset>
    </property>
    <property name="text">
     <string>Add Vertices</string>
@@ -518,7 +655,7 @@
    </property>
    <property name="icon">
     <iconset resource="Icons/icons.qrc">
-     <normaloff>:/Icons/vertex-delete.png</normaloff>:/Icons/vertex-delete.png</iconset>
+     <normaloff>:/Icons/vertex-remove.png</normaloff>:/Icons/vertex-remove.png</iconset>
    </property>
    <property name="text">
     <string>Delete Vertex</string>
@@ -536,7 +673,7 @@
    </property>
    <property name="icon">
     <iconset resource="Icons/icons.qrc">
-     <normaloff>:/Icons/edges-create.png</normaloff>:/Icons/edges-create.png</iconset>
+     <normaloff>:/Icons/edge-select.png</normaloff>:/Icons/edge-select.png</iconset>
    </property>
    <property name="text">
     <string>Select Edge</string>
@@ -555,6 +692,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/edge-add.png</normaloff>:/Icons/edge-add.png</iconset>
+   </property>
    <property name="text">
     <string>Add Edge</string>
    </property>
@@ -562,6 +703,10 @@
   <action name="actionDeleteEdge">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/edge-remove.png</normaloff>:/Icons/edge-remove.png</iconset>
    </property>
    <property name="text">
     <string>Delete Edge</string>
@@ -574,6 +719,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="Icons/icons.qrc">
+     <normaloff>:/Icons/vertex-move.png</normaloff>:/Icons/vertex-move.png</iconset>
+   </property>
    <property name="text">
     <string>Move Vertex</string>
    </property>
@@ -581,30 +730,48 @@
     <string>Move Vertex</string>
    </property>
   </action>
-  <action name="actionPlotEdge">
+  <action name="actionPlotSelectedEdgeLength">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Plot edge length</string>
    </property>
   </action>
-  <action name="actionShowEdges">
+  <action name="actionShowEdgeList">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show Edges</string>
+    <string>Show Edge List</string>
    </property>
   </action>
   <action name="actionVertexMolecularDistribution">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>Vertex MD</string>
+    <string>MD Vertices</string>
+   </property>
+   <property name="toolTip">
+    <string>Compute molecular distribution around vertices</string>
    </property>
   </action>
   <action name="actionEdgeMolecularDistribution">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>Edge MD</string>
+    <string>MD Edges</string>
+   </property>
+   <property name="toolTip">
+    <string>Compute molecular distribution around edges</string>
    </property>
   </action>
   <action name="actionPlotEdgeDistribution">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Plot Edge Distribution</string>
    </property>
@@ -613,13 +780,27 @@
    </property>
   </action>
   <action name="actionPlotVertexDistribution">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Plot Vertex Distribution</string>
    </property>
   </action>
   <action name="actionExportMovie">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Export Movie</string>
+   </property>
+  </action>
+  <action name="actionRefineVertices">
+   <property name="text">
+    <string>Refine Vertices</string>
+   </property>
+   <property name="toolTip">
+    <string>Refine vertex positions to local vertexness maxima</string>
    </property>
   </action>
  </widget>
@@ -630,6 +811,30 @@
    <header>QVTKWidget.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>showOriginalGroupBox</tabstop>
+  <tabstop>showOriginalModeComboBox</tabstop>
+  <tabstop>showOriginalOpacitySlider</tabstop>
+  <tabstop>showDeconvolutedGroupBox</tabstop>
+  <tabstop>showDeconvolutedModeComboBox</tabstop>
+  <tabstop>showDeconvolutedOpacitySlider</tabstop>
+  <tabstop>showPlatenessGroupBox</tabstop>
+  <tabstop>showPlatenessModeComboBox</tabstop>
+  <tabstop>showPlatenessOpacitySlider</tabstop>
+  <tabstop>showPlatenessSliceSpinBox</tabstop>
+  <tabstop>showMotionFieldGroupBox</tabstop>
+  <tabstop>showAJVerticesGroupBox</tabstop>
+  <tabstop>showVertexMotionCBox</tabstop>
+  <tabstop>showMolecularChannelGroupBox</tabstop>
+  <tabstop>showMolecularChannelModeComboBox</tabstop>
+  <tabstop>showMolecularChannelOpacitySlider</tabstop>
+  <tabstop>firstButton</tabstop>
+  <tabstop>previousButton</tabstop>
+  <tabstop>playButton</tabstop>
+  <tabstop>nextButton</tabstop>
+  <tabstop>lastButton</tabstop>
+  <tabstop>frameSlider</tabstop>
+ </tabstops>
  <resources>
   <include location="Icons/icons.qrc"/>
  </resources>

@@ -187,7 +187,11 @@ template<class TMolecularImage> itk::Array<double> SeedBasedMolecularDistributio
     	volume[cluster]++;
     }
     for(int i=0;i<m_NumberOfClusters;i++){
-    	distribution[i]=distribution[i]/volume[i];
+    	if(volume[i]>0){
+    		distribution[i]=distribution[i]/volume[i];
+    	}else{
+    		distribution[i]=0;
+    	}
     }
 
 return distribution;
