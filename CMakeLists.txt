@@ -1,12 +1,20 @@
 cmake_minimum_required(VERSION 2.8.8)
 
-add_definitions("-std=c++11 -fpermissive -g")
+
 
 project(DrosophilaOmmatidiaExplorer)
-include(CPack)
+
+#add_definitions("-std=c++11 -fpermissive -g")
+set(CXX_STANDARD 11)
+set(CXX_STANDARD_REQUIRED ON)
+
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
 find_package(ITK REQUIRED)
 INCLUDE(${ITK_USE_FILE})
-find_package(VTK COMPONENTS
+
+find_package(VTK 6.0 COMPONENTS
   vtkCommonCore
   vtkFiltersCore
   vtkInfovisCore
@@ -19,6 +27,8 @@ find_package(VTK COMPONENTS
   vtkChartsCore
   vtkRenderingContext${VTK_RENDERING_BACKEND}
   vtkViewsContext2D
+
+
 )
 include(${VTK_USE_FILE})
 
@@ -48,8 +58,10 @@ set( QRCs Icons/icons.qrc )
 set(CMAKE_AUTOMOC ON)
 
   # We have ui files, this will bring in the macro: qt5_wrap_ui
-  find_package(Qt5Widgets REQUIRED QUIET)
+  find_package(Qt5Widgets REQUIRED )
+  #find_package(Qt COMPONENTS Qt5Widgets  REQUIRED)
 
+  
   qt5_wrap_ui(UI_Srcs ${UIs})
   qt5_add_resources(QRC_Srcs ${QRCs} )
 
@@ -71,12 +83,13 @@ set(CMAKE_AUTOMOC ON)
 
   add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
 
-  qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
-  target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
+target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 
-install(TARGETS DrosophilaOmmatidiaExplorer RUNTIME DESTINATION bin)
+install(TARGET DrosophilaOmmatidiaExplorer DESTINATION bin  COMPONENT Runtime)
 
+include(DrosophilaOmmatidiaExplorerCPack.cmake )
 
-SET(CPACK_GENERATOR "DEB")
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Rodrigo Cilla")
+#SET(CPACK_GENERATOR "DEB")
+#SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Rodrigo Cilla")

@@ -218,13 +218,13 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
 }
 
 
-void DrosophilaOmmatidiaExplorer::slotVertexTableSelectionChanged(typename AJGraph<AJVertex,AJEdge>::AJVertexHandler  selectedVertex){
+void DrosophilaOmmatidiaExplorer::slotVertexTableSelectionChanged( AJGraph<AJVertex,AJEdge>::AJVertexHandler  selectedVertex){
     this->SetSelectedVertex(selectedVertex);
     this->m_Renderer->GetRenderWindow()->Render();
 }
 
 
-void DrosophilaOmmatidiaExplorer::slotEdgeTableSelectionChanged(typename AJGraph<AJVertex,AJEdge>::AJEdgeHandler selectedEdge){
+void DrosophilaOmmatidiaExplorer::slotEdgeTableSelectionChanged( AJGraph<AJVertex,AJEdge>::AJEdgeHandler selectedEdge){
     this->SetSelectedEdge(selectedEdge);
     this->m_Renderer->GetRenderWindow()->Render();
 }
@@ -263,15 +263,15 @@ void DrosophilaOmmatidiaExplorer::slotLeftClickVertexAddMode(vtkObject*,ulong,vo
     double picked[3];
     picker->GetPickPosition(picked);
 
-    typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::Pointer newVertex = DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::New();
+     DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::Pointer newVertex = DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::New();
 
-    typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::PointType point;
+     DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::PointType point;
     point[0]=picked[0];
     point[1]=picked[1];
     point[2]=picked[2];
     newVertex->SetPosition(point);
 
-    typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler newVertexHandler= this->m_CurrentAJGraph->AddAJVertex(newVertex);
+     DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler newVertexHandler= this->m_CurrentAJGraph->AddAJVertex(newVertex);
 
     vtkSmartPointer<vtkActor> drawn=this->m_VertexLocationsDrawer.DrawAJVertex(newVertexHandler);
     drawn->SetVisibility(true);
@@ -286,8 +286,8 @@ void DrosophilaOmmatidiaExplorer::slotVertexMoveToggled(bool toggled){
 
     if(toggled){
 
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::Pointer vertex = this->m_CurrentAJGraph->GetAJVertex(this->m_SelectedVertex);
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::PointType position= vertex->GetPosition();
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::Pointer vertex = this->m_CurrentAJGraph->GetAJVertex(this->m_SelectedVertex);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::PointType position= vertex->GetPosition();
 
         m_PointWidget->SetPosition(position[0],position[1],position[2]);
 
@@ -399,7 +399,7 @@ void DrosophilaOmmatidiaExplorer::slotLeftClickVertexSelectionMode(vtkObject*, u
     vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
 
     if(pickedActor){
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler clickedVertex = this->m_VertexLocationsDrawer.GetVertexFromActor(pickedActor);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler clickedVertex = this->m_VertexLocationsDrawer.GetVertexFromActor(pickedActor);
         std::cout << "Clicked" <<  clickedVertex << std::endl;
         this->SetSelectedVertex(clickedVertex);
     }
@@ -417,7 +417,7 @@ void DrosophilaOmmatidiaExplorer::slotLeftClickEdgeSelectionMode(vtkObject*, uns
     vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
 
     if(pickedActor){
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler clickedEdge = this->m_EdgesDrawer.GetEdgeFromActor(pickedActor);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler clickedEdge = this->m_EdgesDrawer.GetEdgeFromActor(pickedActor);
         std::cout << "Clicked" <<  clickedEdge << std::endl;
         this->SetSelectedEdge(clickedEdge);
     }
@@ -425,7 +425,7 @@ void DrosophilaOmmatidiaExplorer::slotLeftClickEdgeSelectionMode(vtkObject*, uns
 }
 
 
-void DrosophilaOmmatidiaExplorer::SetSelectedVertex(const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler & selectedVertex){
+void DrosophilaOmmatidiaExplorer::SetSelectedVertex(const  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler & selectedVertex){
 
     if(this->m_SelectedVertex!=-1){
         this->m_VertexLocationsDrawer.DeemphasizeAJVertex(this->m_SelectedVertex);
@@ -442,7 +442,7 @@ void DrosophilaOmmatidiaExplorer::SetSelectedVertex(const typename DrosophilaOmm
     this->m_SelectedVertex=selectedVertex;
 }
 
-void DrosophilaOmmatidiaExplorer::SetSelectedEdge(const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler & selectedEdge){
+void DrosophilaOmmatidiaExplorer::SetSelectedEdge(const  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler & selectedEdge){
 
     if(this->m_IsSelectedEdge){
         this->m_EdgesDrawer.DeemphasizeAJEdge(this->m_SelectedEdge);
@@ -521,13 +521,13 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexLocation(){
 
         typedef HessianImageToVertexnessImageFilter<DrosophilaOmmatidiaJSONProject::HessianImageType,DrosophilaOmmatidiaJSONProject::VertexnessImageType> HessianImageToVertexnessType;
 
-        typename HessianImageToVertexnessType::Pointer hessianToVertexness = HessianImageToVertexnessType::New();
+         HessianImageToVertexnessType::Pointer hessianToVertexness = HessianImageToVertexnessType::New();
 
         hessianToVertexness->SetInput(m_Project.GetHessianImage(referenceFrame));
 
         hessianToVertexness->Update();
 
-        typename DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexnessImage=hessianToVertexness->GetOutput();
+         DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexnessImage=hessianToVertexness->GetOutput();
 
         m_Project.SetVertexnessImage(referenceFrame,vertexnessImage);
 
@@ -564,10 +564,10 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexLocation(){
 void DrosophilaOmmatidiaExplorer::slotDoRefineVertexLocation(){
 	typedef RefineVerticesToNearestVertexnessMaxima<DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,DrosophilaOmmatidiaJSONProject::VertexnessImageType> RefineVerticesToNearestVertexnessMaximaType;
 
-	typename RefineVerticesToNearestVertexnessMaximaType::Pointer verticesRefiner = RefineVerticesToNearestVertexnessMaximaType::New();
+	 RefineVerticesToNearestVertexnessMaximaType::Pointer verticesRefiner = RefineVerticesToNearestVertexnessMaximaType::New();
 
-	typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer vertices = m_Project.GetAJGraph(m_CurrentFrame);
-	typename DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexness = m_Project.GetVertexnessImage(m_CurrentFrame);
+	 DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer vertices = m_Project.GetAJGraph(m_CurrentFrame);
+	 DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexness = m_Project.GetVertexnessImage(m_CurrentFrame);
 
 	verticesRefiner->SetVertexnessImage(vertexness);
 	verticesRefiner->SetVertices(vertices);
@@ -669,12 +669,12 @@ void DrosophilaOmmatidiaExplorer::slotFirstLeftClickAddEdgeMode(vtkObject*,unsig
     vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
 
     if(pickedActor){
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler clickedVertex = this->m_VertexLocationsDrawer.GetVertexFromActor(pickedActor);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler clickedVertex = this->m_VertexLocationsDrawer.GetVertexFromActor(pickedActor);
         std::cout << "Clicked" <<  clickedVertex << std::endl;
 
         m_AddingEdgeSource= clickedVertex;
 
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::Pointer sourceVertex=this->m_CurrentAJGraph->GetAJVertex(clickedVertex);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::Pointer sourceVertex=this->m_CurrentAJGraph->GetAJVertex(clickedVertex);
 
         this->m_pTemporaryLineStruct = new TemporaryRenderedLineStruct();
         this->m_pTemporaryLineStruct->lineSource = vtkSmartPointer<vtkLineSource>::New();
@@ -750,13 +750,13 @@ void DrosophilaOmmatidiaExplorer::slotSecondLeftClickAddEdgeMode(vtkObject*,unsi
 
         //delete this->m_pTemporaryLineStruct;
 
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler clickedVertex = this->m_VertexLocationsDrawer.GetVertexFromActor(pickedActor);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler clickedVertex = this->m_VertexLocationsDrawer.GetVertexFromActor(pickedActor);
 
 
 
         std::cout << "Linking " << this->m_AddingEdgeSource << " TO " << clickedVertex << std::endl;
 
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler newEdge=this->m_CurrentAJGraph->AddAJEdge(m_AddingEdgeSource,clickedVertex);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler newEdge=this->m_CurrentAJGraph->AddAJEdge(m_AddingEdgeSource,clickedVertex);
 
         this->m_Project.SetAJGraph(this->m_CurrentFrame,this->m_CurrentAJGraph);
 
@@ -781,17 +781,17 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexTracking(){
     for(int t=0;t<this->m_Project.GetNumberOfFrames()-1;t++){
         typedef PredictAJGraph<DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,DrosophilaOmmatidiaJSONProject::MotionImageType,DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> PredictAJGraphType;
 
-        typename PredictAJGraphType::Pointer predict= PredictAJGraphType::New();
+         PredictAJGraphType::Pointer predict= PredictAJGraphType::New();
         predict->SetMotionImage(this->m_Project.GetMotionImage(t));
         predict->SetInputGraph(this->m_Project.GetAJGraph(t));
         predict->Compute();
 
     	typedef RefineVerticesToNearestVertexnessMaxima<DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,DrosophilaOmmatidiaJSONProject::VertexnessImageType> RefineVerticesToNearestVertexnessMaximaType;
 
-        typename RefineVerticesToNearestVertexnessMaximaType::Pointer verticesRefiner = RefineVerticesToNearestVertexnessMaximaType::New();
+         RefineVerticesToNearestVertexnessMaximaType::Pointer verticesRefiner = RefineVerticesToNearestVertexnessMaximaType::New();
 
 
-        typename DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexness = m_Project.GetVertexnessImage(t+1);
+         DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexness = m_Project.GetVertexnessImage(t+1);
 
         verticesRefiner->SetVertexnessImage(vertexness);
        	verticesRefiner->SetVertices(predict->GetOutputGraph());
@@ -1060,7 +1060,7 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
 
 
     if(frame!=this->m_Project.GetNumberOfFrames()-1){
-        typename DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer motionImage = m_Project.GetMotionImage(frame);
+         DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer motionImage = m_Project.GetMotionImage(frame);
         m_MotionVolumeDrawer.SetMotionImage(motionImage);
         m_MotionVolumeDrawer.Draw();
         m_MotionVolumeDrawer.SetVisibility(this->m_pUI->showMotionFieldGroupBox->isChecked());
@@ -1178,14 +1178,14 @@ void DrosophilaOmmatidiaExplorer::slotOpenProject(){
 void DrosophilaOmmatidiaExplorer::slotDoVertexMolecularDistribution(){
     for(unsigned int t=0;t<m_Project.GetNumberOfFrames();t++){
 
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer ajgraph= m_Project.GetAJGraph(t);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer ajgraph= m_Project.GetAJGraph(t);
 
         typedef VertexMolecularDistributionDescriptor<typename  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,typename DrosophilaOmmatidiaJSONProject::MolecularImageType> VertexMolecularDistributionDescriptorType;
 
-        typename VertexMolecularDistributionDescriptorType::Pointer vertexDescriptor = VertexMolecularDistributionDescriptorType::New();
+         VertexMolecularDistributionDescriptorType::Pointer vertexDescriptor = VertexMolecularDistributionDescriptorType::New();
 
 
-        typename DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer molecular =m_Project.GetMolecularImage(t);
+         DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer molecular =m_Project.GetMolecularImage(t);
         vertexDescriptor->SetMolecularImage(molecular);
         vertexDescriptor->SetRadius(10*molecular->GetSpacing()[0]); //TODO
         vertexDescriptor->SetAJGraph(ajgraph);
@@ -1198,13 +1198,13 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexMolecularDistribution(){
 
 void DrosophilaOmmatidiaExplorer::slotDoEdgeMolecularDistribution(){
     for(unsigned int t=0;t<m_Project.GetNumberOfFrames();t++){
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer ajgraph= m_Project.GetAJGraph(t);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer ajgraph= m_Project.GetAJGraph(t);
 
         typedef EdgeMolecularDistributionDescriptor<typename  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,typename DrosophilaOmmatidiaJSONProject::MolecularImageType> EdgeMolecularDistributionDescriptorType;
 
-        typename EdgeMolecularDistributionDescriptorType::Pointer edgeDescriptor = EdgeMolecularDistributionDescriptorType::New();
+         EdgeMolecularDistributionDescriptorType::Pointer edgeDescriptor = EdgeMolecularDistributionDescriptorType::New();
 
-        typename DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer molecularImage=m_Project.GetMolecularImage(t);
+         DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer molecularImage=m_Project.GetMolecularImage(t);
         edgeDescriptor->SetMolecularImage(molecularImage);
         edgeDescriptor->SetRadius(2.0*molecularImage->GetSpacing()[0]); //TODO
         edgeDescriptor->SetNumberOfSegments(4);
@@ -1285,7 +1285,7 @@ void DrosophilaOmmatidiaExplorer::PlotDescriptor(const std::vector<itk::Array<do
     arrT->SetName("t");
     arrT->SetNumberOfTuples(T);
 
-    vtkSmartPointer<vtkDoubleArray> arrays[nDescriptors];
+    std::vector< vtkSmartPointer<vtkDoubleArray> > arrays(nDescriptors);
     vtkSmartPointer<vtkTable> datasetTable = vtkSmartPointer<vtkTable>::New();
 
     vtkSmartPointer<vtkPCAStatistics> pcaStatistics = vtkSmartPointer<vtkPCAStatistics>::New();
@@ -1359,12 +1359,12 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeMolecularDistribution(const AJGrap
     std::vector<itk::Array<double> > descriptorSeries;
     int T = m_Project.GetNumberOfFrames();
 
-    typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler source= m_CurrentAJGraph->GetAJEdgeSource(edge);
-    typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler target= m_CurrentAJGraph->GetAJEdgeTarget(edge);
+     DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler source= m_CurrentAJGraph->GetAJEdgeSource(edge);
+     DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler target= m_CurrentAJGraph->GetAJEdgeTarget(edge);
 
 
     for(int t=0;t<T;t++){
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer ajGraph =m_Project.GetAJGraph(t);
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer ajGraph =m_Project.GetAJGraph(t);
 
         auto distribution = ajGraph->GetAJEdge(ajGraph->GetAJEdgeHandler(source,target))->GetDescriptor();
         std::cout << distribution << std::endl;

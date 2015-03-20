@@ -26,7 +26,7 @@ VertexListDockWidget::~VertexListDockWidget()
     delete m_pUI;
 }
 
-typename VertexListDockWidget::VertexContainer::AJVertexHandler VertexListDockWidget::GetSelectedVertex() {
+ VertexListDockWidget::VertexContainer::AJVertexHandler VertexListDockWidget::GetSelectedVertex() {
 
     return this->m_pUI->verticesTableWidget->selectionModel()->currentIndex().row();
 

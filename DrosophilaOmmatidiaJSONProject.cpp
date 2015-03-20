@@ -59,9 +59,9 @@ bool DrosophilaOmmatidiaJSONProject::Open(const std::string & projectPath){
     return true;
 }
 
-typename DrosophilaOmmatidiaJSONProject::OriginalImageType::Pointer DrosophilaOmmatidiaJSONProject::GetOriginalImage(int frame){
+ DrosophilaOmmatidiaJSONProject::OriginalImageType::Pointer DrosophilaOmmatidiaJSONProject::GetOriginalImage(int frame){
 
-    typename OriginalImageType::Pointer originalImage{};
+     OriginalImageType::Pointer originalImage{};
 
     std::stringstream buffer("");
     buffer << "original_T" << m_FirstFrame+frame <<".mha";
@@ -71,9 +71,9 @@ typename DrosophilaOmmatidiaJSONProject::OriginalImageType::Pointer DrosophilaOm
     return originalImage;
 }
 
-typename DrosophilaOmmatidiaJSONProject::PlatenessImageType::Pointer DrosophilaOmmatidiaJSONProject::GetPlatenessImage(int frame){
+ DrosophilaOmmatidiaJSONProject::PlatenessImageType::Pointer DrosophilaOmmatidiaJSONProject::GetPlatenessImage(int frame){
 
-    typename PlatenessImageType::Pointer platenessImage{};
+     PlatenessImageType::Pointer platenessImage{};
 
     std::stringstream buffer("");
     buffer << "plateness_T" << m_FirstFrame+frame <<".mha";
@@ -83,9 +83,9 @@ typename DrosophilaOmmatidiaJSONProject::PlatenessImageType::Pointer DrosophilaO
     return platenessImage;
 }
 
-typename DrosophilaOmmatidiaJSONProject::DeconvolutedImageType::Pointer DrosophilaOmmatidiaJSONProject::GetDeconvolutedImage(int frame){
+ DrosophilaOmmatidiaJSONProject::DeconvolutedImageType::Pointer DrosophilaOmmatidiaJSONProject::GetDeconvolutedImage(int frame){
 
-    typename DeconvolutedImageType::Pointer deconvolutedImage{};
+     DeconvolutedImageType::Pointer deconvolutedImage{};
 
     std::stringstream buffer("");
     buffer << "estimate_T" << m_FirstFrame+frame <<".mha";
@@ -96,9 +96,9 @@ typename DrosophilaOmmatidiaJSONProject::DeconvolutedImageType::Pointer Drosophi
 }
 
 
-typename DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer DrosophilaOmmatidiaJSONProject::GetMotionImage(int frame){
+ DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer DrosophilaOmmatidiaJSONProject::GetMotionImage(int frame){
 
-    typename MotionImageType::Pointer motionImage{};
+     MotionImageType::Pointer motionImage{};
 
     std::stringstream buffer("");
     buffer << "registration_T" << m_FirstFrame+frame << "_T" << m_FirstFrame+frame+1 <<".mha";
@@ -246,9 +246,9 @@ bool DrosophilaOmmatidiaJSONProject::IsMolecularImage(int frame){
     return file.is_open();
 }
 
-typename DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer DrosophilaOmmatidiaJSONProject::GetMolecularImage(int frame){
+DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer DrosophilaOmmatidiaJSONProject::GetMolecularImage(int frame){
 
-    typename MolecularImageType::Pointer molecularImage{};
+    MolecularImageType::Pointer molecularImage{};
 
     std::stringstream buffer("");
     buffer << "actin_T" << m_FirstFrame+frame <<".mha";
@@ -258,8 +258,8 @@ typename DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer DrosophilaO
     return molecularImage;
 }
 
-typename DrosophilaOmmatidiaJSONProject::HessianImageType::Pointer DrosophilaOmmatidiaJSONProject::GetHessianImage(int frame){
-    typename HessianImageType::Pointer hessianImage{};
+DrosophilaOmmatidiaJSONProject::HessianImageType::Pointer DrosophilaOmmatidiaJSONProject::GetHessianImage(int frame){
+    HessianImageType::Pointer hessianImage{};
     std::stringstream buffer("");
     buffer << "hessian_T" << m_FirstFrame+frame << ".mha";
     std::string fileName = buffer.str();
@@ -269,9 +269,9 @@ typename DrosophilaOmmatidiaJSONProject::HessianImageType::Pointer DrosophilaOmm
 
 
 
-typename DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer DrosophilaOmmatidiaJSONProject::GetVertexnessImage(int frame){
+ DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer DrosophilaOmmatidiaJSONProject::GetVertexnessImage(int frame){
 
-    typename VertexnessImageType::Pointer vertexnessImage{};
+     VertexnessImageType::Pointer vertexnessImage{};
 
     std::stringstream buffer("");
     buffer << "vertexness_T" << m_FirstFrame+frame <<".mha";
@@ -281,7 +281,7 @@ typename DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer Drosophila
     return vertexnessImage;
 }
 
-void DrosophilaOmmatidiaJSONProject::SetVertexnessImage(int frame, typename VertexnessImageType::Pointer & vertexnessImage){
+void DrosophilaOmmatidiaJSONProject::SetVertexnessImage(int frame,  VertexnessImageType::Pointer & vertexnessImage){
 
     std::stringstream buffer("");
     buffer << "vertexness_T" << m_FirstFrame+frame << ".mha";
@@ -299,7 +299,7 @@ bool DrosophilaOmmatidiaJSONProject::IsAJVertices(int frame){
 
 }
 
-void DrosophilaOmmatidiaJSONProject::SetAJGraph(int frame,const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & ajVertices){
+void DrosophilaOmmatidiaJSONProject::SetAJGraph(int frame,const  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & ajVertices){
     Json::StyledWriter writer;
     Json::Value root;
     std::stringstream fileNameStream;
@@ -311,8 +311,8 @@ void DrosophilaOmmatidiaJSONProject::SetAJGraph(int frame,const typename Drosoph
     int i=0;
     for(auto it =ajVertices->VerticesBegin();it!=ajVertices->VerticesEnd();it++){
 
-        typename AdherensJunctionGraphType::AJVertexType::PointType position = ajVertices->GetAJVertex((*it))->GetPosition();
-        typename AdherensJunctionGraphType::AJVertexType::VectorType velocity = ajVertices->GetAJVertex((*it))->GetVelocity();
+         AdherensJunctionGraphType::AJVertexType::PointType position = ajVertices->GetAJVertex((*it))->GetPosition();
+         AdherensJunctionGraphType::AJVertexType::VectorType velocity = ajVertices->GetAJVertex((*it))->GetVelocity();
         root["Vertices"][i]["x"] =  position[0];
         root["Vertices"][i]["y"] =  position[1];
         root["Vertices"][i]["z"] =  position[2];
@@ -329,7 +329,7 @@ void DrosophilaOmmatidiaJSONProject::SetAJGraph(int frame,const typename Drosoph
     }
     i=0;
     for(auto it=ajVertices->EdgesBegin();it!=ajVertices->EdgesEnd();it++){
-        typename AdherensJunctionGraphType::AJVertexHandler source,target;
+         AdherensJunctionGraphType::AJVertexHandler source,target;
         source = ajVertices->GetAJEdgeSource(*it);
         target = ajVertices->GetAJEdgeTarget(*it);
 
@@ -353,7 +353,7 @@ void DrosophilaOmmatidiaJSONProject::SetAJGraph(int frame,const typename Drosoph
     file.close();
 }
 
-typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer DrosophilaOmmatidiaJSONProject::GetAJGraph(int frame){
+ DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer DrosophilaOmmatidiaJSONProject::GetAJGraph(int frame){
 
     Json::Reader reader;
     Json::Value root;
@@ -369,21 +369,21 @@ typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer Dros
         std::ifstream jsonAJVerticesFile(ajVerticesFile.c_str());
         reader.parse(jsonAJVerticesFile, root);
 
-        typename AdherensJunctionGraphType::Pointer ajGraph = AdherensJunctionGraphType::New();
+         AdherensJunctionGraphType::Pointer ajGraph = AdherensJunctionGraphType::New();
 
         int numvertices = root["Vertices"].size();
 
         for (int i = 0; i < numvertices; i++) {
-            typename AdherensJunctionGraphType::AJVertexType::Pointer  newVertex =
+             AdherensJunctionGraphType::AJVertexType::Pointer  newVertex =
                     AdherensJunctionGraphType::AJVertexType::New();
 
-            typename AdherensJunctionGraphType::AJVertexType::PointType position;
+             AdherensJunctionGraphType::AJVertexType::PointType position;
 
             position[0] = root["Vertices"][i]["x"].asDouble();
             position[1] = root["Vertices"][i]["y"].asDouble();
             position[2] = root["Vertices"][i]["z"].asDouble();
             newVertex->SetPosition(position);
-            typename AdherensJunctionGraphType::AJVertexType::VectorType velocity;
+             AdherensJunctionGraphType::AJVertexType::VectorType velocity;
             if(root["Vertices"][i].isMember("dx")){
             	velocity[0] = root["Vertices"][i]["dx"].asDouble();
             	velocity[1] = root["Vertices"][i]["dy"].asDouble();
@@ -410,7 +410,7 @@ typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer Dros
         int numedges=root["Edges"].size();
 
         for (int i = 0; i < numedges; i++) {
-            typename AdherensJunctionGraphType::AJVertexHandler source,target;
+             AdherensJunctionGraphType::AJVertexHandler source,target;
 
             source = root["Edges"][i]["s"].asUInt64();
             target = root["Edges"][i]["t"].asUInt64();
@@ -422,7 +422,7 @@ typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer Dros
             	distribution[l]=root["Edges"][i]["descriptor"][l].asDouble();
             }
             auto edgeHandler=ajGraph->AddAJEdge(source,target);
-            typename AJEdge::Pointer edge=ajGraph->GetAJEdge(edgeHandler);
+             AJEdge::Pointer edge=ajGraph->GetAJEdge(edgeHandler);
             edge->SetDescriptor(distribution);
         }
 

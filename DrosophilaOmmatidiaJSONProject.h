@@ -80,23 +80,23 @@ public:
         return m_NumFrames;
     }
 
-    typename OriginalImageType::Pointer GetOriginalImage(int frame);
+     OriginalImageType::Pointer GetOriginalImage(int frame);
 
-    typename DeconvolutedImageType::Pointer GetDeconvolutedImage(int frame);
+     DeconvolutedImageType::Pointer GetDeconvolutedImage(int frame);
 
-    typename MotionImageType::Pointer GetMotionImage(int frame);
+     MotionImageType::Pointer GetMotionImage(int frame);
 
-    typename HessianImageType::Pointer GetHessianImage(int frame);
+     HessianImageType::Pointer GetHessianImage(int frame);
 
-    typename PlatenessImageType::Pointer GetPlatenessImage(int frame);
+     PlatenessImageType::Pointer GetPlatenessImage(int frame);
 
-    typename MolecularImageType::Pointer GetMolecularImage(int frame);
+     MolecularImageType::Pointer GetMolecularImage(int frame);
 
 
-    typename VertexnessImageType::Pointer GetVertexnessImage(int frame);
-    void SetVertexnessImage(int frame,typename VertexnessImageType::Pointer & vertexnessImage);
+     VertexnessImageType::Pointer GetVertexnessImage(int frame);
+    void SetVertexnessImage(int frame, VertexnessImageType::Pointer & vertexnessImage);
 
-    void SetAJGraph(int frame,const typename AdherensJunctionGraphType::Pointer & ajVertices);
+    void SetAJGraph(int frame,const  AdherensJunctionGraphType::Pointer & ajVertices);
 
     //void SetVertexMolecularDistribution(int frame,const VertexMolecularFeatureMapType::Pointer & vertexMolecularDistribution);
     //typename VertexMolecularFeatureMapType::Pointer GetVertexMolecularDistribution(int frame);
@@ -104,7 +104,7 @@ public:
     //void SetEdgeMolecularDistribution(int frame, const EdgeMolecularFeatureMapType::Pointer &edgeMolecularDistribution, const DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & graph);
     //EdgeMolecularFeatureMapType::Pointer GetEdgeMolecularDistribution(int frame,const typename AdherensJunctionGraphType::Pointer & ajGraph);
 
-    typename AdherensJunctionGraphType::Pointer GetAJGraph(int frame);
+     AdherensJunctionGraphType::Pointer GetAJGraph(int frame);
 
     bool IsOriginalImage(int frame);
 

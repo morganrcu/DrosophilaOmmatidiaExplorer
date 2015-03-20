@@ -65,7 +65,7 @@ private:
         //pointWidget->GetPolyData(this->PolyData);
         double position[3];
         pointWidget->GetPosition(position);
-        typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::PointType pointPosition;
+         DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexType::PointType pointPosition;
         pointPosition[0]=position[0];
         pointPosition[1]=position[1];
         pointPosition[2]=position[2];
@@ -194,10 +194,10 @@ private:
   void PlotDescriptor(const std::vector<itk::Array<double> > & descriptors);
   void DrawFrame(int frame);
 
-  void SetSelectedVertex(const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler & );
+  void SetSelectedVertex(const  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler & );
   void ClearSelectedVertex();
 
-  void SetSelectedEdge(const typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler & );
+  void SetSelectedEdge(const  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler & );
   void ClearSelectedEdge();
 
   vtkSmartPointer<vtkRenderer> m_Renderer;
@@ -235,15 +235,15 @@ private:
 
   MotionFieldVolumeDrawer<typename DrosophilaOmmatidiaJSONProject::MotionImageType>  m_MotionVolumeDrawer;
 
-  typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer m_CurrentAJGraph;
+   DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer m_CurrentAJGraph;
 
-  typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler m_SelectedVertex;
+   DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler m_SelectedVertex;
 
   bool m_IsSelectedEdge;
-  typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler m_SelectedEdge;
+   DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJEdgeHandler m_SelectedEdge;
 
 
-  typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler  m_AddingEdgeSource;
+   DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler  m_AddingEdgeSource;
 
 #if 0
   enum VolumeVisualizationType{VOLUME,SLICE};

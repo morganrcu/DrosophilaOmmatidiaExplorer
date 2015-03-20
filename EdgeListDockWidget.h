@@ -16,21 +16,21 @@ class EdgeListDockWidget : public QDockWidget
 
 private:
     typedef AJGraph<AJVertex,AJEdge> EdgeContainer;
-    typename EdgeContainer::Pointer m_EdgesContainer;
+     EdgeContainer::Pointer m_EdgesContainer;
 
-    typename std::map<int,typename EdgeContainer::AJEdgeHandler> m_RowToEdge;
+     std::map<int,typename EdgeContainer::AJEdgeHandler> m_RowToEdge;
 
 public:
     explicit EdgeListDockWidget(QWidget *parent = 0);
     ~EdgeListDockWidget();
 
-    inline void SetEdgesContainer(const  typename EdgeContainer::Pointer & edgesContainer){
+    inline void SetEdgesContainer(const   EdgeContainer::Pointer & edgesContainer){
         m_EdgesContainer=edgesContainer;
     }
 
     virtual void Draw();
 
-    typename EdgeContainer::AJEdgeHandler GetSelectedEdge();
+     EdgeContainer::AJEdgeHandler GetSelectedEdge();
 public slots:
     void slotEdgeTableSelectionChanged();
     void slotDisplayMenu(const QPoint &pos);

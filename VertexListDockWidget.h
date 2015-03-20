@@ -16,7 +16,7 @@ public:
     typedef AJGraph<AJVertex,AJEdge> VertexContainer;
 private:
 
-    typename VertexContainer::Pointer m_VertexContainer;
+     VertexContainer::Pointer m_VertexContainer;
 public:
     explicit VertexListDockWidget(QWidget *parent = 0);
     ~VertexListDockWidget();
@@ -26,7 +26,7 @@ public:
     virtual void SetSelectedVertex(const VertexContainer::AJVertexHandler &);
     virtual void ClearSelection();
 
-    inline void SetVertexContainer(const  typename VertexContainer::Pointer & vertexContainer){
+    inline void SetVertexContainer(const   VertexContainer::Pointer & vertexContainer){
         m_VertexContainer=vertexContainer;
     }
 public slots:

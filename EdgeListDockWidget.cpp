@@ -37,7 +37,7 @@ void EdgeListDockWidget::slotEdgeTableSelectionChanged(){
 }
 
 
-typename EdgeListDockWidget::EdgeContainer::AJEdgeHandler EdgeListDockWidget::GetSelectedEdge() {
+ EdgeListDockWidget::EdgeContainer::AJEdgeHandler EdgeListDockWidget::GetSelectedEdge() {
 
     return this->m_RowToEdge[this->m_pUI->edgesTableWidget->selectionModel()->currentIndex().row()];
 

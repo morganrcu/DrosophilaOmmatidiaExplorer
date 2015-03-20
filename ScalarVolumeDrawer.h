@@ -9,13 +9,16 @@
 #define SCALARVOLUMEDRAWER_H_
 #include <itkImage.h>
 #include <itkImageToVTKImageFilter.h>
+#include <itkMinimumMaximumImageCalculator.h>
 #include <vtkSmartVolumeMapper.h>
 #include <vtkVolumeProperty.h>
 #include "Drawer.h"
 #include <vtkImagePlaneWidget.h>
 #include <vtkLookupTable.h>
 #include <vtkDoubleArray.h>
-#include <itkMinimumMaximumImageCalculator.h>
+#include <vtkRenderWindow.h>
+
+
 namespace ttt {
 
 template<class TImage> class ScalarVolumeDrawer : public Drawer{
