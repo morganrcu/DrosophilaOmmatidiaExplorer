@@ -31,6 +31,7 @@
 
 #include "Drawer.h"
 #include <map>
+#include <boost/bimap.hpp>
 
 template<class TVerticesContainer> class VertexLocationsDrawer : public ttt::Drawer {
 public:
@@ -40,9 +41,13 @@ private:
 
     typename TVerticesContainer::Pointer m_VertexLocations;
 
-    std::map<vtkSmartPointer<vtkActor>,typename TVerticesContainer::AJVertexHandler> m_ActorsToVertices;
-    std::map<typename TVerticesContainer::AJVertexHandler,vtkSmartPointer<vtkActor>> m_VerticesToActors;
-    std::map<typename TVerticesContainer::AJVertexHandler,vtkSmartPointer<vtkSphereSource>> m_VerticesToSources;
+    typedef boost::bimap< boost::bimaps::set_of<vtkSmartPointer<vtkActor> >, boost::bimaps::set_of<typename TVerticesContainer::AJVertexHandler > > ActorVertexContainer;
+    ActorVertexContainer m_ActorsToVertices;
+    typedef typename ActorVertexContainer::value_type ActorVertexPair;
+
+
+
+    std::map<typename TVerticesContainer::AJVertexHandler,vtkSmartPointer<vtkSphereSource> > m_VerticesToSources;
 
 
 public:
@@ -58,10 +63,9 @@ public:
     void Reset(){
 
         for(auto it= m_ActorsToVertices.begin();it!=m_ActorsToVertices.end();++it){
-            m_Renderer->RemoveActor(it->first);
+            m_Renderer->RemoveActor(it->left);
     	}
         m_ActorsToVertices.clear();
-        m_VerticesToActors.clear();
         m_VerticesToSources.clear();
 
     }
@@ -72,42 +76,41 @@ public:
 
     typename TVerticesContainer::AJVertexHandler GetVertexFromActor(const vtkSmartPointer<vtkActor> & actor){
 
-        auto it= m_ActorsToVertices.find(actor);
-        assert(it!=m_ActorsToVertices.end());
-        return it->second;
+        return m_ActorsToVertices.left.at(actor);
+
    	}
 
-    void HighlightVertex(const typename TVerticesContainer::AJVertexHandler & vertexHandler){
-        vtkSmartPointer<vtkActor> actor=m_VerticesToActors[vertexHandler];
+    void HighlightAJVertex(const typename TVerticesContainer::AJVertexHandler & vertexHandler){
+        vtkSmartPointer<vtkActor> actor=m_ActorsToVertices.right.at(vertexHandler);
         assert(actor);
         actor->GetProperty()->SetColor(0.0, 1.0, 0.0);
     }
 
     void DeemphasizeAJVertex(const typename TVerticesContainer::AJVertexHandler & vertexHandler){
-        vtkSmartPointer<vtkActor> actor=m_VerticesToActors[vertexHandler];
+        vtkSmartPointer<vtkActor> actor=m_ActorsToVertices.right.at(vertexHandler);
         assert(actor);
         actor->GetProperty()->SetColor(1.0, 1.0, 0.0);
     }
 
     virtual void Show(){
         for(auto it= m_ActorsToVertices.begin();it!=m_ActorsToVertices.end();it++){
-            it->first->VisibilityOn();
+            it->left->VisibilityOn();
     	}
     }
     virtual void Hide(){
         for(auto it= m_ActorsToVertices.begin();it!=m_ActorsToVertices.end();it++){
-            it->first->VisibilityOff();
+            it->left->VisibilityOff();
     	}
     }
 
     virtual  void PickOn(){
         for(auto it= m_ActorsToVertices.begin();it!=m_ActorsToVertices.end();it++){
-            it->first->PickableOn();
+            it->left->PickableOn();
         }
     }
     virtual  void PickOff(){
         for(auto it= m_ActorsToVertices.begin();it!=m_ActorsToVertices.end();it++){
-            it->first->PickableOff();
+            it->left->PickableOff();
         }
     }
 
@@ -120,6 +123,9 @@ public:
 
 
 
+    }
+    virtual void SetVertexColor(const typename TVerticesContainer::AJVertexHandler & vertexHandler,double r, double g, double b){
+    	this->m_ActorsToVertices.right.at(vertexHandler)->GetProperty()->SetColor(r,g,b);
     }
 
     virtual vtkSmartPointer<vtkActor> DrawAJVertex(const typename TVerticesContainer::AJVertexHandler & vertexHandler){
@@ -145,7 +151,7 @@ public:
         m_Renderer->AddActor(sphereActor);
         sphereActor->VisibilityOff();
         sphereActor->PickableOff();
-
+#if 0
 		vtkSmartPointer<vtkLookupTable> colorMap = vtkSmartPointer<vtkLookupTable>::New(); // hot color map
 
 		colorMap->SetRange( 0.0, m_VertexLocations->GetNumVertices() );
@@ -155,9 +161,21 @@ public:
 		double color[3];
 		colorMap->GetColor(vertexHandler,color);
         sphereActor->GetProperty()->SetColor(color[0],color[1],color[2]);
+#endif
+#if 1
+        int degree=this->m_VertexLocations->AJVertexDegree(vertexHandler);
+        if(degree==1){
+        	sphereActor->GetProperty()->SetColor(1.0,0.0,0.0);
+        }else if(degree==2){
+        	sphereActor->GetProperty()->SetColor(0.0,1.0,0.0);
+        }else if(degree==3){
+        	sphereActor->GetProperty()->SetColor(0.0,0.0,1.0);
+        }
+#endif
+    //	sphereActor->GetProperty()->SetColor(0.0,0.0,0.0);
+    	sphereActor->GetProperty()->SetSpecular(1.0);
+        this->m_ActorsToVertices.insert(ActorVertexPair(sphereActor,vertexHandler));
 
-        this->m_ActorsToVertices[sphereActor]=vertexHandler;
-        this->m_VerticesToActors[vertexHandler]=sphereActor;
         this->m_VerticesToSources[vertexHandler]=sphereSource;
         return sphereActor;
     }

@@ -6,11 +6,16 @@
 #include <itkSymmetricSecondRankTensor.h>
 #include <AdherensJunctionVertex.h>
 #include <AdherensJunctionVerticesContainer.h>
+#include <AJCorrespondenceSet.h>
 #include <AJGraph.h>
+#include <CellGraph.h>
 #include <AJVertex.h>
 #include <AJEdge.h>
+#include <Cell.h>
 #include <itkArray.h>
 #include <FeatureContainer.h>
+#include <CellCorrespondence.h>
+#include <OmmatidiaTissue.h>
 /**
  * @brief The DrosophilaOmmatidiaJSONProject class encapsulates the IO operations with the filesystem
  */
@@ -57,9 +62,20 @@ public:
 
     //typedef AdherensJunctionVerticesContainer<AdherensJunctionVertex<3> > AdherensJunctionVerticesContainerType;
 
-    typedef AJGraph<AJVertex,AJEdge> AdherensJunctionGraphType;
 
 
+    typedef OmmatidiaTissue<3> TissueType;
+    typedef typename OmmatidiaTissue<3>::AJGraphType AdherensJunctionGraphType;
+    typedef typename OmmatidiaTissue<3>::CellGraphType CellGraphType;
+
+
+    typedef AJCorrespondenceSet<TissueType> CorrespondenceSetType;
+    typedef typename CorrespondenceSetType::AJCorrespondenceType AJCorrespondenceType;
+    //typedef CellCorrespondences<typename CellGraphType::CellVertexHandler> CellCorrespondenceType;
+
+    typedef OriginalImageType::SpacingType SpacingType;
+
+    SpacingType m_Spacing;
 
 
 
@@ -96,7 +112,15 @@ public:
      VertexnessImageType::Pointer GetVertexnessImage(int frame);
     void SetVertexnessImage(int frame, VertexnessImageType::Pointer & vertexnessImage);
 
+    void StoreAJGraph(const std::string & fileName,const  AdherensJunctionGraphType::Pointer & ajVertices);
     void SetAJGraph(int frame,const  AdherensJunctionGraphType::Pointer & ajVertices);
+    void SetTissueDescriptor(int frame,const TissueType::Pointer & cellGraph);
+
+    CorrespondenceSetType GetCorrespondences(int frame0,int frame1);
+    void SetCorrespondences(int frame0,int frame1,const  CorrespondenceSetType & correspondences);
+
+    //typename CellCorrespondenceType::Pointer GetCellCorrespondences(int frame0,int frame1);
+    //void SetCellCorrespondences(int frame0,int frame1,const typename CellCorrespondenceType::Pointer & correspondences);
 
     //void SetVertexMolecularDistribution(int frame,const VertexMolecularFeatureMapType::Pointer & vertexMolecularDistribution);
     //typename VertexMolecularFeatureMapType::Pointer GetVertexMolecularDistribution(int frame);
@@ -104,7 +128,11 @@ public:
     //void SetEdgeMolecularDistribution(int frame, const EdgeMolecularFeatureMapType::Pointer &edgeMolecularDistribution, const DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer & graph);
     //EdgeMolecularFeatureMapType::Pointer GetEdgeMolecularDistribution(int frame,const typename AdherensJunctionGraphType::Pointer & ajGraph);
 
-     AdherensJunctionGraphType::Pointer GetAJGraph(int frame);
+    AdherensJunctionGraphType::Pointer LoadAJGraph(const std::string & fileName);
+    AdherensJunctionGraphType::Pointer GetAJGraph(int frame);
+
+    TissueType::Pointer GetTissueDescriptor(int frame);
+
 
     bool IsOriginalImage(int frame);
 
@@ -117,6 +145,7 @@ public:
 
     bool IsMolecularImage(int frame);
 
+    bool IsTissueDescriptor(int frame);
 
 private:
     bool IsImage(const std::string & name);
@@ -128,6 +157,7 @@ private:
 
     int m_FirstFrame;
     int m_LastFrame;
+    int m_Level;
     unsigned int m_NumFrames;
 };
 

@@ -5,7 +5,7 @@
 #include <itkMacro.h>
 #include <itkObjectFactory.h>
 #include <itkPoint.h>
-class AJEdge : public itk::DataObject{
+template<class TCellVertex> class AJEdge : public itk::DataObject{
 
 public:
     typedef AJEdge Self;
@@ -20,18 +20,25 @@ public:
     itkGetMacro(Descriptor,DescriptorType)
     itkSetMacro(Descriptor,DescriptorType)
 
-
+	void SetCellPair(const std::pair<TCellVertex,TCellVertex> & cellPair){
+		m_Cells=cellPair;
+	}
+	std::pair<TCellVertex,TCellVertex> GetCellPair(){
+		return m_Cells;
+	}
 
 protected:
 	AJEdge(){
 
 
 	}
+
 private:
 
 
     DescriptorType m_Descriptor;
 
+    std::pair<TCellVertex,TCellVertex> m_Cells;
 
 };
 

@@ -11,7 +11,7 @@
 template<class TAJVertex,class TAJEdge> class AJGraph : public itk::DataObject {
 
 
-private:
+public:
 
     struct AJVertexPropertyTag {
         typedef boost::vertex_property_tag kind;
@@ -26,10 +26,12 @@ private:
 			boost::property<boost::vertex_index_t, int> >   VertexProperty;
 
     typedef boost::property<AJEdgePropertyTag,typename TAJEdge::Pointer,
-    		boost::property<boost::edge_index_t,int> > EdgeProperty;
-
+    		boost::property<boost::edge_index_t,int,
+			boost::property<boost::edge_weight_t,double>
+    > > EdgeProperty;
+public:
     typedef boost::adjacency_list<boost::vecS,boost::vecS,boost::undirectedS,VertexProperty,EdgeProperty,boost::no_property> BoostGraphType;
-
+private:
 
     BoostGraphType m_Graph;
 public:
@@ -54,20 +56,23 @@ public:
 
     itkNewMacro(Self)
 
-   virtual  AJVertexHandler GetAJEdgeSource(const AJEdgeHandler & source){
+	BoostGraphType & GetBoostGraph(){
+    	return m_Graph;
+    }
+
+    virtual  AJVertexHandler GetAJEdgeSource(const AJEdgeHandler & source){
         return boost::source(source,m_Graph);
     }
+
     virtual AJEdgeHandler GetAJEdgeHandler(const AJVertexHandler & source,const AJVertexHandler & target){
         return boost::edge(source,target,m_Graph).first;
-
     }
-
 
     virtual AJVertexHandler GetAJEdgeTarget(const AJEdgeHandler & target){
         return boost::target(target,m_Graph);
     }
 
-   virtual typename AJVertexType::Pointer GetAJVertex(const AJVertexHandler & vertex){
+    virtual typename AJVertexType::Pointer GetAJVertex(const AJVertexHandler & vertex){
         return boost::get(AJVertexPropertyTag(),m_Graph,vertex);
 
     }
@@ -84,7 +89,7 @@ public:
         return boost::adjacent_vertices(vertex,m_Graph).second;
     }
 
-   virtual AJVertexHandler AddAJVertex(const typename AJVertexType::Pointer & vertex){
+    virtual AJVertexHandler AddAJVertex(const typename AJVertexType::Pointer & vertex){
 
         AJVertexHandler result=boost::add_vertex(m_Graph);
 
@@ -110,8 +115,6 @@ public:
 
     virtual typename AJEdgeType::Pointer GetAJEdge(const AJEdgeHandler & edge){
     	return boost::get(AJEdgePropertyTag(),m_Graph,edge);
-
-
     }
 
     unsigned long GetNumVertices(){

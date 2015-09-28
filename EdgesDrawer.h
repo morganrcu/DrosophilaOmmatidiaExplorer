@@ -26,6 +26,7 @@
 #include <itkFixedArray.h>
 
 #include <boost/tuple/tuple.hpp>
+#include <boost/bimap.hpp>
 
 #include "Drawer.h"
 #include <map>
@@ -37,9 +38,13 @@ private:
 
     typename TEdgesContainer::Pointer m_EdgesContainer;
 
+	typedef boost::bimap<boost::bimaps::set_of<typename TEdgesContainer::AJEdgeHandler>, boost::bimaps::set_of<vtkSmartPointer<vtkActor> > > EdgeActorContainer;
 
-    std::map<vtkSmartPointer<vtkActor>,typename TEdgesContainer::AJEdgeHandler> m_ActorsToEdges;
-    std::map<typename TEdgesContainer::AJEdgeHandler,vtkSmartPointer<vtkActor>> m_EdgesToActors;
+	EdgeActorContainer m_EdgesToActors;
+	typedef typename EdgeActorContainer::value_type EdgeActor;
+
+
+    std::map<typename TEdgesContainer::AJEdgeHandler, itk::FixedArray<double,3> > m_Edges2Colors;
 
 
 public:
@@ -49,12 +54,13 @@ public:
 
     void Reset(){
 
-        for(auto it= m_ActorsToEdges.begin();it!=m_ActorsToEdges.end();++it){
-            m_Renderer->RemoveActor(it->first);
+        for(auto it= m_EdgesToActors.begin();it!=m_EdgesToActors.end();++it){
+            m_Renderer->RemoveActor(it->right);
         }
 
-        m_ActorsToEdges.clear();
+
         m_EdgesToActors.clear();
+
 
     }
     inline void SetEdgesContainer(const  typename TEdgesContainer::Pointer & edgesContainer){
@@ -64,45 +70,49 @@ public:
 
     typename TEdgesContainer::AJEdgeHandler GetEdgeFromActor(const vtkSmartPointer<vtkActor> & actor){
 
-        auto it= m_ActorsToEdges.find(actor);
+    	return m_EdgesToActors.right.at(actor);
+#if 0
+        auto it= m_EdgesToActors.rightfind(actor);
         assert(it!=m_ActorsToEdges.end());
         return it->second;
+#endif
     }
 
     void HighlightEdge(const typename TEdgesContainer::AJEdgeHandler & edgeHandler){
-        vtkSmartPointer<vtkActor> actor=m_EdgesToActors[edgeHandler];
+        vtkSmartPointer<vtkActor> actor=m_EdgesToActors.left.at(edgeHandler);
         assert(actor);
-        actor->GetProperty()->SetColor(1.0, 0.0, 0.0);
+        actor->GetProperty()->SetColor(1.0, 1.0, 1.0);
         //actor->GetProperty()->SetDiffuse(1.0);
         //actor->GetProperty()->SetSpecular(0.0);
     }
 
     void DeemphasizeAJEdge(const typename TEdgesContainer::AJEdgeHandler & edgeHandler){
-        vtkSmartPointer<vtkActor> actor=m_EdgesToActors[edgeHandler];
+        vtkSmartPointer<vtkActor> actor=m_EdgesToActors.left.at(edgeHandler);
         assert(actor);
-        actor->GetProperty()->SetColor(0.0, 1.0, 0.0);
+        auto color = this->m_Edges2Colors[edgeHandler];
+        actor->GetProperty()->SetColor(color[0],color[1],color[2]);
     }
 
     virtual void Show(){
-        for(auto it= m_ActorsToEdges.begin();it!=m_ActorsToEdges.end();it++){
-            it->first->VisibilityOn();
+        for(auto it= m_EdgesToActors.begin();it!=m_EdgesToActors.end();it++){
+            it->right->VisibilityOn();
         }
     }
     virtual void Hide(){
 
-        for(auto it= m_ActorsToEdges.begin();it!=m_ActorsToEdges.end();it++){
-            it->first->VisibilityOff();
+        for(auto it= m_EdgesToActors.begin();it!=m_EdgesToActors.end();it++){
+            it->right->VisibilityOff();
         }
     }
 
     virtual  void PickOn(){
-        for(auto it= m_ActorsToEdges.begin();it!=m_ActorsToEdges.end();it++){
-            it->first->PickableOn();
+        for(auto it= m_EdgesToActors.begin();it!=m_EdgesToActors.end();it++){
+            it->right->PickableOn();
         }
     }
     virtual  void PickOff(){
-        for(auto it= m_ActorsToEdges.begin();it!=m_ActorsToEdges.end();it++){
-            it->first->PickableOff();
+        for(auto it= m_EdgesToActors.begin();it!=m_EdgesToActors.end();it++){
+            it->right->PickableOff();
         }
     }
 
@@ -130,16 +140,29 @@ public:
         lineActor->SetMapper(mapper);
         lineActor->VisibilityOff();
         lineActor->SetPickable(false);
-        lineActor->GetProperty()->SetColor(0.0,1.0,0.0);
+        itk::FixedArray<double,3> color;
+        if(m_Edges2Colors.find(edgeHandler)==m_Edges2Colors.end()){
+        	color[0]=(double)rand()/RAND_MAX;
+        	color[1]=(double)rand()/RAND_MAX;
+        	color[2]=(double)rand()/RAND_MAX;
+            m_Edges2Colors[edgeHandler] =color;
+        }else{
+        	color=m_Edges2Colors[edgeHandler];
+        }
+        lineActor->GetProperty()->SetColor(color[0],color[1],color[2]);
 
         this->m_Renderer->AddActor(lineActor);
 
-        this->m_ActorsToEdges[lineActor]=edgeHandler;
-        this->m_EdgesToActors[edgeHandler]=lineActor;
+
+        this->m_EdgesToActors.insert(EdgeActor(edgeHandler,lineActor));
 
 
         return lineActor;
 
+    }
+
+    virtual itk::FixedArray<double,3> GetEdgeColor(const typename TEdgesContainer::AJEdgeHandler & edgeHandler){
+    	return m_Edges2Colors[edgeHandler];
     }
 
     virtual void Draw(){

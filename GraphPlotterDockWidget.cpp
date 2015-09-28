@@ -8,6 +8,7 @@
 #include <vtkDoubleArray.h>
 #include <vtkPlot.h>
 #include <vtkAxis.h>
+#include <vtkPen.h>
 GraphPlotterDockWidget::GraphPlotterDockWidget(QWidget *parent) :
     QDockWidget(parent),
     m_pUI(new Ui::GraphPlotterDockWidget)
@@ -30,26 +31,55 @@ GraphPlotterDockWidget::GraphPlotterDockWidget(QWidget *parent) :
 
     // Create a table with some points in it...
     m_Table =vtkSmartPointer<vtkTable>::New();
-
+    connect(this->m_pUI->clearButton,SIGNAL(clicked()),SLOT(slotClear()));
 }
-
+#if 0
 void GraphPlotterDockWidget::SetTemporalReference(const vtkSmartPointer<vtkDoubleArray> & tScale){
     m_Table->AddColumn(tScale);
 }
+#endif
+void GraphPlotterDockWidget::slotClear(){
+	for(int c=m_Table->GetNumberOfColumns()-1;c>0;c--){
+		m_Table->RemoveColumn(c);
+	}
+	m_Colors.clear();
+	m_Dashed.clear();
+	m_Chart->ClearPlots();
+}
+void GraphPlotterDockWidget::SetLength(unsigned int samples){
+	vtkSmartPointer<vtkDoubleArray> arrT =vtkSmartPointer<vtkDoubleArray>::New();
+	arrT->SetName("t");
+	arrT->SetNumberOfTuples(samples);
 
-void GraphPlotterDockWidget::AddPlot(const vtkSmartPointer<vtkDoubleArray> & series ){
+	for(int t=0;t<samples;t++){
+		arrT->SetTuple1(t,t);
+	}
 
+	assert(m_Table->GetNumberOfColumns()==0);
+
+	m_Table->AddColumn(arrT);
+
+}
+
+void GraphPlotterDockWidget::AddPlot(const vtkSmartPointer<vtkDoubleArray> & series ,itk::FixedArray<double,3>  & color,bool dashed){
+	std::cout<< m_Table->GetNumberOfColumns() << std::endl;
     m_Table->AddColumn(series);
+    std::cout<< m_Table->GetNumberOfColumns() << std::endl;
+    m_Colors.push_back(color);
+    m_Dashed.push_back(dashed);
 
 }
 
 void GraphPlotterDockWidget::Draw(){
    //m_Chart->ClearPlots();
+	m_Chart->ClearPlots();
     for(int c=1;c<this->m_Table->GetNumberOfColumns();c++){
         vtkSmartPointer<vtkPlot> line = m_Chart->AddPlot(vtkChart::LINE);
         line->SetInputData(this->m_Table,0,c);
-        line->SetColor(0,255.0,0,255.0);
-
+        line->SetColor(m_Colors[c-1][0],m_Colors[c-1][1],m_Colors[c-1][2]);
+        if(m_Dashed[c-1]){
+        	line->GetPen()->SetLineType(vtkPen::DASH_LINE);
+        }
     }
     m_Chart->SetAutoAxes(true);
     m_Chart->SetAutoSize(true);

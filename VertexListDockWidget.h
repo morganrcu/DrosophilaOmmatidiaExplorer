@@ -5,6 +5,7 @@
 #include "AJGraph.h"
 #include "AJVertex.h"
 #include "AJEdge.h"
+#include "OmmatidiaTissue.h"
 namespace Ui {
 class VertexListDockWidget;
 }
@@ -13,7 +14,7 @@ class VertexListDockWidget : public QDockWidget
 {
     Q_OBJECT
 public:
-    typedef AJGraph<AJVertex,AJEdge> VertexContainer;
+    typedef OmmatidiaTissue<3>::AJGraphType VertexContainer;
 private:
 
      VertexContainer::Pointer m_VertexContainer;
@@ -32,7 +33,7 @@ public:
 public slots:
     void slotVertexTableSelectionChanged();
 signals:
-    void SelectedVertexChanged(AJGraph<AJVertex,AJEdge>::AJVertexHandler);
+    void SelectedVertexChanged(VertexContainer::AJVertexHandler);
 
 private:
     Ui::VertexListDockWidget *m_pUI;

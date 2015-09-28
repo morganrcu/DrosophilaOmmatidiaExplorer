@@ -1,8 +1,8 @@
 // QT includes
-#include <QApplication>
+
 
 #include "DrosophilaOmmatidiaExplorer.h"
-
+#include <QApplication>
 extern int qInitResources_icons();
 
 int main( int argc, char** argv )

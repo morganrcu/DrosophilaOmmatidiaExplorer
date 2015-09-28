@@ -127,8 +127,10 @@ public:
 			m_Volume = vtkSmartPointer<vtkVolume>::New();
 			m_VolumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
 			m_VolumeMapper->SetInputData(m_ToVTK->GetOutput());
+			m_VolumeMapper->DebugOn();
 			m_VolumeMapper->Update();
 
+			//m_VolumeMapper->SetRequestedRenderModeToGPU();
 			m_VolumeMapper->SetBlendModeToComposite();
 
 			m_Volume->SetMapper(m_VolumeMapper);

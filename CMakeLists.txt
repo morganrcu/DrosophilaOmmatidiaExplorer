@@ -4,9 +4,13 @@ cmake_minimum_required(VERSION 2.8.8)
 
 project(DrosophilaOmmatidiaExplorer)
 
-#add_definitions("-std=c++11 -fpermissive -g")
+
+add_definitions("-std=c++11 -fpermissive -g ")
+#add_definitions("-std=c++11 -fpermissive -O3")
 set(CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_BUILD_TYPE Debug)
 
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
@@ -14,20 +18,25 @@ include_directories(${Boost_INCLUDE_DIR})
 find_package(ITK REQUIRED)
 INCLUDE(${ITK_USE_FILE})
 
+
+include_directories (/usr/include/eigen3)
+
+
 find_package(VTK 6.0 COMPONENTS
   vtkCommonCore
   vtkFiltersCore
   vtkInfovisCore
   vtkInteractionStyle
 
-  vtkRenderingFreeType${VTK_RENDERING_BACKEND}
+  #vtkRenderingFreeType${VTK_RENDERING_BACKEND}
   vtkRenderingVolume${VTK_RENDERING_BACKEND}
   vtkViewsQt
+  
   vtkjsoncpp
   vtkChartsCore
   vtkRenderingContext${VTK_RENDERING_BACKEND}
   vtkViewsContext2D
-
+  vtkIOFFMPEG
 
 )
 include(${VTK_USE_FILE})
@@ -43,13 +52,14 @@ include_directories(
 )
 
 # Set your files and resources here
-set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp  DetectVerticesDialog.cpp ShowVolumeGroupBox.cpp VertexListDockWidget.cpp EdgeListDockWidget.cpp GraphPlotterDockWidget.cpp)
 
-set( Hdrs DrosophilaOmmatidiaExplorer.h   DetectVerticesDialog.h VertexListDockWidget.h EdgeListDockWidget.h  GraphPlotterDockWidget.h )#AJGraphSelectionInteractorStyle.h)
+set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp  DetectVerticesDialog.cpp ShowVolumeGroupBox.cpp VertexListDockWidget.cpp EdgeListDockWidget.cpp GraphPlotterDockWidget.cpp CellListDockWidget.cpp AJTrackingFrame.cpp)
 
-set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h DetectVerticesDialog.h VertexListDockWidget.h  EdgeListDockWidget.h GraphPlotterDockWidget.h)#AJGraphSelectionInteractorStyle.h)
+set( Hdrs DrosophilaOmmatidiaExplorer.h   DetectVerticesDialog.h VertexListDockWidget.h EdgeListDockWidget.h  GraphPlotterDockWidget.h CellListDockWidget.h  AJTrackingFrame.h ) #AJGraphSelectionInteractorStyle.h)
 
-set( UIs DrosophilaOmmatidiaExplorer.ui DetectVerticesDialog.ui ShowVolumeGroupBox.ui VertexListDockWidget.ui  EdgeListDockWidget.ui  GraphPlotterDockWidget.ui)
+set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h DetectVerticesDialog.h VertexListDockWidget.h  EdgeListDockWidget.h GraphPlotterDockWidget.h CellListDockWidget.h AJTrackingFrame.h )#AJGraphSelectionInteractorStyle.h)
+
+set( UIs DrosophilaOmmatidiaExplorer.ui DetectVerticesDialog.ui ShowVolumeGroupBox.ui VertexListDockWidget.ui  EdgeListDockWidget.ui  GraphPlotterDockWidget.ui CellListDockWidget.ui AJTrackingFrame.ui)
 
 set( QRCs Icons/icons.qrc )
 
@@ -81,15 +91,41 @@ set(CMAKE_AUTOMOC ON)
 #add_executable(VertexMolecularDistributionTest VertexMolecularDistributionTest.cpp  )
 #  target_link_libraries(VertexMolecularDistributionTest ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
-  add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
+add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
 
 qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
-target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES} Cbc OsiClp Osi CoinUtils)
 
 
-install(TARGET DrosophilaOmmatidiaExplorer DESTINATION bin  COMPONENT Runtime)
+#install(TARGETS DrosophilaOmmatidiaExplorer DESTINATION bin  COMPONENT Runtime)
 
 include(DrosophilaOmmatidiaExplorerCPack.cmake )
 
 #SET(CPACK_GENERATOR "DEB")
 #SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Rodrigo Cilla")
+enable_testing()
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIR})
+
+#add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
+
+add_executable(MetaheuristicTissueAssociationCommandTest MetaheuristicTissueAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
+target_link_libraries(MetaheuristicTissueAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES})
+
+#add_executable(S2EmbeddingTest S2EmbeddingTest.cpp)
+#target_link_libraries(S2EmbeddingTest ${ITK_LIBRARIES})
+
+#add_executable(TissueSurfaceMeshSourceTest TissueSurfaceMeshSourceTest.cpp)
+#target_link_libraries(TissueSurfaceMeshSourceTest ${ITK_LIBRARIES} )
+
+
+#add_executable(S2LLEEmbeddingTest S2LLEEmbeddingTest.cpp)
+#target_link_libraries(S2LLEEmbeddingTest ${ITK_LIBRARIES})
+
+#target_link_libraries(MinCostMaxFlowAJAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
+					
+					
+#add_test(
+    #NAME MinCostMaxFlowAJAssociationCommandTest
+    #COMMAND MinCostMaxFlowAJAssociationCommandTest
+#)

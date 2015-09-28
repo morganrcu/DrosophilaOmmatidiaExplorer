@@ -2,10 +2,12 @@
 #define EDGELISTDOCKWIDGET_H
 
 #include <QDockWidget>
+#include <QPoint>
 #include <AJGraph.h>
 #include <AJVertex.h>
 #include <AJEdge.h>
-#include <QPoint>
+#include <OmmatidiaTissue.h>
+
 namespace Ui {
 class EdgeListDockWidget;
 }
@@ -15,8 +17,8 @@ class EdgeListDockWidget : public QDockWidget
     Q_OBJECT
 
 private:
-    typedef AJGraph<AJVertex,AJEdge> EdgeContainer;
-     EdgeContainer::Pointer m_EdgesContainer;
+    typedef  OmmatidiaTissue<3>::AJGraphType EdgeContainer;
+    EdgeContainer::Pointer m_EdgesContainer;
 
      std::map<int,typename EdgeContainer::AJEdgeHandler> m_RowToEdge;
 
@@ -35,8 +37,8 @@ public slots:
     void slotEdgeTableSelectionChanged();
     void slotDisplayMenu(const QPoint &pos);
 signals:
-    void SelectedEdgeChanged(AJGraph<AJVertex,AJEdge>::AJEdgeHandler);
-    void DrawEdgeRequested(AJGraph<AJVertex,AJEdge>::AJEdgeHandler);
+    void SelectedEdgeChanged(EdgeContainer::AJEdgeHandler);
+    void DrawEdgeRequested(EdgeContainer::AJEdgeHandler);
 private:
     Ui::EdgeListDockWidget *m_pUI;
 

@@ -10,7 +10,7 @@ public:
     typedef PredictAJGraph Self;
     typedef itk::Object Superclass;
     typedef itk::SmartPointer<Self> Pointer;
-
+    typedef AJCorrespondenceSet<typename TInputGraph::AJVertexHandler> AJCorrespondenceType;
     itkNewMacro(Self)
 
     itkGetObjectMacro(InputGraph,TInputGraph)
@@ -22,12 +22,15 @@ public:
     itkGetObjectMacro(MotionImage,TMotionImage)
     itkSetObjectMacro(MotionImage,TMotionImage)
 
+	itkGetObjectMacro(Correspondences,AJCorrespondenceType);
+
     void Compute(){
         m_OutputGraph=TOutputGraph::New();
 
         for(typename TInputGraph::VertexIterator it= m_InputGraph->VerticesBegin();it!=m_InputGraph->VerticesEnd();++it){
 
-            typename TInputGraph::AJVertexType::Pointer vertex = m_InputGraph->GetAJVertex(*it);
+            auto vertexHandler=*it;
+        	typename TInputGraph::AJVertexType::Pointer vertex = m_InputGraph->GetAJVertex(vertexHandler);
             typename TOutputGraph::AJVertexType::Pointer nextVertex = TOutputGraph::AJVertexType::New();
 
             typename TInputGraph::AJVertexType::PointType position = vertex->GetPosition();
@@ -39,14 +42,20 @@ public:
             typename TOutputGraph::AJVertexType::PointType nextPosition = position+this->m_MotionImage->GetPixel(index);
 
             nextVertex->SetPosition(nextPosition);
-            m_OutputGraph->AddAJVertex(nextVertex);
+            auto nextVertexHandler = m_OutputGraph->AddAJVertex(nextVertex);
+
+#if 0
+            typename AJCorrespondenceType::SuccesorType succesor(vertexHandler,nextVertexHandler);
+
+            m_Correspondences->AddSuccesor(succesor);
+#endif
         }
 
         for(typename TInputGraph::EdgeIterator it = m_InputGraph->EdgesBegin();it!=m_InputGraph->EdgesEnd();++it){
             typename TInputGraph::AJVertexHandler source = m_InputGraph->GetAJEdgeSource(*it);
             typename TInputGraph::AJVertexHandler target = m_InputGraph->GetAJEdgeTarget(*it);
 
-            m_OutputGraph->AddAJEdge(source,target);
+            auto nextEdgeHandler = m_OutputGraph->AddAJEdge(source,target);
         }
     }
 protected:
@@ -56,6 +65,7 @@ protected:
 
 private:
 
+    AJCorrespondenceType m_Correspondences;
     typename TInputGraph::Pointer m_InputGraph;
     typename TOutputGraph::Pointer m_OutputGraph;
     typename TMotionImage::Pointer m_MotionImage;

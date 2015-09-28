@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1334</width>
-    <height>735</height>
+    <height>829</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,7 +74,7 @@
            <item>
             <widget class="QPushButton" name="previousButton">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="text">
               <string/>
@@ -102,7 +102,7 @@
            <item>
             <widget class="QPushButton" name="nextButton">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="text">
               <string/>
@@ -137,6 +137,9 @@
            <item>
             <widget class="QSlider" name="frameSlider">
              <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="tracking">
               <bool>false</bool>
              </property>
              <property name="orientation">
@@ -185,8 +188,10 @@
      <string>View</string>
     </property>
     <addaction name="actionShowCharts"/>
+    <addaction name="separator"/>
     <addaction name="actionShowVertices"/>
     <addaction name="actionShowEdgeList"/>
+    <addaction name="actionShowCells"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -222,7 +227,11 @@
    <addaction name="actionDeleteEdge"/>
    <addaction name="separator"/>
    <addaction name="actionTrackVertices"/>
+   <addaction name="actionValidateTracking"/>
+   <addaction name="actionTrackOne"/>
    <addaction name="separator"/>
+   <addaction name="actionCells"/>
+   <addaction name="actionSelectCell"/>
    <addaction name="actionExportMovie"/>
    <addaction name="actionPlotSelectedEdgeLength"/>
    <addaction name="actionPlotEdgeDistribution"/>
@@ -295,6 +304,16 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="showOriginalSliceLabel">
+          <property name="text">
+           <string>Slice:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="showOriginalSliceSpinBox"/>
+        </item>
        </layout>
       </widget>
      </item>
@@ -346,13 +365,23 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="showDeconvolutedSliceLabel">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="showDeconvolutedSliceSpinBox"/>
+        </item>
        </layout>
       </widget>
      </item>
-     <item row="4" column="0" colspan="2">
-      <widget class="QGroupBox" name="showMotionFieldGroupBox">
+     <item row="2" column="0">
+      <widget class="QGroupBox" name="showVertexnessGroupBox">
        <property name="title">
-        <string>Motion Field</string>
+        <string>Vertexness</string>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -360,19 +389,28 @@
        <property name="checked">
         <bool>false</bool>
        </property>
-      </widget>
-     </item>
-     <item row="5" column="0" colspan="2">
-      <widget class="QCheckBox" name="showAJVerticesGroupBox">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>AJ Vertices</string>
-       </property>
+       <layout class="QFormLayout" name="formLayout_6">
+        <item row="0" column="0">
+         <widget class="QLabel" name="showVertexnessOpacityLabel">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QSlider" name="showVertexnessOpacitySlider">
+          <property name="maximum">
+           <number>1000000</number>
+          </property>
+          <property name="tracking">
+           <bool>false</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item row="3" column="0" colspan="2">
@@ -424,7 +462,7 @@
          <widget class="QSpinBox" name="showPlatenessSliceSpinBox"/>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="showPlatenessSliceLabel">
           <property name="text">
            <string>Slice:</string>
           </property>
@@ -433,7 +471,46 @@
        </layout>
       </widget>
      </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="QGroupBox" name="showMotionFieldGroupBox">
+       <property name="title">
+        <string>Motion Field</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2">
+      <widget class="QCheckBox" name="showAJVerticesCheckBox">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>AJ Vertices</string>
+       </property>
+      </widget>
+     </item>
      <item row="7" column="0">
+      <widget class="QCheckBox" name="showVertexMotionCBox">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Vertex Motion</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
       <widget class="QGroupBox" name="showMolecularChannelGroupBox">
        <property name="title">
         <string>Molecular channel</string>
@@ -481,55 +558,11 @@
        </layout>
       </widget>
      </item>
-     <item row="6" column="0">
-      <widget class="QCheckBox" name="showVertexMotionCBox">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
+     <item row="6" column="0" colspan="2">
+      <widget class="QCheckBox" name="showCellsCheckBox">
        <property name="text">
-        <string>Vertex Motion</string>
+        <string>Cells</string>
        </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QGroupBox" name="showVertexnessGroupBox">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="title">
-        <string>Vertexness</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-       <layout class="QFormLayout" name="formLayout_6">
-        <item row="0" column="0">
-         <widget class="QLabel" name="showVertexnessOpacityLabel">
-          <property name="text">
-           <string>Opacity:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QSlider" name="showVertexnessOpacitySlider">
-          <property name="maximum">
-           <number>1000000</number>
-          </property>
-          <property name="tracking">
-           <bool>false</bool>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </widget>
      </item>
     </layout>
@@ -789,7 +822,7 @@
   </action>
   <action name="actionExportMovie">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Export Movie</string>
@@ -801,6 +834,43 @@
    </property>
    <property name="toolTip">
     <string>Refine vertex positions to local vertexness maxima</string>
+   </property>
+  </action>
+  <action name="actionCells">
+   <property name="text">
+    <string>Cells</string>
+   </property>
+   <property name="toolTip">
+    <string>Identify Cells</string>
+   </property>
+  </action>
+  <action name="actionSelectCell">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Select Cell</string>
+   </property>
+  </action>
+  <action name="actionShowCells">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Cells</string>
+   </property>
+  </action>
+  <action name="actionTrackOne">
+   <property name="text">
+    <string>Track One</string>
+   </property>
+   <property name="toolTip">
+    <string>Track One</string>
+   </property>
+  </action>
+  <action name="actionValidateTracking">
+   <property name="text">
+    <string>Validate Tracking</string>
    </property>
   </action>
  </widget>
@@ -823,7 +893,7 @@
   <tabstop>showPlatenessOpacitySlider</tabstop>
   <tabstop>showPlatenessSliceSpinBox</tabstop>
   <tabstop>showMotionFieldGroupBox</tabstop>
-  <tabstop>showAJVerticesGroupBox</tabstop>
+  <tabstop>showAJVerticesCheckBox</tabstop>
   <tabstop>showVertexMotionCBox</tabstop>
   <tabstop>showMolecularChannelGroupBox</tabstop>
   <tabstop>showMolecularChannelModeComboBox</tabstop>

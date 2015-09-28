@@ -1,4 +1,5 @@
-
+#include <QObject>
+#include <AJGraphToTissueDescriptor.h>
 #include "ui_DrosophilaOmmatidiaExplorer.h"
 #include "DrosophilaOmmatidiaExplorer.h"
 
@@ -35,7 +36,6 @@
 
 #include "VertexMolecularDistributionDescriptor.h"
 #include "EdgeMolecularDistributionDescriptor.h"
-
 #include <vtkContextView.h>
 #include <vtkContextScene.h>
 #include <vtkChartXY.h>
@@ -50,6 +50,11 @@
 #include <vtkWindowToImageFilter.h>
 #include <vtkPNGWriter.h>
 #include <string>
+
+#include <vtkFFMPEGWriter.h>
+
+
+#include <AJTrackingFrame.h>
 // Constructor
 DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
 {
@@ -84,6 +89,8 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
 
 
     this->m_RenderWindowInteractor=this->m_pUI->qvtkWidget->GetInteractor();
+    this->m_RenderWindowInteractor->SetDesiredUpdateRate(1.0);
+
 
     m_DeconvolutedDrawer.SetRenderer(this->m_Renderer);
     m_OriginalDrawer.SetRenderer(this->m_Renderer);
@@ -94,6 +101,7 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     m_VertexLocationsDrawer.SetRenderer(this->m_Renderer);
     m_VertexMotionsDrawer.SetRenderer(this->m_Renderer);
     m_EdgesDrawer.SetRenderer(this->m_Renderer);
+    m_CellDrawer.SetRenderer(this->m_Renderer);
 
     //Setup connection forwarder
     this->m_QtToVTKConnections= vtkSmartPointer<vtkEventQtSlotConnect>::New();
@@ -110,7 +118,9 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     connect(this->m_pUI->actionEdgeMolecularDistribution,SIGNAL(triggered()),SLOT(slotDoEdgeMolecularDistribution()));
     connect(this->m_pUI->actionExportMovie,SIGNAL(triggered()),SLOT(slotDoExportMovie()));
     connect(this->m_pUI->actionRefineVertices,SIGNAL(triggered()),SLOT(slotDoRefineVertexLocation()));
+    connect(this->m_pUI->actionCells,SIGNAL(triggered()),SLOT(slotDoCells()));
 
+    connect(this->m_pUI->actionTrackOne,SIGNAL(triggered()),SLOT(slotDoTrackOne()));
 
     //Visualization
 
@@ -119,16 +129,18 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     connect(this->m_pUI->showOriginalGroupBox,SIGNAL(toggled(bool)),SLOT(slotShowOriginalChanged(bool)));
     connect(this->m_pUI->showOriginalModeComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowOriginalModeChanged(QString)));
     connect(this->m_pUI->showOriginalOpacitySlider,SIGNAL(valueChanged(int)),SLOT(slotShowOriginalOpacityChanged(int)));
+    connect(this->m_pUI->showOriginalSliceSpinBox,SIGNAL(valueChanged(int)),SLOT(slotShowOriginalSliceChanged(int)));
 
     connect(this->m_pUI->showDeconvolutedGroupBox,SIGNAL(toggled(bool)),SLOT(slotShowDeconvolutedChanged(bool)));
     connect(this->m_pUI->showDeconvolutedModeComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowDeconvolutedModeChanged(QString)));
     connect(this->m_pUI->showDeconvolutedOpacitySlider,SIGNAL(valueChanged(int)),SLOT(slotShowDeconvolutedOpacityChanged(int)));
+    connect(this->m_pUI->showDeconvolutedSliceSpinBox,SIGNAL(valueChanged(int)),SLOT(slotShowDeconvolutedSliceChanged(int)));
 
     connect(this->m_pUI->showMotionFieldGroupBox,SIGNAL(toggled(bool)),SLOT(slotShowMotionFieldChanged(bool)));
 
     connect(this->m_pUI->showVertexMotionCBox,SIGNAL(toggled(bool)),SLOT(slotShowVertexMotionChanged(bool)));
 
-    connect(this->m_pUI->showAJVerticesGroupBox,SIGNAL(toggled(bool)),SLOT(slotShowVertexLocationsChanged(bool)));
+    connect(this->m_pUI->showAJVerticesCheckBox,SIGNAL(toggled(bool)),SLOT(slotShowVertexLocationsChanged(bool)));
 
     connect(this->m_pUI->showPlatenessGroupBox,SIGNAL(toggled(bool)),SLOT(slotShowPlatenessChanged(bool)));
     connect(this->m_pUI->showPlatenessModeComboBox,SIGNAL(currentIndexChanged(QString)),SLOT(slotShowPlatenessModeChanged(QString)));
@@ -138,6 +150,7 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     connect(this->m_pUI->showVertexnessGroupBox,SIGNAL(toggled(bool)),SLOT(slotShowVertexnessChanged(bool)));
     connect(this->m_pUI->showVertexnessOpacitySlider,SIGNAL(valueChanged(int)),SLOT(slotShowVertexnessOpacityChanged(int)));
 
+    connect(this->m_pUI->showCellsCheckBox,SIGNAL(toggled(bool)),SLOT(slotShowCellsChanged(bool)));
 
 
     connect(this->m_pUI->showMolecularChannelGroupBox,SIGNAL(toggled(bool)),SLOT(slotShowMolecularChanged(bool)));
@@ -152,10 +165,13 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     m_PointWidget->SetInteractor(this->m_RenderWindowInteractor);
 
 
+
     connect(this->m_pUI->actionSelectVertex,SIGNAL(toggled(bool)),SLOT(slotVertexSelectionToggled(bool)));
     connect(this->m_pUI->actionAddVertices,SIGNAL(toggled(bool)),SLOT(slotVertexAdditionToggled(bool)));
     connect(this->m_pUI->actionDeleteVertex,SIGNAL(triggered()),SLOT(slotDeleteVertex()));
     connect(this->m_pUI->actionMoveVertex,SIGNAL(toggled(bool)),SLOT(slotVertexMoveToggled(bool)));
+
+
 
 
 
@@ -164,6 +180,7 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
 
     connect(this->m_pUI->actionDeleteEdge,SIGNAL(triggered()),SLOT(slotDeleteEdge()));
 
+    connect(this->m_pUI->actionSelectCell,SIGNAL(toggled(bool)),SLOT(slotCellSelectionToggled(bool)));
 
     connect(this->m_pUI->actionPlotSelectedEdgeLength,SIGNAL(triggered()),SLOT(slotPlotSelectedEdgeLength()));
 
@@ -212,19 +229,33 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     connect(this->m_pUI->actionPlotVertexDistribution,SIGNAL(triggered()),this,SLOT(slotPlotSelectedVertexMolecularDistribution()));
 
 
+    m_pCellListDockWidget= new CellListDockWidget(this);
+    //m_pCellListDockWidget->setHidden(true);
+    this->addDockWidget(Qt::RightDockWidgetArea,this->m_pCellListDockWidget);
+    connect(this->m_pCellListDockWidget,SIGNAL(ModifiedCells()),SLOT(slotCellsShanged()));
+    connect(this->m_pCellListDockWidget,SIGNAL(SelectedCellChanged(CellGraph<Cell>::CellVertexHandler)),SLOT(slotSelectedCellChanged(CellGraph<Cell>::CellVertexHandler)));
+
+    connect(this->m_pUI->actionShowCells,SIGNAL(toggled(bool)),this->m_pCellListDockWidget,SLOT(setVisible(bool)));
+
+
+    m_SelectedCell=-1;
 
 
 
+    connect(this->m_pUI->nextButton,SIGNAL(clicked()),SLOT(slotNextFrame()));
+    connect(this->m_pUI->previousButton,SIGNAL(clicked()),SLOT(slotPreviousFrame()));
+
+    connect(this->m_pUI->actionValidateTracking,SIGNAL(triggered()),SLOT(slotDoValidateTracking()));
 }
 
 
-void DrosophilaOmmatidiaExplorer::slotVertexTableSelectionChanged( AJGraph<AJVertex,AJEdge>::AJVertexHandler  selectedVertex){
+void DrosophilaOmmatidiaExplorer::slotVertexTableSelectionChanged( OmmatidiaTissue<3>::AJGraphType::AJVertexHandler  selectedVertex){
     this->SetSelectedVertex(selectedVertex);
     this->m_Renderer->GetRenderWindow()->Render();
 }
 
 
-void DrosophilaOmmatidiaExplorer::slotEdgeTableSelectionChanged( AJGraph<AJVertex,AJEdge>::AJEdgeHandler selectedEdge){
+void DrosophilaOmmatidiaExplorer::slotEdgeTableSelectionChanged( OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler selectedEdge){
     this->SetSelectedEdge(selectedEdge);
     this->m_Renderer->GetRenderWindow()->Render();
 }
@@ -238,7 +269,7 @@ void DrosophilaOmmatidiaExplorer::slotVertexAdditionToggled(bool toggled){
         this->m_pUI->actionDetectVertices->setEnabled(false);
         this->m_pUI->actionTrackVertices->setEnabled(false);
 
-        this->m_QtToVTKConnections->Connect(this->m_pUI->qvtkWidget->GetRenderWindow()->GetInteractor(),vtkCommand::LeftButtonPressEvent,this,SLOT(slotLeftClickAddMode(vtkObject*,ulong,void*,void*,vtkCommand*)));
+        this->m_QtToVTKConnections->Connect(this->m_pUI->qvtkWidget->GetRenderWindow()->GetInteractor(),vtkCommand::LeftButtonPressEvent,this,SLOT(slotLeftClickVertexAddMode(vtkObject*,ulong,void*,void*,vtkCommand*)));
     }else{
         this->m_pUI->actionAddEdge->setEnabled(true);
         this->m_pUI->actionSelectEdge->setEnabled(true);
@@ -281,7 +312,24 @@ void DrosophilaOmmatidiaExplorer::slotLeftClickVertexAddMode(vtkObject*,ulong,vo
 
 
 }
+void DrosophilaOmmatidiaExplorer::slotLeftClickCellSelectionMode(vtkObject*, unsigned long, void*,void*, vtkCommand*){
+    int* clickPos = this->m_RenderWindowInteractor->GetEventPosition();
+    // Pick from this location.
+    vtkSmartPointer<vtkPropPicker>  picker =  	vtkSmartPointer<vtkPropPicker>::New();
+    picker->Pick(clickPos[0], clickPos[1], 0, m_Renderer);
 
+    vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
+
+    if(pickedActor){
+        auto clickedCell = this->m_CellDrawer.GetCellFromActor(pickedActor);
+        std::cout << "Clicked" <<  clickedCell << std::endl;
+        this->SetSelectedCell(clickedCell);
+    }
+}
+
+void DrosophilaOmmatidiaExplorer::slotRightClickCellSelectionMode(vtkObject*, unsigned long, void*,void*, vtkCommand*){
+
+}
 void DrosophilaOmmatidiaExplorer::slotVertexMoveToggled(bool toggled){
 
     if(toggled){
@@ -302,20 +350,35 @@ void DrosophilaOmmatidiaExplorer::slotVertexMoveToggled(bool toggled){
         this->m_PointWidget->AddObserver(vtkCommand::InteractionEvent,callback);
 
         m_PointWidget->On();
-
-
     }else{
         this->m_Project.SetAJGraph(this->m_CurrentFrame,this->m_CurrentAJGraph);
         m_PointWidget->Off();
+        m_PointWidget->RemoveAllObservers();
         this->m_QtToVTKConnections->Disconnect();
         //Restore Selection mode
         this->m_QtToVTKConnections->Connect(this->m_pUI->qvtkWidget->GetRenderWindow()->GetInteractor(),vtkCommand::LeftButtonPressEvent,this,SLOT(slotLeftClickVertexSelectionMode(vtkObject*,unsigned long, void*,void*,vtkCommand*)));
         this->m_QtToVTKConnections->Connect(this->m_pUI->qvtkWidget->GetRenderWindow()->GetInteractor(),vtkCommand::RightButtonPressEvent,this,SLOT(slotRightClickVertexSelectionMode(vtkObject*,unsigned long, void*,void*,vtkCommand*)));
+
+        this->DrawAJVertices(this->m_CurrentFrame);
     }
 }
 
 void DrosophilaOmmatidiaExplorer::slotRightClickVertexMoveMode(vtkObject*,ulong,void*,void*,vtkCommand*){
 	this->m_pUI->actionMoveVertex->toggle();
+}
+
+
+
+void DrosophilaOmmatidiaExplorer::slotCellSelectionToggled(bool toggled){
+	if(toggled){
+		this->m_CellDrawer.PickOn();
+		this->m_QtToVTKConnections->Connect(this->m_pUI->qvtkWidget->GetRenderWindow()->GetInteractor(),vtkCommand::LeftButtonPressEvent,this,SLOT(slotLeftClickCellSelectionMode(vtkObject*,unsigned long, void*,void*,vtkCommand*)));
+		this->m_QtToVTKConnections->Connect(this->m_pUI->qvtkWidget->GetRenderWindow()->GetInteractor(),vtkCommand::RightButtonPressEvent,this,SLOT(slotRightClickCellSelectionMode(vtkObject*,unsigned long, void*,void*,vtkCommand*)));
+	}else{
+		this->m_CellDrawer.PickOff();
+		this->m_QtToVTKConnections->Disconnect();
+	}
+
 }
 void DrosophilaOmmatidiaExplorer::slotVertexSelectionToggled(bool toggled){
 
@@ -424,6 +487,19 @@ void DrosophilaOmmatidiaExplorer::slotLeftClickEdgeSelectionMode(vtkObject*, uns
 
 }
 
+void DrosophilaOmmatidiaExplorer::SetSelectedCell(const  DrosophilaOmmatidiaJSONProject::CellGraphType::CellVertexHandler & selectedCell){
+
+	if(this->m_SelectedCell!=-1){
+		 this->m_CellDrawer.DeemphasizeCell(this->m_SelectedCell);
+	 }
+
+
+	 this->m_CellDrawer.HighlightCell(selectedCell);
+
+	 this->m_pCellListDockWidget->SetSelectedCell(selectedCell);
+
+	 this->m_SelectedCell=selectedCell;
+}
 
 void DrosophilaOmmatidiaExplorer::SetSelectedVertex(const  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler & selectedVertex){
 
@@ -435,7 +511,7 @@ void DrosophilaOmmatidiaExplorer::SetSelectedVertex(const  DrosophilaOmmatidiaJS
     this->m_pUI->actionMoveVertex->setEnabled(true);
     this->m_pUI->actionPlotVertexDistribution->setEnabled(true);
 
-    this->m_VertexLocationsDrawer.HighlightVertex(selectedVertex);
+    this->m_VertexLocationsDrawer.HighlightAJVertex(selectedVertex);
 
     this->m_pVertexListDockWidget->SetSelectedVertex(selectedVertex);
 
@@ -509,7 +585,22 @@ void DrosophilaOmmatidiaExplorer::slotRightClickEdgeSelectionMode(vtkObject*, un
 }
 
 void DrosophilaOmmatidiaExplorer::slotDoVertexLocation(){
+	for(int t=0;t<m_Project.GetNumberOfFrames();t++){
 
+
+    typedef HessianImageToVertexnessImageFilter<DrosophilaOmmatidiaJSONProject::HessianImageType,DrosophilaOmmatidiaJSONProject::VertexnessImageType> HessianImageToVertexnessType;
+
+     HessianImageToVertexnessType::Pointer hessianToVertexness = HessianImageToVertexnessType::New();
+
+    hessianToVertexness->SetInput(m_Project.GetHessianImage(t));
+
+    hessianToVertexness->Update();
+
+     DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexnessImage=hessianToVertexness->GetOutput();
+
+    m_Project.SetVertexnessImage(t,vertexnessImage);
+	}
+#if 0
     DetectVerticesDialog dialog(this);
     dialog.exec();
 
@@ -558,7 +649,14 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexLocation(){
 
 #endif
     }
+#endif
+}
 
+void DrosophilaOmmatidiaExplorer::slotDoValidateTracking(){
+
+	AJTrackingFrame frame(this,&m_Project);
+
+	frame.exec();
 }
 
 void DrosophilaOmmatidiaExplorer::slotDoRefineVertexLocation(){
@@ -582,11 +680,11 @@ void DrosophilaOmmatidiaExplorer::slotDeleteVertex(){
     this->m_Project.SetAJGraph(this->m_CurrentFrame,this->m_CurrentAJGraph);
 
     this->m_VertexLocationsDrawer.Draw();
-    this->m_VertexLocationsDrawer.SetVisibility(this->m_pUI->showAJVerticesGroupBox->isChecked());
+    this->m_VertexLocationsDrawer.SetVisibility(this->m_pUI->showAJVerticesCheckBox->isChecked());
     this->m_VertexLocationsDrawer.PickOn();
 
     this->m_EdgesDrawer.Draw();
-    this->m_EdgesDrawer.SetVisibility(this->m_pUI->showAJVerticesGroupBox->isChecked());
+    this->m_EdgesDrawer.SetVisibility(this->m_pUI->showAJVerticesCheckBox->isChecked());
     this->m_EdgesDrawer.PickOff();
 
     this->m_SelectedVertex=-1;
@@ -595,6 +693,7 @@ void DrosophilaOmmatidiaExplorer::slotDeleteVertex(){
 
     this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
 }
+
 
 
 void DrosophilaOmmatidiaExplorer::slotDeleteEdge(){
@@ -606,11 +705,11 @@ void DrosophilaOmmatidiaExplorer::slotDeleteEdge(){
     this->m_Project.SetAJGraph(this->m_CurrentFrame,this->m_CurrentAJGraph);
 
     this->m_VertexLocationsDrawer.Draw();
-    this->m_VertexLocationsDrawer.SetVisibility(this->m_pUI->showAJVerticesGroupBox->isChecked());
+    this->m_VertexLocationsDrawer.SetVisibility(this->m_pUI->showAJVerticesCheckBox->isChecked());
     this->m_VertexLocationsDrawer.PickOff();
 
     this->m_EdgesDrawer.Draw();
-    this->m_EdgesDrawer.SetVisibility(this->m_pUI->showAJVerticesGroupBox->isChecked());
+    this->m_EdgesDrawer.SetVisibility(this->m_pUI->showAJVerticesCheckBox->isChecked());
     this->m_EdgesDrawer.PickOn();
 
     this->m_IsSelectedEdge=false;
@@ -774,31 +873,62 @@ void DrosophilaOmmatidiaExplorer::slotSecondLeftClickAddEdgeMode(vtkObject*,unsi
 }
 
 
+void DrosophilaOmmatidiaExplorer::slotDoTrackOne(){
+#if 0
+	typedef PredictAJGraph<DrosophilaOmmatidiaJSONProject::TissueType,DrosophilaOmmatidiaJSONProject::MotionImageType,DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> PredictAJGraphType;
 
+    PredictAJGraphType::Pointer predict= PredictAJGraphType::New();
+    predict->SetMotionImage(this->m_Project.GetMotionImage(this->m_CurrentFrame));
+    predict->SetInputGraph(this->m_Project.GetAJGraph(this->m_CurrentFrame));
+    predict->Compute();
+	     //   m_Project.SetAJGraph(t+1,predict->GetOutputGraph());
+
+
+  	typedef RefineVerticesToNearestVertexnessMaxima<DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,DrosophilaOmmatidiaJSONProject::VertexnessImageType> RefineVerticesToNearestVertexnessMaximaType;
+
+  	RefineVerticesToNearestVertexnessMaximaType::Pointer verticesRefiner = RefineVerticesToNearestVertexnessMaximaType::New();
+
+
+	DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexness = m_Project.GetVertexnessImage(this->m_CurrentFrame+1);
+
+	verticesRefiner->SetVertexnessImage(vertexness);
+	verticesRefiner->SetVertices(predict->GetOutputGraph());
+	verticesRefiner->Compute();
+	verticesRefiner->GetVertices();
+
+	m_Project.SetAJGraph(this->m_CurrentFrame+1,verticesRefiner->GetVertices());
+
+	this->slotFrameChanged(this->m_CurrentFrame+1);
+#endif
+}
 
 void DrosophilaOmmatidiaExplorer::slotDoVertexTracking(){
-
+#if 0
     for(int t=0;t<this->m_Project.GetNumberOfFrames()-1;t++){
         typedef PredictAJGraph<DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,DrosophilaOmmatidiaJSONProject::MotionImageType,DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType> PredictAJGraphType;
 
-         PredictAJGraphType::Pointer predict= PredictAJGraphType::New();
+
+        PredictAJGraphType::Pointer predict= PredictAJGraphType::New();
         predict->SetMotionImage(this->m_Project.GetMotionImage(t));
         predict->SetInputGraph(this->m_Project.GetAJGraph(t));
         predict->Compute();
 
+     //   m_Project.SetAJGraph(t+1,predict->GetOutputGraph());
+
+
     	typedef RefineVerticesToNearestVertexnessMaxima<DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,DrosophilaOmmatidiaJSONProject::VertexnessImageType> RefineVerticesToNearestVertexnessMaximaType;
 
-         RefineVerticesToNearestVertexnessMaximaType::Pointer verticesRefiner = RefineVerticesToNearestVertexnessMaximaType::New();
+    	RefineVerticesToNearestVertexnessMaximaType::Pointer verticesRefiner = RefineVerticesToNearestVertexnessMaximaType::New();
 
-
-         DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexness = m_Project.GetVertexnessImage(t+1);
+    	DrosophilaOmmatidiaJSONProject::VertexnessImageType::Pointer vertexness = m_Project.GetVertexnessImage(t+1);
 
         verticesRefiner->SetVertexnessImage(vertexness);
        	verticesRefiner->SetVertices(predict->GetOutputGraph());
        	verticesRefiner->Compute();
-       	verticesRefiner->GetVertices();
 
         m_Project.SetAJGraph(t+1,verticesRefiner->GetVertices());
+
+
     }
     {
         auto pastGraph=m_Project.GetAJGraph(0);
@@ -837,9 +967,24 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexTracking(){
         m_Project.SetAJGraph(this->m_Project.GetNumberOfFrames()-1,nextGraph);
 
     }
-
+#endif
 }
 
+void DrosophilaOmmatidiaExplorer::slotDoCells(){
+
+#if 0
+	typedef AJGraphToTissueDescriptor<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,
+					   typename DrosophilaOmmatidiaJSONProject::TissueType> CellFilterType;
+
+	typename CellFilterType::Pointer cellFilter = CellFilterType::New();
+
+	cellFilter->SetAJGraph(m_Project.GetAJGraph(m_CurrentFrame));
+	cellFilter->Compute();
+
+	//m_Project.SetCellGraph(m_CurrentFrame,cellFilter->GetCellGraph());
+#endif
+
+}
 
 void DrosophilaOmmatidiaExplorer::slotShowOriginalModeChanged(const QString & mode){
 
@@ -910,6 +1055,26 @@ void DrosophilaOmmatidiaExplorer::slotShowOriginalOpacityChanged(int opacity){
 
 }
 
+void DrosophilaOmmatidiaExplorer::slotShowOriginalSliceChanged(int value){
+
+    m_OriginalDrawer.SetSlice(value);
+    this->m_OriginalDrawer.Draw();
+    this->m_OriginalDrawer.SetVisibility(this->m_pUI->showOriginalGroupBox->isChecked());
+
+    this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
+}
+
+void DrosophilaOmmatidiaExplorer::slotShowDeconvolutedSliceChanged(int value){
+
+    m_DeconvolutedDrawer.SetSlice(value);
+    this->m_DeconvolutedDrawer.Draw();
+    this->m_DeconvolutedDrawer.SetVisibility(this->m_pUI->showDeconvolutedGroupBox->isChecked());
+
+    this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
+}
+
 void DrosophilaOmmatidiaExplorer::slotShowPlatenessOpacityChanged(int opacity){
 
     double value = double(opacity)/1000000.0;
@@ -926,6 +1091,13 @@ void DrosophilaOmmatidiaExplorer::slotShowVertexLocationsChanged(bool value){
 
     m_VertexLocationsDrawer.SetVisibility(value);
     m_EdgesDrawer.SetVisibility(value);
+    this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
+}
+
+void DrosophilaOmmatidiaExplorer::slotShowCellsChanged(bool value){
+
+	m_CellDrawer.SetVisibility(value);
     this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
 
 }
@@ -1015,6 +1187,8 @@ DrosophilaOmmatidiaExplorer::~DrosophilaOmmatidiaExplorer()
 
 
 }
+
+
 void DrosophilaOmmatidiaExplorer::slotFrameChanged(int frame){
 
     QString baseText("t=%1");
@@ -1028,46 +1202,44 @@ void DrosophilaOmmatidiaExplorer::slotFrameChanged(int frame){
         this->m_pUI->showMotionFieldGroupBox->setEnabled(true);
     }
 
+
+	this->m_pUI->frameSlider->blockSignals(true);
+	this->m_pUI->frameSlider->setValue(this->m_CurrentFrame);
+    this->m_pUI->frameSlider->blockSignals(false);
+
     this->DrawFrame(this->m_CurrentFrame);
 
 }
 
-void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
+void DrosophilaOmmatidiaExplorer::slotNextFrame(){
+	this->m_CurrentFrame++;
+	this->slotFrameChanged(this->m_CurrentFrame);
 
-    this->m_Renderer->RemoveAllViewProps();
-    m_OriginalDrawer.SetImage(m_Project.GetOriginalImage(frame));
-    m_OriginalDrawer.SetOpacity(double(this->m_pUI->showOriginalOpacitySlider->value())/1000000.0);
-    m_OriginalDrawer.Draw();
-    m_OriginalDrawer.SetVisibility(this->m_pUI->showOriginalGroupBox->isChecked());
+}
 
-
-    m_DeconvolutedDrawer.SetImage(m_Project.GetDeconvolutedImage(frame));
-    m_DeconvolutedDrawer.SetOpacity(double(this->m_pUI->showDeconvolutedOpacitySlider->value())/1000000.0);
-    m_DeconvolutedDrawer.Draw();
-    m_DeconvolutedDrawer.SetVisibility(this->m_pUI->showDeconvolutedGroupBox->isChecked());
+void DrosophilaOmmatidiaExplorer::slotPreviousFrame(){
+	this->m_CurrentFrame--;
+	this->slotFrameChanged(this->m_CurrentFrame);
+}
 
 
-    m_PlatenessDrawer.SetImage(m_Project.GetPlatenessImage(frame));
-    m_PlatenessDrawer.SetOpacity(double(this->m_pUI->showPlatenessOpacitySlider->value())/1000000.0);
-    m_PlatenessDrawer.Draw();
-    m_PlatenessDrawer.SetVisibility(this->m_pUI->showPlatenessGroupBox->isChecked());
+void DrosophilaOmmatidiaExplorer::DrawCells(int frame){
+    if(this->m_Project.IsTissueDescriptor(frame)){
+           	this->m_CurrentTissue = m_Project.GetTissueDescriptor(frame);
+           	this->m_CellDrawer.SetAJVertices(m_CurrentTissue->GetAJGraph());
+           	this->m_CellDrawer.SetCells(m_CurrentTissue->GetCellGraph());
+           	this->m_CellDrawer.Draw();
+           	this->m_CellDrawer.SetVisibility(this->m_pUI->showCellsCheckBox->isChecked());
 
-    m_VertexnessDrawer.SetImage(m_Project.GetVertexnessImage(frame));
-    m_VertexnessDrawer.SetOpacity(double(this->m_pUI->showVertexnessOpacitySlider->value())/1000000.0);
-    //m_VertexnessDrawer.SetOpacity(1.0);
-    m_VertexnessDrawer.Draw();
-    m_VertexnessDrawer.SetVisibility(this->m_pUI->showVertexnessGroupBox->isChecked());
-
-
-    if(frame!=this->m_Project.GetNumberOfFrames()-1){
-         DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer motionImage = m_Project.GetMotionImage(frame);
-        m_MotionVolumeDrawer.SetMotionImage(motionImage);
-        m_MotionVolumeDrawer.Draw();
-        m_MotionVolumeDrawer.SetVisibility(this->m_pUI->showMotionFieldGroupBox->isChecked());
-
+           	//this->m_pCellListDockWidget->SetCells(m_CurrentTissue->GetCellGraph());
+           	//this->m_pCellListDockWidget->Draw();
     }else{
-        m_MotionVolumeDrawer.Reset();
+    	this->m_CellDrawer.Reset();
     }
+
+}
+
+void DrosophilaOmmatidiaExplorer::DrawAJVertices(int frame){
 
     if(this->m_Project.IsAJVertices(frame)){
 
@@ -1075,7 +1247,7 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
 
         this->m_VertexLocationsDrawer.SetVertexLocations(this->m_CurrentAJGraph);
         this->m_VertexLocationsDrawer.Draw();
-        this->m_VertexLocationsDrawer.SetVisibility(this->m_pUI->showAJVerticesGroupBox->isChecked());
+        this->m_VertexLocationsDrawer.SetVisibility(this->m_pUI->showAJVerticesCheckBox->isChecked());
 
         this->m_pVertexListDockWidget->SetVertexContainer(this->m_CurrentAJGraph);
         this->m_pVertexListDockWidget->Draw();
@@ -1083,7 +1255,7 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
 
         this->m_EdgesDrawer.SetEdgesContainer(this->m_CurrentAJGraph);
         this->m_EdgesDrawer.Draw();
-        this->m_EdgesDrawer.SetVisibility(this->m_pUI->showAJVerticesGroupBox->isChecked());
+        this->m_EdgesDrawer.SetVisibility(this->m_pUI->showAJVerticesCheckBox->isChecked());
 
         this->m_pEdgeListDockWidget->SetEdgesContainer(this->m_CurrentAJGraph);
         this->m_pEdgeListDockWidget->Draw();
@@ -1097,6 +1269,54 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
         this->m_EdgesDrawer.Reset();
         this->m_VertexMotionsDrawer.Reset();
     }
+}
+void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
+    this->m_pUI->frameSlider->blockSignals(true);
+    this->m_pUI->frameSlider->setValue(frame);
+    this->m_pUI->frameSlider->blockSignals(false);
+
+    this->m_Renderer->RemoveAllViewProps();
+#if 1
+    m_OriginalDrawer.SetImage(m_Project.GetOriginalImage(frame));
+    m_OriginalDrawer.SetOpacity(double(this->m_pUI->showOriginalOpacitySlider->value())/1000000.0);
+    m_OriginalDrawer.Draw();
+    m_OriginalDrawer.SetVisibility(this->m_pUI->showOriginalGroupBox->isChecked());
+#endif
+
+
+    m_DeconvolutedDrawer.SetImage(m_Project.GetDeconvolutedImage(frame));
+    m_DeconvolutedDrawer.SetOpacity(double(this->m_pUI->showDeconvolutedOpacitySlider->value())/1000000.0);
+    m_DeconvolutedDrawer.Draw();
+    m_DeconvolutedDrawer.SetVisibility(this->m_pUI->showDeconvolutedGroupBox->isChecked());
+
+
+    m_PlatenessDrawer.SetImage(m_Project.GetPlatenessImage(frame));
+    m_PlatenessDrawer.SetOpacity(double(this->m_pUI->showPlatenessOpacitySlider->value())/1000000.0);
+    m_PlatenessDrawer.Draw();
+    m_PlatenessDrawer.SetVisibility(this->m_pUI->showPlatenessGroupBox->isChecked());
+
+    if(this->m_Project.IsVertexnessImage(frame)){
+    m_VertexnessDrawer.SetImage(m_Project.GetVertexnessImage(frame));
+    m_VertexnessDrawer.SetOpacity(double(this->m_pUI->showVertexnessOpacitySlider->value())/1000000.0);
+    //m_VertexnessDrawer.SetOpacity(1.0);
+    m_VertexnessDrawer.Draw();
+    m_VertexnessDrawer.SetVisibility(this->m_pUI->showVertexnessGroupBox->isChecked());
+
+    }else{
+    	m_VertexnessDrawer.Reset();
+    }
+
+    if(frame!=this->m_Project.GetNumberOfFrames()-1){
+         DrosophilaOmmatidiaJSONProject::MotionImageType::Pointer motionImage = m_Project.GetMotionImage(frame);
+        m_MotionVolumeDrawer.SetMotionImage(motionImage);
+        m_MotionVolumeDrawer.Draw();
+        m_MotionVolumeDrawer.SetVisibility(this->m_pUI->showMotionFieldGroupBox->isChecked());
+
+    }else{
+        m_MotionVolumeDrawer.Reset();
+    }
+
+
 
     if(this->m_Project.IsMolecularImage(frame)){
 
@@ -1109,9 +1329,10 @@ void DrosophilaOmmatidiaExplorer::DrawFrame(int frame ){
         this->m_MolecularImageDrawer.Reset();
     }
 
-
-
+    this->DrawAJVertices(frame);
+    this->DrawCells(frame);
     this->m_pUI->qvtkWidget->GetRenderWindow()->Render();
+
 
 }
 
@@ -1158,6 +1379,9 @@ void DrosophilaOmmatidiaExplorer::slotOpenProject(){
             this->m_pUI->actionVertexMolecularDistribution->setEnabled(true);
             this->m_pUI->actionEdgeMolecularDistribution->setEnabled(true);
             this->m_pUI->statusbar->showMessage(tr("Ready"));
+
+
+            this->m_pGraphPlotterDockWidget->SetLength(m_Project.GetNumberOfFrames());
         }else{
 
 
@@ -1196,6 +1420,7 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexMolecularDistribution(){
     }
 }
 
+
 void DrosophilaOmmatidiaExplorer::slotDoEdgeMolecularDistribution(){
     for(unsigned int t=0;t<m_Project.GetNumberOfFrames();t++){
          DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer ajgraph= m_Project.GetAJGraph(t);
@@ -1219,15 +1444,52 @@ void DrosophilaOmmatidiaExplorer::slotDoEdgeMolecularDistribution(){
 void DrosophilaOmmatidiaExplorer::slotPlotSelectedEdgeLength(){
 	return slotPlotEdgeLength(this->m_SelectedEdge);
 }
-void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const AJGraph<AJVertex,AJEdge>::AJEdgeHandler & edge){
 
+void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const DrosophilaOmmatidiaExplorer::CellGraphType::CellVertexHandler & cell){
 
-    vtkSmartPointer<vtkDoubleArray> arrT =vtkSmartPointer<vtkDoubleArray>::New();
-    arrT->SetName("t");
-    arrT->SetNumberOfTuples(this->m_Project.GetNumberOfFrames());
+    vtkSmartPointer<vtkDoubleArray> arrCell =vtkSmartPointer<vtkDoubleArray>::New();
+    std::string arrayName("cellArea-" + std::to_string(cell));
+    arrCell->SetName(arrayName.c_str());
+    arrCell->SetNumberOfTuples(this->m_Project.GetNumberOfFrames());
 
+    for(int t=0;t<this->m_Project.GetNumberOfFrames();t++){
+        auto tissue = m_Project.GetTissueDescriptor(t);
+
+        arrCell->SetTuple1(t,tissue->GetCellGraph()->GetCell(cell)->GetArea());
+
+    }
+
+    double sum=0;
+    double sum2=0;
+    for(int t=0;t< arrCell->GetNumberOfTuples();t++){
+    	sum+=arrCell->GetTuple1(t);
+    	sum2+=arrCell->GetTuple1(t)*arrCell->GetTuple1(t);
+    }
+    double mean = sum / arrCell->GetNumberOfTuples();
+
+    double std = sum2/arrCell->GetNumberOfTuples() - mean*mean;
+    std= sqrt(std);
+    for(int t=0;t< arrCell->GetNumberOfTuples();t++){
+    	arrCell->SetTuple1(t,(arrCell->GetTuple1(t)-mean)/std);
+    }
+
+    //auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
+    itk::FixedArray<double,3> color;
+    color[0]=1.0;
+    color[1]=1.0;
+    color[2]=1.0;
+    std::cout << color << std::endl;
+
+    this->m_pGraphPlotterDockWidget->AddPlot(arrCell,color,false);
+    this->m_pGraphPlotterDockWidget->Draw();
+
+}
+
+void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
+#if 0
     vtkSmartPointer<vtkDoubleArray> arrEdge =vtkSmartPointer<vtkDoubleArray>::New();
-    arrEdge->SetName("edge");
+    std::string arrayName("edgeLength-" + std::to_string(this->m_CurrentAJGraph->GetAJEdgeSource(edge)) + "-" + std::to_string(this->m_CurrentAJGraph->GetAJEdgeTarget(edge)));
+    arrEdge->SetName(arrayName.c_str());
     arrEdge->SetNumberOfTuples(this->m_Project.GetNumberOfFrames());
 
     for(int t=0;t<this->m_Project.GetNumberOfFrames();t++){
@@ -1245,25 +1507,31 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const AJGraph<AJVertex,AJEd
         double dist = diff.GetNorm();
 
         arrEdge->SetTuple1(t,dist);
-        arrT->SetTuple1(t,t);
+
     }
 
-    double maxAbs=0;
+    double sum=0;
+    double sum2=0;
     for(int t=0;t< arrEdge->GetNumberOfTuples();t++){
-    	if(std::fabs(arrEdge->GetTuple1(t))>maxAbs){
-    		maxAbs=std::fabs(arrEdge->GetTuple1(t));
-    	}
+    	sum+=arrEdge->GetTuple1(t);
+    	sum2+=arrEdge->GetTuple1(t)*arrEdge->GetTuple1(t);
     }
+    double mean = sum / arrEdge->GetNumberOfTuples();
 
+    double std = sum2/arrEdge->GetNumberOfTuples() - mean*mean;
+    std= sqrt(std);
     for(int t=0;t< arrEdge->GetNumberOfTuples();t++){
-    	arrEdge->SetTuple1(t,arrEdge->GetTuple1(t)/maxAbs);
+    	arrEdge->SetTuple1(t,(arrEdge->GetTuple1(t)-mean)/std);
     }
 
-    this->m_pGraphPlotterDockWidget->SetTemporalReference(arrT);
-    this->m_pGraphPlotterDockWidget->AddPlot(arrEdge);
+    auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
+    std::cout << color << std::endl;
+
+    this->m_pGraphPlotterDockWidget->AddPlot(arrEdge,color,false);
     this->m_pGraphPlotterDockWidget->Draw();
-
+#endif
 }
+
 #if 0
 void DrosophilaOmmatidiaExplorer::slotShowEdges(bool state){
 
@@ -1276,14 +1544,11 @@ void DrosophilaOmmatidiaExplorer::slotShowEdges(bool state){
 }
 #endif
 
-void DrosophilaOmmatidiaExplorer::PlotDescriptor(const std::vector<itk::Array<double> > & descriptors){
+void DrosophilaOmmatidiaExplorer::PlotDescriptor(const std::vector<itk::Array<double> > & descriptors,itk::FixedArray<double,3> color,const std::string & name){
 
 	int T = descriptors.size();
     int nDescriptors = descriptors[0].size();
 
-    vtkSmartPointer<vtkDoubleArray> arrT = vtkSmartPointer<vtkDoubleArray>::New();
-    arrT->SetName("t");
-    arrT->SetNumberOfTuples(T);
 
     std::vector< vtkSmartPointer<vtkDoubleArray> > arrays(nDescriptors);
     vtkSmartPointer<vtkTable> datasetTable = vtkSmartPointer<vtkTable>::New();
@@ -1294,15 +1559,15 @@ void DrosophilaOmmatidiaExplorer::PlotDescriptor(const std::vector<itk::Array<do
 
     for(int n=0;n<nDescriptors;n++){
         arrays[n]=vtkSmartPointer<vtkDoubleArray>::New();
-        std::string name = std::string("edge") + std::to_string(n);
-        arrays[n]->SetName(name.c_str());
+        std::string tmpName = name + std::to_string(n);
+        arrays[n]->SetName(tmpName.c_str());
         arrays[n]->SetNumberOfTuples(T);
         datasetTable->AddColumn(arrays[n]);
-        pcaStatistics->SetColumnStatus(name.c_str(), 1 );
+        pcaStatistics->SetColumnStatus(tmpName.c_str(), 1 );
     }
 
     vtkSmartPointer<vtkDoubleArray> variation=vtkSmartPointer<vtkDoubleArray>::New();
-    variation->SetName("variation");
+    variation->SetName(name.c_str());
     variation->SetNumberOfTuples(T);
 
 
@@ -1333,8 +1598,6 @@ void DrosophilaOmmatidiaExplorer::PlotDescriptor(const std::vector<itk::Array<do
 
     pcaStatistics->GetEigenvectors(eigenvectors);
 
-
-
     vtkSmartPointer<vtkDoubleArray> evec1 = vtkSmartPointer<vtkDoubleArray>::New();
     pcaStatistics->GetEigenvector(0, evec1);
 
@@ -1345,17 +1608,17 @@ void DrosophilaOmmatidiaExplorer::PlotDescriptor(const std::vector<itk::Array<do
         }
         std::cout << val << std::endl;
         variation->SetTuple1(t,val);
-        arrT->SetTuple1(t,t);
+
     }
-    this->m_pGraphPlotterDockWidget->SetTemporalReference(arrT);
-    this->m_pGraphPlotterDockWidget->AddPlot(variation);
+    this->m_pGraphPlotterDockWidget->AddPlot(variation,color,true);
     this->m_pGraphPlotterDockWidget->Draw();
 
 }
 void DrosophilaOmmatidiaExplorer::slotPlotSelectedEdgeMolecularDistribution(){
 	this->slotPlotEdgeMolecularDistribution(m_SelectedEdge);
 }
-void DrosophilaOmmatidiaExplorer::slotPlotEdgeMolecularDistribution(const AJGraph<AJVertex,AJEdge>::AJEdgeHandler & edge){
+void DrosophilaOmmatidiaExplorer::slotPlotEdgeMolecularDistribution(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
+#if 0
     std::vector<itk::Array<double> > descriptorSeries;
     int T = m_Project.GetNumberOfFrames();
 
@@ -1370,10 +1633,51 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeMolecularDistribution(const AJGrap
         std::cout << distribution << std::endl;
         descriptorSeries.push_back(distribution);
     }
-    this->PlotDescriptor(descriptorSeries);
+    auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
 
+    std::string arrayName("edgeDistribution-" + std::to_string(this->m_CurrentAJGraph->GetAJEdgeSource(edge)) + "-" + std::to_string(this->m_CurrentAJGraph->GetAJEdgeTarget(edge)));
+
+    this->PlotDescriptor(descriptorSeries,color,arrayName);
+#endif
 }
+
 void DrosophilaOmmatidiaExplorer::slotDoExportMovie(){
+
+	this->m_Renderer->GetRenderWindow()->SetSize(1280,720);
+#if 0
+	vtkSmartPointer<vtkFFMPEGWriter> writer = vtkSmartPointer<vtkFFMPEGWriter>::New();
+
+	writer->SetFileName("test.avi");
+
+	vtkSmartPointer<vtkWindowToImageFilter> windowToImageFilter =  vtkSmartPointer<vtkWindowToImageFilter>::New();
+	  //this->m_Renderer->GetRenderWindow()->set
+	windowToImageFilter->SetMagnification(1); //set the resolution of the output image (3 times the current resolution of vtk render window)
+	windowToImageFilter->SetInputBufferTypeToRGB(); //also record the alpha (transparency) channel
+	  //windowToImageFilter->ReadFrontBufferOff(); // read from the back buffer
+	windowToImageFilter->SetInput(this->m_Renderer->GetRenderWindow());
+
+	//writer->SetBitRate(this->m_Renderer->GetRenderWindow()->GetSize()[0]*this->m_Renderer->GetRenderWindow()->GetSize()[1]*this->m_Renderer->GetRenderWindow()->GetSize()[2]);
+	writer->SetRate(15);
+	writer->SetQuality(2);
+
+	//writer->SetCompression(false);
+	writer->SetInputConnection(windowToImageFilter->GetOutputPort());
+	writer->Start();
+
+
+	  for(int t=0;t<m_Project.GetNumberOfFrames();t++){
+
+		  this->DrawFrame(t);
+		  this->m_Renderer->GetRenderWindow()->Render();
+
+		  windowToImageFilter->Update();
+		  writer->Write();
+	  }
+	  writer->End();
+#endif
+#if 1
+
+
 
     for(int t=0;t<m_Project.GetNumberOfFrames();t++){
         this->DrawFrame(t);
@@ -1381,8 +1685,9 @@ void DrosophilaOmmatidiaExplorer::slotDoExportMovie(){
         vtkSmartPointer<vtkWindowToImageFilter> windowToImageFilter =
                 vtkSmartPointer<vtkWindowToImageFilter>::New();
         windowToImageFilter->SetInput(this->m_Renderer->GetRenderWindow());
-        windowToImageFilter->SetMagnification(3); //set the resolution of the output image (3 times the current resolution of vtk render window)
-        windowToImageFilter->SetInputBufferTypeToRGBA(); //also record the alpha (transparency) channel
+
+        //windowToImageFilter->SetMagnification(3); //set the resolution of the output image (3 times the current resolution of vtk render window)
+        windowToImageFilter->SetInputBufferTypeToRGB(); //also record the alpha (transparency) channel
         windowToImageFilter->ReadFrontBufferOff(); // read from the back buffer
         windowToImageFilter->Update();
 
@@ -1393,13 +1698,14 @@ void DrosophilaOmmatidiaExplorer::slotDoExportMovie(){
         writer->SetInputConnection(windowToImageFilter->GetOutputPort());
         writer->Write();
     }
+#endif
     this->DrawFrame(m_CurrentFrame);
 
 }
 void DrosophilaOmmatidiaExplorer::slotPlotSelectedVertexMolecularDistribution(){
 	this->slotPlotVertexMolecularDistribution(m_SelectedVertex);
 }
-void DrosophilaOmmatidiaExplorer::slotPlotVertexMolecularDistribution(const AJGraph<AJVertex,AJEdge>::AJVertexHandler & vertex){
+void DrosophilaOmmatidiaExplorer::slotPlotVertexMolecularDistribution(const OmmatidiaTissue<3>::AJGraphType::AJVertexHandler & vertex){
 
     std::vector<itk::Array<double> > descriptors;
     int T = m_Project.GetNumberOfFrames();
@@ -1409,7 +1715,11 @@ void DrosophilaOmmatidiaExplorer::slotPlotVertexMolecularDistribution(const AJGr
         itk::Array<double> descriptor = graph->GetAJVertex(vertex)->GetDescriptor();
         descriptors.push_back(descriptor);
     }
-    this->PlotDescriptor(descriptors);
+    itk::FixedArray<double,3> color;
+    color.Fill(0);
+    std::string name("vertexDistribution-" + std::to_string(vertex));
+
+    this->PlotDescriptor(descriptors,color,name);
 
 #if 0
     ///////// Eigenvalues ////////////
@@ -1454,3 +1764,15 @@ void DrosophilaOmmatidiaExplorer::slotExit() {
 
 }
 
+void DrosophilaOmmatidiaExplorer::slotCellsShanged(){
+#if 0
+	this->m_Project.SetCellGraph(m_CurrentFrame,this->m_pCellListDockWidget->GetCells());
+	this->m_CellDrawer.SetCells(m_pCellListDockWidget->GetCells());
+	this->m_CellDrawer.SetVisibility(true);
+	this->m_CellDrawer.Draw();
+	this->m_RenderWindow->Render();
+#endif
+}
+void DrosophilaOmmatidiaExplorer::slotSelectedCellChanged(DrosophilaOmmatidiaExplorer::CellGraphType::CellVertexHandler  cell){
+	this->SetSelectedCell(cell);
+}
