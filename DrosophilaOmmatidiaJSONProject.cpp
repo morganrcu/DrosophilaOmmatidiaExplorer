@@ -674,7 +674,7 @@ DrosophilaOmmatidiaJSONProject::TissueType::Pointer DrosophilaOmmatidiaJSONProje
 
 
 
-typename DrosophilaOmmatidiaJSONProject::CorrespondenceSetType DrosophilaOmmatidiaJSONProject::GetCorrespondences(int frame0, int frame1) {
+DrosophilaOmmatidiaJSONProject::CorrespondenceSetType DrosophilaOmmatidiaJSONProject::GetCorrespondences(int frame0, int frame1) {
 	CorrespondenceSetType correspondences;
 
 	Json::Reader reader;
@@ -821,7 +821,7 @@ typename DrosophilaOmmatidiaJSONProject::CorrespondenceSetType DrosophilaOmmatid
 }
 
 void DrosophilaOmmatidiaJSONProject::SetCorrespondences(int frame0, int frame1,
-		const typename DrosophilaOmmatidiaJSONProject::CorrespondenceSetType & correspondences) {
+		const DrosophilaOmmatidiaJSONProject::CorrespondenceSetType & correspondences) {
 
 	Json::Value root;
 	Json::StyledWriter writer;

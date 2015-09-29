@@ -16,15 +16,15 @@ class CellListDockWidget : public QDockWidget
 
     typedef DrosophilaOmmatidiaJSONProject::CellGraphType CellsContainer;
 
-    typename CellsContainer::Pointer m_Cells;
+    CellsContainer::Pointer m_Cells;
 
 public:
     virtual void Draw();
-    inline void SetCells(typename CellsContainer::Pointer & cells){
+    inline void SetCells(CellsContainer::Pointer & cells){
         m_Cells=cells;
     }
 
-    typename CellsContainer::Pointer GetCells(){
+    CellsContainer::Pointer GetCells(){
     	return m_Cells;
     }
 

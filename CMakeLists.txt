@@ -36,7 +36,7 @@ find_package(VTK 6.0 COMPONENTS
   vtkChartsCore
   vtkRenderingContext${VTK_RENDERING_BACKEND}
   vtkViewsContext2D
-  vtkIOFFMPEG
+  #vtkIOFFMPEG
 
 )
 include(${VTK_USE_FILE})
@@ -104,9 +104,10 @@ include(DrosophilaOmmatidiaExplorerCPack.cmake )
 #SET(CPACK_GENERATOR "DEB")
 #SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Rodrigo Cilla")
 enable_testing()
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIR})
-
+IF(WITH_GTEST )
+	find_package(GTest REQUIRED)
+	include_directories(${GTEST_INCLUDE_DIR})
+ENDIF(WITH_GTEST)
 #add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
 
 add_executable(MetaheuristicTissueAssociationCommandTest MetaheuristicTissueAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )

@@ -50,7 +50,7 @@ public slots:
 public:
 	void PopulateTable();
 private:
-	typename DrosophilaOmmatidiaJSONProject::CorrespondenceSetType m_Correspondences;
+	DrosophilaOmmatidiaJSONProject::CorrespondenceSetType m_Correspondences;
 
 
     Ui::AJTrackingFrame *m_pUI;
@@ -96,7 +96,7 @@ private:
 	vtkSmartPointer<vtkPointWidget> m_PointWidget;
 	vtkSmartPointer<vtkEventQtSlotConnect> m_QtToVTKConnections;
 
-	typedef typename AJGraphType::AJVertexHandler VertexType;
+	typedef AJGraphType::AJVertexHandler VertexType;
 
 	VertexType m_VertexSelectedBefore;
 	bool m_IsVertexSelectedBefore;
@@ -104,7 +104,7 @@ private:
 	VertexType m_VertexSelectedAfter;
 	bool m_IsVertexSelectedAfter;
 
-	typedef typename AJGraphType::AJEdgeHandler EdgeType;
+	typedef AJGraphType::AJEdgeHandler EdgeType;
 
 	EdgeType m_EdgeSelectedBefore;
 	bool m_IsEdgeSelectedBefore;
@@ -112,7 +112,7 @@ private:
 	EdgeType m_EdgeSelectedAfter;
 	bool m_IsEdgeSelectedAfter;
 
-	typedef typename CellGraphType::CellVertexHandler CellType;
+	typedef CellGraphType::CellVertexHandler CellType;
 
 	CellType m_CellSelectedBefore;
 	bool m_IsCellSelectedBefore;
@@ -120,11 +120,11 @@ private:
 	CellType m_CellSelectedAfter;
 	bool m_IsCellSelectedAfter;
 
-	typedef typename DrosophilaOmmatidiaJSONProject::CorrespondenceSetType CorrespondenceSetType;
-	typedef typename CorrespondenceSetType::AJCorrespondenceType AJCorrespondenceType;
+	typedef DrosophilaOmmatidiaJSONProject::CorrespondenceSetType CorrespondenceSetType;
+	typedef CorrespondenceSetType::AJCorrespondenceType AJCorrespondenceType;
 
 
-	typedef typename AJCorrespondenceType::AJSubgraphType AJSubgraphType;
+	typedef AJCorrespondenceType::AJSubgraphType AJSubgraphType;
 	AJSubgraphType m_BeforeSelection;
 	AJSubgraphType m_AfterSelection;
 

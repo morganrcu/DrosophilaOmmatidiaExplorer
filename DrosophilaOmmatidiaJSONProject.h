@@ -14,7 +14,7 @@
 #include <Cell.h>
 #include <itkArray.h>
 #include <FeatureContainer.h>
-#include <CellCorrespondence.h>
+//#include <CellCorrespondence.h>
 #include <OmmatidiaTissue.h>
 /**
  * @brief The DrosophilaOmmatidiaJSONProject class encapsulates the IO operations with the filesystem
@@ -65,12 +65,12 @@ public:
 
 
     typedef OmmatidiaTissue<3> TissueType;
-    typedef typename OmmatidiaTissue<3>::AJGraphType AdherensJunctionGraphType;
-    typedef typename OmmatidiaTissue<3>::CellGraphType CellGraphType;
+    typedef OmmatidiaTissue<3>::AJGraphType AdherensJunctionGraphType;
+    typedef OmmatidiaTissue<3>::CellGraphType CellGraphType;
 
 
     typedef AJCorrespondenceSet<TissueType> CorrespondenceSetType;
-    typedef typename CorrespondenceSetType::AJCorrespondenceType AJCorrespondenceType;
+    typedef CorrespondenceSetType::AJCorrespondenceType AJCorrespondenceType;
     //typedef CellCorrespondences<typename CellGraphType::CellVertexHandler> CellCorrespondenceType;
 
     typedef OriginalImageType::SpacingType SpacingType;
