@@ -100,7 +100,7 @@ void CellListDockWidget::slotCellModified(const QString & position){
 
 	QComboBox * changed = static_cast<QComboBox*>(this->m_pUI->cellTableWidget->cellWidget(row,0));
 
-	this->m_Cells->GetCell(col)->SetCellType(changed->currentIndex());
+	this->m_Cells->GetCell(col)->SetCellType(static_cast<CellsContainer::CellType::CellType>(changed->currentIndex()));
 	std::cout << "Setting type to " <<this->m_Cells->GetCell(col)->GetCellType() << std::endl;
 	emit ModifiedCells();
 }

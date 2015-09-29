@@ -651,7 +651,7 @@ DrosophilaOmmatidiaJSONProject::TissueType::Pointer DrosophilaOmmatidiaJSONProje
 			newCell->AddAJEdgeToPerimeter(tissue->GetAJGraph()->GetAJEdgeHandler(root["Cells"][i]["PerimeterEdges"][k][0].asUInt64(),root["Cells"][i]["PerimeterEdges"][k][1].asUInt64()));
 		}
 		if (root["Cells"][i].isMember("type")) {
-			newCell->SetCellType(root["Cells"][i]["type"].asInt());
+			newCell->SetCellType(static_cast<typename CellGraphType::CellType::CellType>(root["Cells"][i]["type"].asInt()));
 		}
 		cellGraph->AddCell(newCell);
 	}
@@ -692,7 +692,7 @@ DrosophilaOmmatidiaJSONProject::CorrespondenceSetType DrosophilaOmmatidiaJSONPro
 	reader.parse(jsonCorrespondenceFile, root);
 
 	{
-		int numCorrespondences = root["Correspondences"].size();
+		int numCorrespondences = root["Correspondence"].size();
 		for (int i = 0; i < numCorrespondences; i++) {
 			CorrespondenceSetType::AJSubgraphType antecessor;
 			CorrespondenceSetType::AJSubgraphType successor;

@@ -654,7 +654,7 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexLocation(){
 
 void DrosophilaOmmatidiaExplorer::slotDoValidateTracking(){
 
-	AJTrackingFrame frame(this,&m_Project);
+	AJTrackingFrame frame(this,m_Project);
 
 	frame.exec();
 }

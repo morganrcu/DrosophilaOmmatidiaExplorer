@@ -391,14 +391,14 @@ public:
 		m_Cost=std::numeric_limits<double>::max();
 	}
 
-	AJSubgraphType GetAntecessor(){
+	AJSubgraphType GetAntecessor() const{
 		return m_Antecessor;
 	}
 
 	void SetAntecessor(const AJSubgraphType & antecessor){
 		m_Antecessor=antecessor;
 	}
-	AJSubgraphType GetSuccessor(){
+	AJSubgraphType GetSuccessor() const{
 			return m_Successor;
 	}
 	void SetSuccessor(const AJSubgraphType & successor){
@@ -407,7 +407,7 @@ public:
 	void SetCost(double cost){
 		m_Cost=cost;
 	}
-	double GetCost(){
+	double GetCost() const{
 		return m_Cost;
 	}
 	bool operator<(const AJCorrespondence & other) const{
@@ -473,7 +473,7 @@ public:
 
 	CorrespondenceIterator GetCorrespondence(const AJSubgraphType & antecessor, const AJSubgraphType & successor){
 
-		return m_Correspondences.get<correspondence>().find(boost::make_tuple(antecessor,successor));
+		return m_Correspondences.template get<correspondence>().find(boost::make_tuple(antecessor,successor));
 
 	}
 	bool RemoveCorrespondence(const AJSubgraphType & antecessor, const AJSubgraphType & succesor){
@@ -493,18 +493,18 @@ public:
 	unsigned int GetNumberOfCorrespondences(){
 		return m_Correspondences.size();
 	}
-	AntecessorResultSet FindByAntecessor(const  AJSubgraphType & ante){
-		return m_Correspondences.get<antecessor>().equal_range(ante);
+	AntecessorResultSet FindByAntecessor(const  AJSubgraphType & ante) const{
+		return m_Correspondences.template get<antecessor>().equal_range(ante);
 	}
 
-	SuccessorResultSet FindBySuccessor(const AJSubgraphType & succe){
+	SuccessorResultSet FindBySuccessor(const AJSubgraphType & succe) const{
 
-		return m_Correspondences.get<successor>().equal_range(succe);
+		return m_Correspondences.template get<successor>().equal_range(succe);
 	}
-	CorrespondenceIterator BeginCorrespondences(){
+	CorrespondenceIterator BeginCorrespondences() const{
 		return m_Correspondences.begin();
 	}
-	CorrespondenceIterator EndCorrespondences(){
+	CorrespondenceIterator EndCorrespondences() const{
 		return m_Correspondences.end();
 	}
 

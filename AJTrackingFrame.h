@@ -21,7 +21,7 @@ class AJTrackingFrame : public QDialog
     Q_OBJECT
 
 public:
-    explicit AJTrackingFrame(QWidget *parent = 0, DrosophilaOmmatidiaJSONProject * pProject=0);
+    explicit AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject & project);
     ~AJTrackingFrame();
 
 public:
@@ -55,7 +55,7 @@ private:
 
     Ui::AJTrackingFrame *m_pUI;
 
-    DrosophilaOmmatidiaJSONProject * m_pProject;
+    DrosophilaOmmatidiaJSONProject & m_Project;
 
     vtkSmartPointer<vtkRenderer> m_BeforeRenderer;
     vtkSmartPointer<vtkRenderer> m_AfterRenderer;

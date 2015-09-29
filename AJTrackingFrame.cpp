@@ -3,16 +3,16 @@
 #include <vtkPropPicker.h>
 //#include "MinCostMaxFlowAJAssociationCommand.h"
 
-AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject * pProject) :
+AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject & project) :
     QDialog(parent),
 	m_pUI(new Ui::AJTrackingFrame),
-	m_pProject(pProject)
+	m_Project(project)
 {
 	m_pUI->setupUi(this);
 
 
 	this->m_pUI->frameSlider->setMinimum(0);
-	this->m_pUI->frameSlider->setMaximum(pProject->GetNumberOfFrames()-2);
+	this->m_pUI->frameSlider->setMaximum(m_Project.GetNumberOfFrames()-2);
 
 
 	this->m_BeforeRenderer = vtkSmartPointer<vtkRenderer>::New();
@@ -41,7 +41,7 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 	this->m_BeforeRenderer->SetActiveCamera(this->m_Camera);
 	this->m_AfterRenderer->SetActiveCamera(this->m_Camera);
 
-	this->m_pUI->frameSlider->setMaximum(m_pProject->GetNumberOfFrames());
+	this->m_pUI->frameSlider->setMaximum(m_Project.GetNumberOfFrames());
 	connect(this->m_pUI->frameSlider,SIGNAL(valueChanged(int)),SLOT(slotFrameChanged(int)));
 
 	connect(this->m_pUI->actionSelectVertexBefore,SIGNAL(triggered()),SLOT(slotSelectVertexBefore()));
@@ -80,6 +80,7 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 
 	m_PointWidget=vtkSmartPointer<vtkPointWidget>::New();
 	m_QtToVTKConnections=vtkSmartPointer<vtkEventQtSlotConnect>::New();
+
 
 }
 
@@ -142,7 +143,7 @@ void AJTrackingFrame::slotDeleteSelectedCorrespondences(){
 		}
 	}
 	this->PopulateTable();
-	this->m_pProject->SetCorrespondences(this->m_CurrentFrame,this->m_CurrentFrame+1,this->m_Correspondences);
+	this->m_Project.SetCorrespondences(this->m_CurrentFrame,this->m_CurrentFrame+1,this->m_Correspondences);
 //	m_Correspondences.DeleteCorrespondence();
 }
 void AJTrackingFrame::PopulateTable(){
@@ -164,6 +165,7 @@ void AJTrackingFrame::PopulateTable(){
 }
 void AJTrackingFrame::slotAddCorrespondence(){
 	this->m_Correspondences.AddCorrespondence(this->m_BeforeSelection,this->m_AfterSelection,0);
+	this->m_Project.SetCorrespondences(this->m_CurrentFrame,this->m_CurrentFrame+1,this->m_Correspondences);
 	this->PopulateTable();
 }
 void AJTrackingFrame::slotLeftClickBeforeVertexSelection(vtkObject*,unsigned long, void*,void*,vtkCommand*){
@@ -390,9 +392,9 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 
 
 	this->m_CurrentFrame=frame;
-	m_Correspondences = m_pProject->GetCorrespondences(m_CurrentFrame,m_CurrentFrame+1);
-	this->m_BeforeTissue=this->m_pProject->GetTissueDescriptor(frame);
-	this->m_AfterTissue=this->m_pProject->GetTissueDescriptor(frame+1);
+	m_Correspondences = m_Project.GetCorrespondences(m_CurrentFrame,m_CurrentFrame+1);
+	this->m_BeforeTissue=this->m_Project.GetTissueDescriptor(frame);
+	this->m_AfterTissue=this->m_Project.GetTissueDescriptor(frame+1);
 
 	this->m_BeforeEdgesDrawer.SetEdgesContainer(this->m_BeforeTissue->GetAJGraph());
 	this->m_BeforeEdgesDrawer.Draw();

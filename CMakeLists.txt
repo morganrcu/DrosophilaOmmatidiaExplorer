@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(DrosophilaOmmatidiaExplorer)
 
 
-add_definitions("-std=c++11 -fpermissive -g ")
+add_definitions("-std=c++11 -fpermissive -Wno-static-float-init ")
 #add_definitions("-std=c++11 -fpermissive -O3")
 set(CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
@@ -110,8 +110,8 @@ IF(WITH_GTEST )
 ENDIF(WITH_GTEST)
 #add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
 
-add_executable(MetaheuristicTissueAssociationCommandTest MetaheuristicTissueAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
-target_link_libraries(MetaheuristicTissueAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES})
+#add_executable(MetaheuristicTissueAssociationCommandTest MetaheuristicTissueAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
+#target_link_libraries(MetaheuristicTissueAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES})
 
 #add_executable(S2EmbeddingTest S2EmbeddingTest.cpp)
 #target_link_libraries(S2EmbeddingTest ${ITK_LIBRARIES})
