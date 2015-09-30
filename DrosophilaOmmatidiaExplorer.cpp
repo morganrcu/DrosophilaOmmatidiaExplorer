@@ -50,9 +50,9 @@
 #include <vtkWindowToImageFilter.h>
 #include <vtkPNGWriter.h>
 #include <string>
-
+#ifdef USE_FFMPEG
 #include <vtkFFMPEGWriter.h>
-
+#endif
 
 #include <AJTrackingFrame.h>
 // Constructor

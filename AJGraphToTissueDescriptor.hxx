@@ -20,7 +20,7 @@
 #include <vnl/vnl_sparse_matrix.h>
 #include <itkPoint.h>
 #include <algorithm>
-#include "S2Embedding.h"
+//#include "S2Embedding.h"
 #include "itkAzimuthElevationToCartesianTransform.h"
 /**
  * \class CentroidGraphCalculator
@@ -197,7 +197,7 @@ void create_dual_graph(typename InputGraph::Pointer & g, typename OutputGraph::P
 }
 
 template<class TAJGraph, class TTissueDescriptor> void AJGraphToTissueDescriptor<TAJGraph, TTissueDescriptor>::Compute() {
-
+#if 0
 	//1. Compute embedding of the AJGraph from R3 to S2
 
 	{
@@ -825,6 +825,7 @@ template<class TAJGraph, class TTissueDescriptor> void AJGraphToTissueDescriptor
 			cell->SetPosition(centroid3D);
 		}
 	}
+#endif
 }
 
 #endif /* AJGRAPHTOTISSUEDESCRIPTOR_HXX_ */

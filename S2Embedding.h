@@ -8,7 +8,8 @@
 #ifndef S2EMBEDDING_H_
 #define S2EMBEDDING_H_
 
-
+#define _USE_MATH_DEFINES
+#include <math.h>
 double distAng(double lat0,double lon0, double lat1, double lon1){
 	double a = pow(std::sin((lat1-lat0)/2),2)+std::cos(lat1)*std::cos(lat0)*std::pow(std::sin((lon1-lon0)/2),2);
 	return 2*atan2(std::sqrt(a),std::sqrt(1-a));

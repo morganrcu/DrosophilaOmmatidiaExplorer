@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(DrosophilaOmmatidiaExplorer)
 
 
-add_definitions("-std=c++11 -fpermissive -Wno-static-float-init ")
+add_definitions("-std=c++11 -fpermissive ")
 #add_definitions("-std=c++11 -fpermissive -O3")
 set(CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
@@ -19,17 +19,19 @@ find_package(ITK REQUIRED)
 INCLUDE(${ITK_USE_FILE})
 
 
-include_directories (/usr/include/eigen3)
+#include_directories (/usr/include/eigen3)
 
 
-find_package(VTK 6.0 COMPONENTS
+find_package(VTK 6.3 COMPONENTS
   vtkCommonCore
   vtkFiltersCore
   vtkInfovisCore
   vtkInteractionStyle
 
   #vtkRenderingFreeType${VTK_RENDERING_BACKEND}
-  vtkRenderingVolume${VTK_RENDERING_BACKEND}
+  #vtkRenderingVolume${VTK_RENDERING_BACKEND}
+  vtkRenderingVolume
+  vtkRenderingVolumeOpenGL
   vtkViewsQt
   
   vtkjsoncpp
@@ -94,7 +96,8 @@ set(CMAKE_AUTOMOC ON)
 add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
 
 qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
-target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES} Cbc OsiClp Osi CoinUtils)
+#target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES} Cbc OsiClp Osi CoinUtils)
+target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 
 #install(TARGETS DrosophilaOmmatidiaExplorer DESTINATION bin  COMPONENT Runtime)
