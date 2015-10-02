@@ -20,6 +20,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkSphereSource.h>
 #include <vtkLineSource.h>
+#include <vtkTubeFilter.h>
 
 #include <vtkActor.h>
 #include <vtkProperty.h>
@@ -128,11 +129,20 @@ public:
 
         lineSource->SetPoint1(sourceVertex->GetPosition()[0],sourceVertex->GetPosition()[1],sourceVertex->GetPosition()[2]);
         lineSource->SetPoint2(targetVertex->GetPosition()[0],targetVertex->GetPosition()[1],targetVertex->GetPosition()[2]);
-        lineSource->Update();
+
+        // Create a tube (cylinder) around the line
+         vtkSmartPointer<vtkTubeFilter> tubeFilter =
+           vtkSmartPointer<vtkTubeFilter>::New();
+         tubeFilter->SetInputConnection(lineSource->GetOutputPort());
+         tubeFilter->SetRadius(0.00025); //default is .5
+         tubeFilter->SetNumberOfSides(50);
+         tubeFilter->Update();
+
+
 
         vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 
-        mapper->SetInputData(lineSource->GetOutput());
+        mapper->SetInputData(tubeFilter->GetOutput());
 
 
         vtkSmartPointer<vtkActor> lineActor = vtkSmartPointer<vtkActor>::New();

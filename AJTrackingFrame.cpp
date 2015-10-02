@@ -3,6 +3,19 @@
 #include <vtkPropPicker.h>
 //#include "MinCostMaxFlowAJAssociationCommand.h"
 
+class RenderSyncCommand : public vtkCommand{
+public:
+	std::list<vtkSmartPointer<vtkRenderWindow> > m_Renderers;
+
+	static RenderSyncCommand * New(){
+		return new RenderSyncCommand;
+	}
+	virtual void Execute (vtkObject *caller, unsigned long eventId, void *callData){
+		for(vtkSmartPointer<vtkRenderWindow> render : m_Renderers){
+			render->Render();
+		}
+	}
+};
 AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject & project) :
     QDialog(parent),
 	m_pUI(new Ui::AJTrackingFrame),
@@ -41,6 +54,11 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 	this->m_BeforeRenderer->SetActiveCamera(this->m_Camera);
 	this->m_AfterRenderer->SetActiveCamera(this->m_Camera);
 
+	vtkSmartPointer<RenderSyncCommand> renderSyncCommand = vtkSmartPointer<RenderSyncCommand>::New();
+	renderSyncCommand->m_Renderers.push_back(m_BeforeRenderWindow);
+	renderSyncCommand->m_Renderers.push_back(m_AfterRenderWindow);
+	this->m_Camera->AddObserver(vtkCommand::ModifiedEvent,renderSyncCommand);
+
 	this->m_pUI->frameSlider->setMaximum(m_Project.GetNumberOfFrames());
 	connect(this->m_pUI->frameSlider,SIGNAL(valueChanged(int)),SLOT(slotFrameChanged(int)));
 
@@ -55,38 +73,126 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 
 	connect(this->m_pUI->actionAddCorrespondence,SIGNAL(triggered()),SLOT(slotAddCorrespondence()));
 
-	connect(this->m_pUI->actionDeleteCorrespondence,SIGNAL(triggered()),SLOT(slotDeleteSelectedCorrespondence()));
-#if 0
+	connect(this->m_pUI->actionDeleteCorrespondence,SIGNAL(triggered()),SLOT(slotDeleteSelectedCorrespondences()));
 
-	connect(this->m_pUI->actionAddSuccesor,SIGNAL(triggered()),SLOT(slotAddSuccesor()));
-	connect(this->m_pUI->actionAddLeaving,SIGNAL(triggered()),SLOT(slotAddLeaving()));
-	connect(this->m_pUI->actionAddMerge,SIGNAL(triggered()),SLOT(slotAddMerge()));
-	connect(this->m_pUI->actionAddSplit,SIGNAL(triggered()),SLOT(slotAddSplit()));
-	connect(this->m_pUI->actionAddT1,SIGNAL(triggered()),SLOT(slotAddT1()));
-	connect(this->m_pUI->actionAddT2,SIGNAL(triggered()),SLOT(slotAddT2()));
-
-	connect(this->m_pUI->actionDeleteEntering,SIGNAL(triggered()),SLOT(slotDeleteEntering()));
-	connect(this->m_pUI->actionDeleteSuccesor,SIGNAL(triggered()),SLOT(slotDeleteSuccesor()));
-	connect(this->m_pUI->actionDeleteLeaving,SIGNAL(triggered()),SLOT(slotDeleteLeaving()));
-	connect(this->m_pUI->actionDeleteMerge,SIGNAL(triggered()),SLOT(slotDeleteMerge()));
-	connect(this->m_pUI->actionDeleteSplit,SIGNAL(triggered()),SLOT(slotDeleteSplit()));
-	connect(this->m_pUI->actionDeleteT1,SIGNAL(triggered()),SLOT(slotDeleteT1()));
-	connect(this->m_pUI->actionDeleteT2,SIGNAL(triggered()),SLOT(slotDeleteT2()));
-
-	connect(this->m_pUI->actionComputeCorrespondence,SIGNAL(triggered()),SLOT(slotComputeCorrespondences()));
-#endif
+	connect(this->m_pUI->correspondencesTableWidget,SIGNAL(itemSelectionChanged()),SLOT(slotCorrespondenceSelectionChanged()));
 	this->slotFrameChanged(0);
 
 
 	m_PointWidget=vtkSmartPointer<vtkPointWidget>::New();
 	m_QtToVTKConnections=vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
+	this->m_IsVertexSelectedBefore=false;
+	this->m_IsVertexSelectedAfter=false;
+	this->m_IsEdgeSelectedBefore=false;
+	this->m_IsEdgeSelectedAfter=false;
+	this->m_IsCellSelectedBefore=false;
+	this->m_IsCellSelectedAfter=false;
 
 }
 
 AJTrackingFrame::~AJTrackingFrame()
 {
     delete m_pUI;
+}
+
+
+template<class TTissueDescriptor,class TAJSubgraph>  typename TTissueDescriptor::CellGraphType::CellVertexHandler vertexSubsetToCellHandler(const typename TTissueDescriptor::Pointer & tissue, const TAJSubgraph & subgraph){
+
+	auto result = std::find_if(tissue->GetCellGraph()->CellsBegin(),tissue->GetCellGraph()->CellsEnd(),
+							  [&tissue,&subgraph](const typename TTissueDescriptor::CellGraphType::CellVertexHandler & cellVertexHandler){
+									auto cell = tissue->GetCellGraph()->GetCell(cellVertexHandler);
+									std::vector<typename TTissueDescriptor::AJGraphType::AJVertexHandler> missing;
+
+									for(auto perimeterVertexIt =cell->BeginPerimeterAJVertices();perimeterVertexIt!=cell->BeginPerimeterAJVertices();++perimeterVertexIt ){
+										if(std::find(subgraph.BeginVertices(),subgraph.EndVertices(),*perimeterVertexIt)==subgraph.EndVertices()){
+											return false;
+										}
+									}
+
+									for(auto perimeterVertexIt =subgraph.BeginVertices();perimeterVertexIt!=subgraph.EndVertices();++perimeterVertexIt ){
+										if(std::find(cell->BeginPerimeterAJVertices(),cell->EndPerimeterAJVertices(),*perimeterVertexIt)==cell->EndPerimeterAJVertices()){
+											return false;
+										}
+									}
+									return true;
+							}
+					);
+	assert(result!=tissue->GetCellGraph()->CellsEnd());
+	return *result;
+}
+void AJTrackingFrame::slotCorrespondenceSelectionChanged(){
+
+	int selectedCorrespondence = this->m_pUI->correspondencesTableWidget->selectedItems()[0]->row();
+
+	auto correspondence = m_PlottedCorrespondences[selectedCorrespondence];
+
+	auto antecessor = correspondence.GetAntecessor();
+	auto successor = correspondence.GetSuccessor();
+
+	this->clearBeforeSelection();
+	switch(antecessor.GetOrder()){
+	case 3: //cell
+	{
+		auto cell =vertexSubsetToCellHandler<OmmatidiaTissue<3>,AJSubgraphType>(m_BeforeTissue,antecessor);
+		this->setSelectedCellBefore(cell);
+		break;
+	}
+	case 2:
+	{
+		auto vertexIt = antecessor.BeginVertices();
+
+		auto source = *vertexIt;
+		++vertexIt;
+
+		auto target = *vertexIt;
+		auto edge=m_BeforeTissue->GetAJGraph()->GetAJEdgeHandler(source,target);
+
+		this->setSelectedEdgeBefore(edge);
+
+		break;
+	}
+
+	case 1:
+		auto vertex = *(antecessor.BeginVertices());
+		this->setSelectedVertexBefore(vertex);
+
+
+
+	}
+	this->clearAfterSelection();
+	switch(successor.GetOrder()){
+		case 3: //cell
+		{
+			auto cell =vertexSubsetToCellHandler<OmmatidiaTissue<3>,AJSubgraphType>(m_AfterTissue,successor);
+
+			this->setSelectedCellAfter(cell);
+
+			break;
+		}
+		case 2:
+		{
+			auto vertexIt = successor.BeginVertices();
+
+			auto source = *vertexIt;
+			++vertexIt;
+
+			auto target = *vertexIt;
+			auto edge=m_AfterTissue->GetAJGraph()->GetAJEdgeHandler(source,target);
+			this->setSelectedEdgeAfter(edge);
+
+			break;
+		}
+
+		case 1:
+		{
+			auto vertex = *(successor.BeginVertices());
+			this->setSelectedVertexAfter(vertex);
+			break;
+		}
+	}
+	this->m_BeforeRenderWindow->Render();
+	this->m_AfterRenderWindow->Render();
 }
 
 template<class AJVertexSubsetType> QString to_qstring(const AJVertexSubsetType & subset){
@@ -96,7 +202,7 @@ template<class AJVertexSubsetType> QString to_qstring(const AJVertexSubsetType &
 		label =QString("%1").arg(*(subset.BeginVertices()));
 
 	}else if(subset.GetOrder()==2){
-		label = label.arg("vertex");
+
 		auto vertexIt =subset.BeginVertices();
 		auto vertexA = *vertexIt;
 		++vertexIt;
@@ -168,6 +274,36 @@ void AJTrackingFrame::slotAddCorrespondence(){
 	this->m_Project.SetCorrespondences(this->m_CurrentFrame,this->m_CurrentFrame+1,this->m_Correspondences);
 	this->PopulateTable();
 }
+void AJTrackingFrame::clearBeforeSelection(){
+	if(this->m_IsVertexSelectedBefore){
+		this->m_BeforeVertexDrawer.DeemphasizeAJVertex(m_VertexSelectedBefore);
+		this->m_IsVertexSelectedBefore=false;
+	}
+	if(this->m_IsEdgeSelectedBefore){
+		this->m_BeforeEdgesDrawer.DeemphasizeAJEdge(m_EdgeSelectedBefore);
+		this->m_IsEdgeSelectedBefore=false;
+	}
+
+	if(this->m_IsCellSelectedBefore){
+		this->m_BeforeCellsDrawer.DeemphasizeCell(m_CellSelectedBefore);
+		this->m_IsCellSelectedBefore=false;
+	}
+}
+void AJTrackingFrame::clearAfterSelection(){
+	if(this->m_IsVertexSelectedAfter){
+		this->m_AfterVertexDrawer.DeemphasizeAJVertex(m_VertexSelectedAfter);
+		this->m_IsVertexSelectedAfter=false;
+	}
+	if(this->m_IsEdgeSelectedAfter){
+		this->m_AfterEdgesDrawer.DeemphasizeAJEdge(m_EdgeSelectedAfter);
+		this->m_IsEdgeSelectedAfter=false;
+	}
+
+	if(this->m_IsCellSelectedAfter){
+		this->m_AfterCellsDrawer.DeemphasizeCell(m_CellSelectedAfter);
+		this->m_IsCellSelectedAfter=false;
+	}
+}
 void AJTrackingFrame::slotLeftClickBeforeVertexSelection(vtkObject*,unsigned long, void*,void*,vtkCommand*){
 
 	int* clickPos = this->m_BeforeRenderWindowInteractor->GetEventPosition();
@@ -178,20 +314,50 @@ void AJTrackingFrame::slotLeftClickBeforeVertexSelection(vtkObject*,unsigned lon
 	vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
 
 	if(pickedActor){
+
 		auto clickedVertex = this->m_BeforeVertexDrawer.GetVertexFromActor(pickedActor);
+
 		std::cout << "Picked " << clickedVertex << std::endl;
+
+		this->clearBeforeSelection();
+
+		this->setSelectedVertexBefore(clickedVertex);
 		m_BeforeVertexDrawer.PickOff();
 		m_QtToVTKConnections->Disconnect();
-
-		AJSubgraphType selection;
-		selection.SetOrder(1);
-		selection.AddVertex(clickedVertex);
-		this->m_BeforeSelection=selection;
-
-		this->m_BeforeVertexDrawer.HighlightAJVertex(clickedVertex);
-
-		this->m_pUI->beforeSelectLabel->setText(QString("Selected vertex %1").arg(to_qstring(selection)));
 	}
+}
+void AJTrackingFrame::setSelectedVertexBefore(const AJTrackingFrame::VertexType & selectedVertex ){
+
+	AJSubgraphType selection;
+	selection.SetOrder(1);
+	selection.AddVertex(selectedVertex);
+	this->clearBeforeSelection();
+
+	this->m_BeforeSelection=selection;
+
+	m_VertexSelectedBefore=selectedVertex;
+	this->m_IsVertexSelectedBefore=true;
+
+	this->m_BeforeVertexDrawer.HighlightAJVertex(selectedVertex);
+
+	this->m_pUI->beforeSelectLabel->setText(QString("Selected vertex %1").arg(selectedVertex));
+}
+
+void AJTrackingFrame::setSelectedVertexAfter(const AJTrackingFrame::VertexType & selectedVertex ){
+
+	AJSubgraphType selection;
+	selection.SetOrder(1);
+	selection.AddVertex(selectedVertex);
+	this->clearAfterSelection();
+
+	this->m_AfterSelection=selection;
+
+	m_VertexSelectedAfter=selectedVertex;
+	this->m_IsVertexSelectedAfter=true;
+
+	this->m_AfterVertexDrawer.HighlightAJVertex(selectedVertex);
+
+	this->m_pUI->afterSelectLabel->setText(QString("Selected vertex %1").arg(selectedVertex));
 }
 void AJTrackingFrame::slotLeftClickAfterVertexSelection(vtkObject*,unsigned long, void*,void*,vtkCommand*){
 	int* clickPos = this->m_AfterRenderWindowInteractor->GetEventPosition();
@@ -202,25 +368,55 @@ void AJTrackingFrame::slotLeftClickAfterVertexSelection(vtkObject*,unsigned long
 	vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
 
 	if(pickedActor){
+
 		auto clickedVertex = this->m_AfterVertexDrawer.GetVertexFromActor(pickedActor);
+
 		std::cout << "Picked " << clickedVertex << std::endl;
+
+		this->clearAfterSelection();
+
+		this->setSelectedVertexAfter(clickedVertex);
 		m_AfterVertexDrawer.PickOff();
-		this->m_AfterVertexDrawer.HighlightAJVertex(clickedVertex);
 		m_QtToVTKConnections->Disconnect();
 
-		AJSubgraphType selection;
-		selection.SetOrder(1);
-		selection.AddVertex(clickedVertex);
-		this->m_AfterSelection=selection;
 
-
-		this->m_pUI->afterSelectLabel->setText(QString("Selected vertex %1").arg(clickedVertex));
 
 	}
+}
+void AJTrackingFrame::setSelectedEdgeBefore(const AJTrackingFrame::EdgeType & selectedEdge ){
+	this->m_BeforeEdgesDrawer.HighlightEdge(selectedEdge);
+
+	AJSubgraphType selection;
+	selection.SetOrder(2);
+	selection.AddVertex(m_BeforeTissue->GetAJGraph()->GetAJEdgeSource(selectedEdge));
+	selection.AddVertex(m_BeforeTissue->GetAJGraph()->GetAJEdgeTarget(selectedEdge));
+	selection.AddEdge(selectedEdge);
+	this->m_BeforeSelection=selection;
+	m_EdgeSelectedBefore=selectedEdge;
+	this->m_IsEdgeSelectedBefore=true;
+	this->m_pUI->beforeSelectLabel->setText(QString("Selected edge %1").arg(to_qstring(selection)));
+
+
+}
+void AJTrackingFrame::setSelectedEdgeAfter(const AJTrackingFrame::EdgeType & selectedEdge ){
+	this->m_AfterEdgesDrawer.HighlightEdge(selectedEdge);
+
+	AJSubgraphType selection;
+	selection.SetOrder(2);
+	selection.AddVertex(m_AfterTissue->GetAJGraph()->GetAJEdgeSource(selectedEdge));
+	selection.AddVertex(m_AfterTissue->GetAJGraph()->GetAJEdgeTarget(selectedEdge));
+	selection.AddEdge(selectedEdge);
+	this->m_AfterSelection=selection;
+	m_EdgeSelectedAfter=selectedEdge;
+	this->m_IsEdgeSelectedAfter=true;
+	this->m_pUI->afterSelectLabel->setText(QString("Selected edge %1").arg(to_qstring(selection)));
+
+
 }
 void AJTrackingFrame::slotLeftClickBeforeEdgeSelection(vtkObject*,unsigned long, void*,void*,vtkCommand*){
 	int* clickPos = this->m_BeforeRenderWindowInteractor->GetEventPosition();
 		    // Pick from this location.
+	std::cout << "Click at " << clickPos[0] << " "<< clickPos[1] << " "<< std::endl;
 	vtkSmartPointer<vtkPropPicker>  picker =  	vtkSmartPointer<vtkPropPicker>::New();
 	picker->Pick(clickPos[0], clickPos[1], 0, m_BeforeRenderer);
 
@@ -229,21 +425,13 @@ void AJTrackingFrame::slotLeftClickBeforeEdgeSelection(vtkObject*,unsigned long,
 	if(pickedActor){
 
 		auto clickedEdge = this->m_BeforeEdgesDrawer.GetEdgeFromActor(pickedActor);
+
 		std::cout << "Picked " << clickedEdge << std::endl;
+
+		this->clearBeforeSelection();
+		this->setSelectedEdgeBefore(clickedEdge);
 		m_BeforeEdgesDrawer.PickOff();
 		m_QtToVTKConnections->Disconnect();
-		this->m_BeforeEdgesDrawer.HighlightEdge(clickedEdge);
-
-
-		AJSubgraphType selection;
-		selection.SetOrder(2);
-		selection.AddVertex(m_BeforeTissue->GetAJGraph()->GetAJEdgeSource(clickedEdge));
-		selection.AddVertex(m_BeforeTissue->GetAJGraph()->GetAJEdgeTarget(clickedEdge));
-		selection.AddEdge(clickedEdge);
-		this->m_BeforeSelection=selection;
-
-		this->m_pUI->beforeSelectLabel->setText(QString("Selected edge %1").arg(to_qstring(selection)));
-
 
 	}
 }
@@ -257,22 +445,69 @@ void AJTrackingFrame::slotLeftClickAfterEdgeSelection(vtkObject*,unsigned long, 
 	vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
 
 	if(pickedActor){
+
 		auto clickedEdge = this->m_AfterEdgesDrawer.GetEdgeFromActor(pickedActor);
+
+		std::cout << "Picked " << clickedEdge << std::endl;
+
+		this->clearAfterSelection();
+		this->setSelectedEdgeAfter(clickedEdge);
 		m_AfterEdgesDrawer.PickOff();
 		m_QtToVTKConnections->Disconnect();
-		this->m_AfterEdgesDrawer.HighlightEdge(clickedEdge);
-
-
-		AJSubgraphType selection;
-		selection.SetOrder(2);
-		selection.AddVertex(m_AfterTissue->GetAJGraph()->GetAJEdgeSource(clickedEdge));
-		selection.AddVertex(m_AfterTissue->GetAJGraph()->GetAJEdgeTarget(clickedEdge));
-		selection.AddEdge(clickedEdge);
-		this->m_AfterSelection=selection;
-
-
-		this->m_pUI->afterSelectLabel->setText(QString("Selected edge %1").arg(to_qstring(selection)));
 	}
+}
+
+
+
+void AJTrackingFrame::setSelectedCellAfter(const AJTrackingFrame::CellType & selectedCell ){
+
+	auto cell = this->m_AfterTissue->GetCellGraph()->GetCell(selectedCell);
+
+	AJSubgraphType selection;
+	selection.SetOrder(3);
+
+	for(auto itVertices = cell->BeginPerimeterAJVertices();itVertices!=cell->EndPerimeterAJVertices();++itVertices){
+		selection.AddVertex(*itVertices);
+	}
+	for(auto itEdges = cell->BeginPerimeterAJEdges();itEdges!=cell->EndPerimeterAJEdges();++itEdges){
+		selection.AddEdge(*itEdges);
+	}
+
+	this->m_AfterSelection=selection;
+	this->m_AfterCellsDrawer.HighlightCell(selectedCell);
+	m_CellSelectedAfter=selectedCell;
+
+	this->m_IsCellSelectedAfter=true;
+
+	QString label=QString("Selected cell %1").arg(to_qstring(selection));
+
+	this->m_pUI->afterSelectLabel->setText(label);
+
+}
+void AJTrackingFrame::setSelectedCellBefore(const AJTrackingFrame::CellType & selectedCell ){
+
+	auto cell = this->m_BeforeTissue->GetCellGraph()->GetCell(selectedCell);
+
+	AJSubgraphType selection;
+	selection.SetOrder(3);
+
+	for(auto itVertices = cell->BeginPerimeterAJVertices();itVertices!=cell->EndPerimeterAJVertices();++itVertices){
+		selection.AddVertex(*itVertices);
+	}
+	for(auto itEdges = cell->BeginPerimeterAJEdges();itEdges!=cell->EndPerimeterAJEdges();++itEdges){
+		selection.AddEdge(*itEdges);
+	}
+
+	this->m_BeforeSelection=selection;
+	this->m_BeforeCellsDrawer.HighlightCell(selectedCell);
+	m_CellSelectedBefore=selectedCell;
+
+	this->m_IsCellSelectedBefore=true;
+
+	QString label=QString("Selected cell %1").arg(to_qstring(selection));
+
+	this->m_pUI->beforeSelectLabel->setText(label);
+
 }
 
 void AJTrackingFrame::slotLeftClickBeforeCellSelection(vtkObject*,unsigned long, void*,void*,vtkCommand*){
@@ -284,32 +519,17 @@ void AJTrackingFrame::slotLeftClickBeforeCellSelection(vtkObject*,unsigned long,
 	vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
 
 	if(pickedActor){
+
+		this->clearBeforeSelection();
+
 		auto clickedCell = this->m_BeforeCellsDrawer.GetCellFromActor(pickedActor);
+
+
+		this->setSelectedCellBefore(clickedCell);
 		m_BeforeCellsDrawer.PickOff();
 		m_QtToVTKConnections->Disconnect();
-		this->m_BeforeCellsDrawer.HighlightCell(clickedCell);
-
-		auto cell = this->m_BeforeTissue->GetCellGraph()->GetCell(clickedCell);
-
-		AJSubgraphType selection;
-		selection.SetOrder(3);
-
-		for(auto itVertices = cell->BeginPerimeterAJVertices();itVertices!=cell->EndPerimeterAJVertices();++itVertices){
-			selection.AddVertex(*itVertices);
-		}
-
-		for(auto itEdges = cell->BeginPerimeterAJEdges();itEdges!=cell->EndPerimeterAJEdges();++itEdges){
-			selection.AddEdge(*itEdges);
-		}
-
-		this->m_BeforeSelection=selection;
-
-		QString label=QString("Selected cell %1").arg(to_qstring(selection));
-
-		this->m_pUI->beforeSelectLabel->setText(label);
 	}
 }
-
 void AJTrackingFrame::slotLeftClickAfterCellSelection(vtkObject*,unsigned long, void*,void*,vtkCommand*){
 	int* clickPos = this->m_AfterRenderWindowInteractor->GetEventPosition();
 		    // Pick from this location.
@@ -319,29 +539,15 @@ void AJTrackingFrame::slotLeftClickAfterCellSelection(vtkObject*,unsigned long, 
 	vtkSmartPointer<vtkActor> pickedActor = picker->GetActor();
 
 	if(pickedActor){
+
+
+		this->clearAfterSelection();
+
 		auto clickedCell = this->m_AfterCellsDrawer.GetCellFromActor(pickedActor);
-		this->m_AfterCellsDrawer.HighlightCell(clickedCell);
-		m_QtToVTKConnections->Disconnect();
+
+		this->setSelectedCellAfter(clickedCell);
 		m_AfterCellsDrawer.PickOff();
-
-		auto cell = this->m_BeforeTissue->GetCellGraph()->GetCell(clickedCell);
-
-		AJSubgraphType selection;
-		selection.SetOrder(3);
-
-		for(auto itVertices = cell->BeginPerimeterAJVertices();itVertices!=cell->EndPerimeterAJVertices();++itVertices){
-			selection.AddVertex(*itVertices);
-		}
-
-		for(auto itEdges = cell->BeginPerimeterAJEdges();itEdges!=cell->EndPerimeterAJEdges();++itEdges){
-			selection.AddEdge(*itEdges);
-		}
-
-		this->m_AfterSelection=selection;
-		QString label=QString("Selected cell %1").arg(to_qstring(selection));
-
-		this->m_pUI->afterSelectLabel->setText(label);
-
+		m_QtToVTKConnections->Disconnect();
 	}
 }
 
@@ -392,6 +598,11 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 
 
 	this->m_CurrentFrame=frame;
+
+	QString beforeLabel = QString("t=%1").arg(m_CurrentFrame);
+	this->m_pUI->beforeGroupBox->setTitle(beforeLabel);
+	QString afterLabel = QString("t=%1").arg(m_CurrentFrame+1);
+	this->m_pUI->afterGroupBox->setTitle(afterLabel);
 	m_Correspondences = m_Project.GetCorrespondences(m_CurrentFrame,m_CurrentFrame+1);
 	this->m_BeforeTissue=this->m_Project.GetTissueDescriptor(frame);
 	this->m_AfterTissue=this->m_Project.GetTissueDescriptor(frame+1);
@@ -421,6 +632,46 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 	this->m_AfterCellsDrawer.SetCells(this->m_AfterTissue->GetCellGraph());
 	this->m_AfterCellsDrawer.Draw();
 	this->m_AfterCellsDrawer.SetVisibility(true);
+
+
+	if(frame>0){
+		auto previousCorrespondences = m_Project.GetCorrespondences(m_CurrentFrame-1,m_CurrentFrame);
+
+		for(auto correspondence = previousCorrespondences.BeginCorrespondences();correspondence!=previousCorrespondences.EndCorrespondences();++correspondence){
+
+			auto successor = correspondence->GetSuccessor();
+			switch(successor.GetOrder()){
+				case 3: //cell
+				{
+					auto cell =vertexSubsetToCellHandler<OmmatidiaTissue<3>,AJSubgraphType>(m_BeforeTissue,successor);
+					this->m_BeforeCellsDrawer.HighlightCell(cell);
+
+					break;
+				}
+				case 2:
+				{
+					auto vertexIt = successor.BeginVertices();
+
+					auto source = *vertexIt;
+					++vertexIt;
+
+					auto target = *vertexIt;
+					auto edge=m_BeforeTissue->GetAJGraph()->GetAJEdgeHandler(source,target);
+					this->m_BeforeEdgesDrawer.HighlightEdge(edge);
+
+
+					break;
+				}
+
+				case 1:
+				{
+					auto vertex = *(successor.BeginVertices());
+					this->m_BeforeVertexDrawer.HighlightAJVertex(vertex);
+					break;
+				}
+			}
+		}
+	}
 	this->PopulateTable();
 #if 0
 #if 0
@@ -472,130 +723,6 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 
 
 
-
-void AJTrackingFrame::PopulateTables(){
-#if 0
-	this->m_pUI->succesorsTableWidget->clear();
-
-	this->m_pUI->succesorsTableWidget->setColumnCount(2);
-	this->m_pUI->succesorsTableWidget->setRowCount(m_Correspondences->GetNumberOfSuccesors());
-
-	int k=0;
-	for( auto succesorsIt = this->m_Correspondences->BeginSuccesors();succesorsIt!=this->m_Correspondences->EndSuccesors();++succesorsIt){
-		{
-		 QTableWidgetItem * v0Widget =new QTableWidgetItem;
-		 v0Widget->setData(0,(unsigned long long) succesorsIt->GetV0());
-		 this->m_pUI->succesorsTableWidget->setItem(k,0,v0Widget);
-		}
-		{
-		 QTableWidgetItem * v1Widget =new QTableWidgetItem;
-		 v1Widget->setData(0,(unsigned long long) succesorsIt->GetV1());
-		 this->m_pUI->succesorsTableWidget->setItem(k,1,v1Widget);
-		}
-		k++;
-	}
-	k=0;
-
-	this->m_pUI->mergesTableWidget->setRowCount(m_Correspondences->GetNumberOfMerges());
-	this->m_pUI->mergesTableWidget->setColumnCount(3);
-	for( auto mergesIt = this->m_Correspondences->BeginMerges();mergesIt!=this->m_Correspondences->EndMerges();mergesIt++){
-		{
-		QTableWidgetItem * v0aWidget =new QTableWidgetItem;
-		v0aWidget->setData(0,(unsigned long long) mergesIt->GetV0A());
-		this->m_pUI->mergesTableWidget->setItem(k,0,v0aWidget);
-		}
-		{
-
-		QTableWidgetItem * v0bWidget =new QTableWidgetItem;
-		v0bWidget->setData(0,(unsigned long long) mergesIt->GetV0B());
-		this->m_pUI->mergesTableWidget->setItem(k,1,v0bWidget);
-		}
-		{
-		QTableWidgetItem * v1Widget =new QTableWidgetItem;
-		v1Widget->setData(0,(unsigned long long) mergesIt->GetV1());
-		this->m_pUI->mergesTableWidget->setItem(k,2,v1Widget);
-		}
-		k++;
-
-	}
-
-	k=0;
-	this->m_pUI->splitTableWidget->setRowCount(m_Correspondences->GetNumberOfSplits());
-	this->m_pUI->splitTableWidget->setColumnCount(3);
-	for( auto splitsIt = this->m_Correspondences->BeginSplits();splitsIt!=this->m_Correspondences->EndSplits();splitsIt++){
-
-		{
-			QTableWidgetItem * v0Widget =new QTableWidgetItem;
-			v0Widget->setData(0,(unsigned long long) splitsIt->GetV0());
-			this->m_pUI->splitTableWidget->setItem(k,0,v0Widget);
-		}
-		{
-
-			QTableWidgetItem * v1aWidget =new QTableWidgetItem;
-			v1aWidget->setData(0,(unsigned long long) splitsIt->GetV1A());
-			this->m_pUI->splitTableWidget->setItem(k,1,v1aWidget);
-		}
-		{
-			QTableWidgetItem * v1bWidget =new QTableWidgetItem;
-			v1bWidget->setData(0,(unsigned long long) splitsIt->GetV1B());
-			this->m_pUI->splitTableWidget->setItem(k,2,v1bWidget);
-		}
-
-
-		k++;
-	}
-
-	k=0;
-	this->m_pUI->t1TableWidget->setColumnCount(4);
-	this->m_pUI->t1TableWidget->setRowCount(m_Correspondences->GetNumberOfT1s());
-	for( auto t1It = this->m_Correspondences->BeginT1s();t1It!=this->m_Correspondences->EndT1s();t1It++){
-
-		{
-			QTableWidgetItem * v0aWidget =new QTableWidgetItem;
-			v0aWidget->setData(0,(unsigned long long) t1It->GetV0A());
-			this->m_pUI->t1TableWidget->setItem(k,0,v0aWidget);
-		}
-		{
-			QTableWidgetItem * v0bWidget =new QTableWidgetItem;
-			v0bWidget->setData(0,(unsigned long long) t1It->GetV0B());
-			this->m_pUI->t1TableWidget->setItem(k,1,v0bWidget);
-		}
-		{
-
-			QTableWidgetItem * v1aWidget =new QTableWidgetItem;
-			v1aWidget->setData(0,(unsigned long long) t1It->GetV1A());
-			this->m_pUI->t1TableWidget->setItem(k,2,v1aWidget);
-		}
-		{
-			QTableWidgetItem * v1bWidget =new QTableWidgetItem;
-			v1bWidget->setData(0,(unsigned long long) t1It->GetV1B());
-			this->m_pUI->t1TableWidget->setItem(k,3,v1bWidget);
-		}
-
-
-		k++;
-	}
-
-	k=0;
-	this->m_pUI->t2TableWidget->setRowCount(m_Correspondences->GetNumberOfT2s());
-	this->m_pUI->t2TableWidget->setColumnCount(4);
-
-
-	for( auto t2It = this->m_Correspondences->BeginT2s();t2It!=this->m_Correspondences->EndT2s();t2It++){
-
-#if 0
-		this->m_pUI->t1TableWidget->item(k,0)->setText(QString("%1").arg((unsigned long)t2I->GetV0A()));
-		this->m_pUI->t1TableWidget->item(k,1)->setText(QString("%1").arg((unsigned long)t1It->GetV0B()));
-		this->m_pUI->t1TableWidget->item(k,2)->setText(QString("%1").arg((unsigned long)t1It->GetV1A()));
-		this->m_pUI->t1TableWidget->item(k,3)->setText(QString("%1").arg((unsigned long)t1It->GetV1B()));
-		k++;
-#endif
-	}
-
-	this->m_pUI->enteringTableWidget->setRowCount(0);
-	this->m_pUI->leavingTableWidget->setRowCount(0);
-#endif
-}
 
 void AJTrackingFrame::slotComputeCorrespondences(){
 #if 0

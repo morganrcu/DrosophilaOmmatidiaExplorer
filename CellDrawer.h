@@ -53,20 +53,15 @@ public:
 		m_AJVertices=vertices;
 	}
 	virtual void Reset() {
-		for (auto it = m_CellToActor.begin(); it != m_CellToActor.end(); it++) {
-			m_Renderer->RemoveActor(it->right);
-		}
+		std::for_each(m_CellToActor.begin(),m_CellToActor.end(),[&](CellActor & cellActor){m_Renderer->RemoveActor(cellActor.right);});
 		m_CellToActor.clear();
 	}
 	virtual void PickOn(){
-		for (auto it = m_CellToActor.begin(); it != m_CellToActor.end(); it++) {
-				it->right->PickableOn();
-		}
+		std::for_each(m_CellToActor.begin(),m_CellToActor.end(),[&](CellActor & cellActor){cellActor.right->PickableOn();});
+
 	}
 	virtual void PickOff(){
-		for (auto it = m_CellToActor.begin(); it != m_CellToActor.end(); it++) {
-			it->right->PickableOff();
-		}
+		std::for_each(m_CellToActor.begin(),m_CellToActor.end(),[&](CellActor & cellActor){cellActor.right->PickableOff();});
 	}
 
 	virtual CellVertexHandler GetCellFromActor(const vtkSmartPointer<vtkActor> & actor){
@@ -162,7 +157,9 @@ public:
 	virtual void Draw() {
 		this->Reset();
 		for (auto it = m_Cells->CellsBegin(); it!=m_Cells->CellsEnd(); ++it) {
-			this->DrawCell(*it);
+			if(*it!=m_Cells->GetUnboundedFace()){
+				this->DrawCell(*it);
+			}
 
 		}
 	}

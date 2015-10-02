@@ -25,7 +25,23 @@ public:
     ~AJTrackingFrame();
 
 public:
-    void PopulateTables();
+
+    typedef OmmatidiaTissue<3>::AJGraphType AJGraphType;
+    typedef DrosophilaOmmatidiaJSONProject::CellGraphType CellGraphType;
+
+	typedef CellGraphType::CellVertexHandler CellType;
+
+	typedef AJGraphType::AJVertexHandler VertexType;
+	typedef AJGraphType::AJEdgeHandler EdgeType;
+
+    void clearBeforeSelection();
+    void clearAfterSelection();
+    void setSelectedCellAfter(const CellType & cell);
+    void setSelectedCellBefore(const CellType & cell);
+    void setSelectedEdgeAfter(const EdgeType & edge);
+    void setSelectedEdgeBefore(const EdgeType & edge);
+    void setSelectedVertexAfter(const VertexType & vertex);
+    void setSelectedVertexBefore(const VertexType & vertex);
 public slots:
 
 	void slotFrameChanged(int frame);
@@ -47,8 +63,10 @@ public slots:
 	void slotLeftClickBeforeCellSelection(vtkObject*,unsigned long, void*,void*,vtkCommand*);
 	void slotLeftClickAfterCellSelection(vtkObject*,unsigned long, void*,void*,vtkCommand*);
 
+	void slotCorrespondenceSelectionChanged();
 public:
 	void PopulateTable();
+
 private:
 	DrosophilaOmmatidiaJSONProject::CorrespondenceSetType m_Correspondences;
 
@@ -67,9 +85,6 @@ private:
     vtkSmartPointer<vtkRenderWindowInteractor> m_AfterRenderWindowInteractor;
 
     unsigned int m_CurrentFrame;
-
-    typedef OmmatidiaTissue<3>::AJGraphType AJGraphType;
-    typedef DrosophilaOmmatidiaJSONProject::CellGraphType CellGraphType;
 
 
     typedef VertexLocationsDrawer<AJGraphType > VertexLocationsDrawerType;
@@ -96,15 +111,13 @@ private:
 	vtkSmartPointer<vtkPointWidget> m_PointWidget;
 	vtkSmartPointer<vtkEventQtSlotConnect> m_QtToVTKConnections;
 
-	typedef AJGraphType::AJVertexHandler VertexType;
-
 	VertexType m_VertexSelectedBefore;
 	bool m_IsVertexSelectedBefore;
 
 	VertexType m_VertexSelectedAfter;
 	bool m_IsVertexSelectedAfter;
 
-	typedef AJGraphType::AJEdgeHandler EdgeType;
+
 
 	EdgeType m_EdgeSelectedBefore;
 	bool m_IsEdgeSelectedBefore;
@@ -112,7 +125,6 @@ private:
 	EdgeType m_EdgeSelectedAfter;
 	bool m_IsEdgeSelectedAfter;
 
-	typedef CellGraphType::CellVertexHandler CellType;
 
 	CellType m_CellSelectedBefore;
 	bool m_IsCellSelectedBefore;

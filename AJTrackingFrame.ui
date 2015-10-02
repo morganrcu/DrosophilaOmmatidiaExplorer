@@ -50,8 +50,11 @@
         <widget class="QWidget" name="widget_3" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QWidget" name="widget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_2">
+           <widget class="QGroupBox" name="beforeGroupBox">
+            <property name="title">
+             <string>t</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
              <item>
               <widget class="QVTKWidget" name="beforeQVTKWidget">
                <property name="sizePolicy">
@@ -103,8 +106,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QWidget" name="widget_2" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_3">
+           <widget class="QGroupBox" name="afterGroupBox">
+            <property name="title">
+             <string>t</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
               <widget class="QVTKWidget" name="afterQVTKWidget">
                <property name="sizePolicy">
@@ -153,6 +159,11 @@
               </widget>
              </item>
             </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_2" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_3"/>
            </widget>
           </item>
          </layout>
@@ -208,6 +219,12 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
             </property>
            </widget>
           </item>
