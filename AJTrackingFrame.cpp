@@ -123,6 +123,7 @@ template<class TTissueDescriptor,class TAJSubgraph>  typename TTissueDescriptor:
 }
 void AJTrackingFrame::slotCorrespondenceSelectionChanged(){
 
+if(this->m_pUI->correspondencesTableWidget->selectedItems().size()>0){
 	int selectedCorrespondence = this->m_pUI->correspondencesTableWidget->selectedItems()[0]->row();
 
 	auto correspondence = m_PlottedCorrespondences[selectedCorrespondence];
@@ -193,6 +194,7 @@ void AJTrackingFrame::slotCorrespondenceSelectionChanged(){
 	}
 	this->m_BeforeRenderWindow->Render();
 	this->m_AfterRenderWindow->Render();
+}
 }
 
 template<class AJVertexSubsetType> QString to_qstring(const AJVertexSubsetType & subset){

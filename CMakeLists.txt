@@ -55,13 +55,13 @@ include_directories(
 
 # Set your files and resources here
 
-set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp  DetectVerticesDialog.cpp ShowVolumeGroupBox.cpp VertexListDockWidget.cpp EdgeListDockWidget.cpp GraphPlotterDockWidget.cpp CellListDockWidget.cpp AJTrackingFrame.cpp)
+set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp  DetectVerticesDialog.cpp ShowVolumeGroupBox.cpp VertexListDockWidget.cpp EdgeListDockWidget.cpp GraphPlotterDockWidget.cpp CellListDockWidget.cpp AJTrackingFrame.cpp OmmatidiaTissueDockWidget.cpp  OmmatidiaTissueTreeModel.cpp OmmatidiaTissueTreeItem.cpp)
 
-set( Hdrs DrosophilaOmmatidiaExplorer.h   DetectVerticesDialog.h VertexListDockWidget.h EdgeListDockWidget.h  GraphPlotterDockWidget.h CellListDockWidget.h  AJTrackingFrame.h ) #AJGraphSelectionInteractorStyle.h)
+set( Hdrs DrosophilaOmmatidiaExplorer.h   DetectVerticesDialog.h VertexListDockWidget.h EdgeListDockWidget.h  GraphPlotterDockWidget.h CellListDockWidget.h  AJTrackingFrame.h OmmatidiaTissueDockWidget.h  OmmatidiaTissueTreeModel.h  OmmatidiaTissueTreeItem.h) #AJGraphSelectionInteractorStyle.h)
 
-set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h DetectVerticesDialog.h VertexListDockWidget.h  EdgeListDockWidget.h GraphPlotterDockWidget.h CellListDockWidget.h AJTrackingFrame.h )#AJGraphSelectionInteractorStyle.h)
+set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h DetectVerticesDialog.h VertexListDockWidget.h  EdgeListDockWidget.h GraphPlotterDockWidget.h CellListDockWidget.h AJTrackingFrame.h OmmatidiaTissueDockWidget.h OmmatidiaTissueTreeModel.h  OmmatidiaTissueTreeItem.h)#AJGraphSelectionInteractorStyle.h)
 
-set( UIs DrosophilaOmmatidiaExplorer.ui DetectVerticesDialog.ui ShowVolumeGroupBox.ui VertexListDockWidget.ui  EdgeListDockWidget.ui  GraphPlotterDockWidget.ui CellListDockWidget.ui AJTrackingFrame.ui)
+set( UIs DrosophilaOmmatidiaExplorer.ui DetectVerticesDialog.ui ShowVolumeGroupBox.ui VertexListDockWidget.ui  EdgeListDockWidget.ui  GraphPlotterDockWidget.ui CellListDockWidget.ui AJTrackingFrame.ui OmmatidiaTissueDockWidget.ui )
 
 set( QRCs Icons/icons.qrc )
 

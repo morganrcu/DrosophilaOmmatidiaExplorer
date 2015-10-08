@@ -54,6 +54,8 @@
 #include <vtkFFMPEGWriter.h>
 #endif
 
+#include <OmmatidiaTissue.h>
+
 #include <AJTrackingFrame.h>
 // Constructor
 DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
@@ -198,6 +200,10 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     m_PointWidget->SetInputData(cube->GetOutput());
     m_PointWidget->PlaceWidget();
 
+    m_pTissueDockWidget = new OmmatidiaTissueDockWidget(this);
+    this->m_pTissueDockWidget->setHidden(true);
+    this->addDockWidget(Qt::RightDockWidgetArea,this->m_pTissueDockWidget);
+    connect(this->m_pUI->actionShowTissueTree,SIGNAL(toggled(bool)),this->m_pTissueDockWidget,SLOT(setVisible(bool)));
 
 
     m_pVertexListDockWidget=  new VertexListDockWidget(this);
@@ -205,9 +211,9 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     this->addDockWidget(Qt::RightDockWidgetArea,this->m_pVertexListDockWidget);
     connect(this->m_pUI->actionShowVertices,SIGNAL(toggled(bool)),this->m_pVertexListDockWidget,SLOT(setVisible(bool)));
 
-
     connect(this->m_pVertexListDockWidget,SIGNAL(visibilityChanged(bool)),this->m_pUI->actionShowVertices,SLOT(setChecked(bool)));
     connect(this->m_pVertexListDockWidget,SIGNAL(SelectedVertexChanged(AJGraph<AJVertex,AJEdge>::AJVertexHandler)),SLOT(slotVertexTableSelectionChanged(AJGraph<AJVertex,AJEdge>::AJVertexHandler)));
+
 
     m_pEdgeListDockWidget= new EdgeListDockWidget(this);
     m_pEdgeListDockWidget->setHidden(true);
@@ -1230,7 +1236,8 @@ void DrosophilaOmmatidiaExplorer::DrawCells(int frame){
            	this->m_CellDrawer.SetCells(m_CurrentTissue->GetCellGraph());
            	this->m_CellDrawer.Draw();
            	this->m_CellDrawer.SetVisibility(this->m_pUI->showCellsCheckBox->isChecked());
-
+           	this->m_pTissueDockWidget->SetTissue(m_CurrentTissue);
+           	this->m_pTissueDockWidget->Init();
            	//this->m_pCellListDockWidget->SetCells(m_CurrentTissue->GetCellGraph());
            	//this->m_pCellListDockWidget->Draw();
     }else{
@@ -1444,7 +1451,7 @@ void DrosophilaOmmatidiaExplorer::slotDoEdgeMolecularDistribution(){
 void DrosophilaOmmatidiaExplorer::slotPlotSelectedEdgeLength(){
 	return slotPlotEdgeLength(this->m_SelectedEdge);
 }
-
+#if 0
 void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const DrosophilaOmmatidiaExplorer::CellGraphType::CellVertexHandler & cell){
 
     vtkSmartPointer<vtkDoubleArray> arrCell =vtkSmartPointer<vtkDoubleArray>::New();
@@ -1484,30 +1491,194 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const DrosophilaOmmatidiaExpl
     this->m_pGraphPlotterDockWidget->Draw();
 
 }
+#endif
+template<class TTissueDescriptor,class TAJSubgraph>  typename TTissueDescriptor::CellGraphType::CellVertexHandler vertexSubsetToCellHandler(const typename TTissueDescriptor::Pointer & tissue, const TAJSubgraph & subgraph){
 
+	auto result = std::find_if(tissue->GetCellGraph()->CellsBegin(),tissue->GetCellGraph()->CellsEnd(),
+							  [&tissue,&subgraph](const typename TTissueDescriptor::CellGraphType::CellVertexHandler & cellVertexHandler){
+									auto cell = tissue->GetCellGraph()->GetCell(cellVertexHandler);
+									std::vector<typename TTissueDescriptor::AJGraphType::AJVertexHandler> missing;
+
+									for(auto perimeterVertexIt =cell->BeginPerimeterAJVertices();perimeterVertexIt!=cell->BeginPerimeterAJVertices();++perimeterVertexIt ){
+										if(std::find(subgraph.BeginVertices(),subgraph.EndVertices(),*perimeterVertexIt)==subgraph.EndVertices()){
+											return false;
+										}
+									}
+
+									for(auto perimeterVertexIt =subgraph.BeginVertices();perimeterVertexIt!=subgraph.EndVertices();++perimeterVertexIt ){
+										if(std::find(cell->BeginPerimeterAJVertices(),cell->EndPerimeterAJVertices(),*perimeterVertexIt)==cell->EndPerimeterAJVertices()){
+											return false;
+										}
+									}
+									return true;
+							}
+					);
+	assert(result!=tissue->GetCellGraph()->CellsEnd());
+	return *result;
+}
+void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::CellGraphType::CellVertexHandler & cellHandler){
+
+    vtkSmartPointer<vtkDoubleArray> arrCell =vtkSmartPointer<vtkDoubleArray>::New();
+    std::string arrayName("cellArea-" + std::to_string(cellHandler));
+    arrCell->SetName(arrayName.c_str());
+    arrCell->SetNumberOfTuples(this->m_Project.GetNumberOfFrames());
+
+    DrosophilaOmmatidiaJSONProject::AJCorrespondenceType::AJSubgraphType cellSubgraph;
+
+    auto cell = m_CurrentTissue->GetCellGraph()->GetCell(cellHandler);
+
+    for(auto it= cell->BeginPerimeterAJVertices();it!=cell->EndPerimeterAJVertices();it++){
+    	cellSubgraph.AddVertex(*it);
+    }
+
+    arrCell->SetTuple1(m_CurrentFrame,cell->GetArea());
+
+
+    for(int t=m_CurrentFrame+1;t<this->m_Project.GetNumberOfFrames();t++){
+        auto tissue = m_Project.GetTissueDescriptor(t);
+        auto correspondences = m_Project.GetCorrespondences(t-1,t);
+
+        auto resultSet = correspondences.FindByAntecessor(cellSubgraph);
+        if(resultSet.first!=resultSet.second){
+			auto correspondence = resultSet.first;
+
+			cellSubgraph = correspondence->GetSuccessor();
+			auto cellHandler =vertexSubsetToCellHandler<OmmatidiaTissue<3>,decltype(cellSubgraph)>(tissue,cellSubgraph);
+			auto cell = tissue->GetCellGraph()->GetCell(cellHandler);
+			arrCell->SetTuple1(t,cell->GetArea());
+        }else{
+        	break;
+        }
+
+    }
+
+    for(int t=m_CurrentFrame;t>0;t--){
+    	auto tissue = m_Project.GetTissueDescriptor(t-1);
+        auto correspondences = m_Project.GetCorrespondences(t-1,t);
+
+        auto resultSet = correspondences.FindBySuccessor(cellSubgraph);
+
+        if(resultSet.first!=resultSet.second){
+        	auto correspondence=resultSet.first;
+
+			cellSubgraph = correspondence->GetAntecessor();
+			auto cellHandler =vertexSubsetToCellHandler<OmmatidiaTissue<3>,decltype(cellSubgraph)>(tissue,cellSubgraph);
+			auto cell = tissue->GetCellGraph()->GetCell(cellHandler);
+			arrCell->SetTuple1(t,cell->GetArea());
+
+        }else{
+        	break;
+        }
+    }
+
+    double sum=0;
+    double sum2=0;
+    for(int t=0;t< arrCell->GetNumberOfTuples();t++){
+    	sum+=arrCell->GetTuple1(t);
+    	sum2+=arrCell->GetTuple1(t)*arrCell->GetTuple1(t);
+    }
+    double mean = sum / arrCell->GetNumberOfTuples();
+
+
+    double std = sum2/arrCell->GetNumberOfTuples() - mean*mean;
+    std= sqrt(std);
+    for(int t=0;t< arrCell->GetNumberOfTuples();t++){
+    	arrCell->SetTuple1(t,(arrCell->GetTuple1(t)-mean)/std);
+    }
+
+    //auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
+    itk::FixedArray<double,3> color;
+    color[0]=1.0;
+    color[1]=1.0;
+    color[2]=1.0;
+    std::cout << color << std::endl;
+
+    this->m_pGraphPlotterDockWidget->AddPlot(arrCell,color,false);
+    this->m_pGraphPlotterDockWidget->Draw();
+    }
 void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
-#if 0
+
     vtkSmartPointer<vtkDoubleArray> arrEdge =vtkSmartPointer<vtkDoubleArray>::New();
     std::string arrayName("edgeLength-" + std::to_string(this->m_CurrentAJGraph->GetAJEdgeSource(edge)) + "-" + std::to_string(this->m_CurrentAJGraph->GetAJEdgeTarget(edge)));
     arrEdge->SetName(arrayName.c_str());
     arrEdge->SetNumberOfTuples(this->m_Project.GetNumberOfFrames());
 
-    for(int t=0;t<this->m_Project.GetNumberOfFrames();t++){
-        auto graph = m_Project.GetAJGraph(t);
 
-        auto sourceHandler=graph->GetAJEdgeSource(edge);
-        auto targetHandler=graph->GetAJEdgeTarget(edge);
+    auto sourceHandler=m_CurrentTissue->GetAJGraph()->GetAJEdgeSource(edge);
+    auto targetHandler=m_CurrentTissue->GetAJGraph()->GetAJEdgeTarget(edge);
 
-        auto sourceLocation = graph->GetAJVertex(sourceHandler)->GetPosition();
-        auto targetLocation = graph->GetAJVertex(targetHandler)->GetPosition();
-
-        auto diff =  sourceLocation - targetLocation;
+    DrosophilaOmmatidiaJSONProject::AJCorrespondenceType::AJSubgraphType edgeSubgraph;
 
 
-        double dist = diff.GetNorm();
 
-        arrEdge->SetTuple1(t,dist);
+    edgeSubgraph.AddEdge(edge);
+    edgeSubgraph.AddVertex(sourceHandler);
+    edgeSubgraph.AddVertex(targetHandler);
 
+
+    auto sourceLocation = m_CurrentTissue->GetAJGraph()->GetAJVertex(sourceHandler)->GetPosition();
+    auto targetLocation = m_CurrentTissue->GetAJGraph()->GetAJVertex(targetHandler)->GetPosition();
+    auto diff =  sourceLocation - targetLocation;
+
+    double dist = diff.GetNorm();
+
+    arrEdge->SetTuple1(m_CurrentFrame,dist);
+
+
+    for(int t=m_CurrentFrame+1;t<this->m_Project.GetNumberOfFrames();t++){
+        auto tissue = m_Project.GetTissueDescriptor(t);
+        auto correspondences = m_Project.GetCorrespondences(t-1,t);
+
+        auto resultSet = correspondences.FindByAntecessor(edgeSubgraph);
+        if(resultSet.first!=resultSet.second){
+			auto correspondence = resultSet.first;
+
+			edgeSubgraph = correspondence->GetSuccessor();
+
+			auto vertexIt=edgeSubgraph.BeginVertices();
+			auto source = *vertexIt;
+			++vertexIt;
+			auto target = *vertexIt;
+
+			auto sourceLocation = tissue->GetAJGraph()->GetAJVertex(source)->GetPosition();
+			auto targetLocation = tissue->GetAJGraph()->GetAJVertex(target)->GetPosition();
+			auto diff =  sourceLocation - targetLocation;
+
+			double dist = diff.GetNorm();
+			arrEdge->SetTuple1(t,dist);
+        }else{
+        	break;
+        }
+
+    }
+
+    for(int t=m_CurrentFrame;t>0;t--){
+    	auto tissue = m_Project.GetTissueDescriptor(t-1);
+        auto correspondences = m_Project.GetCorrespondences(t-1,t);
+
+        auto resultSet = correspondences.FindBySuccessor(edgeSubgraph);
+
+        if(resultSet.first!=resultSet.second){
+			auto correspondence = resultSet.first;
+
+
+			edgeSubgraph = correspondence->GetAntecessor();
+
+
+			auto vertexIt=edgeSubgraph.BeginVertices();
+			auto source = *vertexIt;
+			++vertexIt;
+			auto target = *vertexIt;
+
+			auto sourceLocation = tissue->GetAJGraph()->GetAJVertex(source)->GetPosition();
+			auto targetLocation = tissue->GetAJGraph()->GetAJVertex(target)->GetPosition();
+			auto diff =  sourceLocation - targetLocation;
+
+			double dist = diff.GetNorm();
+			arrEdge->SetTuple1(t,dist);
+        }else{
+        	break;
+        }
     }
 
     double sum=0;
@@ -1529,7 +1700,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
 
     this->m_pGraphPlotterDockWidget->AddPlot(arrEdge,color,false);
     this->m_pGraphPlotterDockWidget->Draw();
-#endif
+
 }
 
 #if 0

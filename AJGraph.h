@@ -52,6 +52,7 @@ public:
     typedef typename boost::graph_traits<BoostGraphType>::edge_iterator EdgeIterator;
 
     typedef typename boost::graph_traits<BoostGraphType>::adjacency_iterator AdjacencyIterator;
+    typedef typename boost::graph_traits<BoostGraphType>::out_edge_iterator OutEdgesIterator;
 public:
 
     itkNewMacro(Self)
@@ -142,7 +143,13 @@ public:
         return boost::vertices(m_Graph).second;
     }
 
+    OutEdgesIterator BeginOutEdges( const AJVertexHandler & vertex){
+    	return boost::out_edges(vertex,m_Graph).first;
+    }
 
+    OutEdgesIterator EndOutEdges( const AJVertexHandler & vertex){
+    	return boost::out_edges(vertex,m_Graph).second;
+    }
 
 protected:
     AJGraph(){

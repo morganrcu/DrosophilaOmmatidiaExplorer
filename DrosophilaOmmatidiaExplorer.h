@@ -32,6 +32,7 @@
 
 #include "VertexLocationsDrawer.h"
 #include "CellListDockWidget.h"
+#include "OmmatidiaTissueDockWidget.h"
 #include "EdgesDrawer.h"
 #include "CellDrawer.h"
 #include "MotionFieldVolumeDrawer.h"
@@ -286,6 +287,8 @@ private:
 	VertexListDockWidget * m_pVertexListDockWidget;
 	GraphPlotterDockWidget * m_pGraphPlotterDockWidget;
 	CellListDockWidget * m_pCellListDockWidget;
+
+	OmmatidiaTissueDockWidget * m_pTissueDockWidget;
 
 };
 

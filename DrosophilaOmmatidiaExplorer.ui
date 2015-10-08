@@ -192,6 +192,7 @@
     <addaction name="actionShowVertices"/>
     <addaction name="actionShowEdgeList"/>
     <addaction name="actionShowCells"/>
+    <addaction name="actionShowTissueTree"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -871,6 +872,14 @@
   <action name="actionValidateTracking">
    <property name="text">
     <string>Validate Tracking</string>
+   </property>
+  </action>
+  <action name="actionShowTissueTree">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Tissue Tree</string>
    </property>
   </action>
  </widget>
