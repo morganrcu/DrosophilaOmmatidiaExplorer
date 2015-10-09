@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(DrosophilaOmmatidiaExplorer)
 
 
-add_definitions("-std=c++11 -fpermissive -Wno-static-float-init")
+add_definitions("-std=c++11 -fpermissive ")
 #add_definitions("-std=c++11 -fpermissive -O3")
 set(CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
@@ -55,11 +55,11 @@ include_directories(
 
 # Set your files and resources here
 
-set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp  DetectVerticesDialog.cpp ShowVolumeGroupBox.cpp VertexListDockWidget.cpp EdgeListDockWidget.cpp GraphPlotterDockWidget.cpp CellListDockWidget.cpp AJTrackingFrame.cpp OmmatidiaTissueDockWidget.cpp  OmmatidiaTissueTreeModel.cpp OmmatidiaTissueTreeItem.cpp)
+set( Srcs main.cpp DrosophilaOmmatidiaExplorer.cpp DrosophilaOmmatidiaJSONProject.cpp  DetectVerticesDialog.cpp ShowVolumeGroupBox.cpp VertexListDockWidget.cpp EdgeListDockWidget.cpp GraphPlotterDockWidget.cpp CellListDockWidget.cpp AJTrackingFrame.cpp OmmatidiaTissueDockWidget.cpp  OmmatidiaTissueTreeModel.cpp )
 
-set( Hdrs DrosophilaOmmatidiaExplorer.h   DetectVerticesDialog.h VertexListDockWidget.h EdgeListDockWidget.h  GraphPlotterDockWidget.h CellListDockWidget.h  AJTrackingFrame.h OmmatidiaTissueDockWidget.h  OmmatidiaTissueTreeModel.h  OmmatidiaTissueTreeItem.h) #AJGraphSelectionInteractorStyle.h)
+set( Hdrs DrosophilaOmmatidiaExplorer.h   DetectVerticesDialog.h VertexListDockWidget.h EdgeListDockWidget.h  GraphPlotterDockWidget.h CellListDockWidget.h  AJTrackingFrame.h OmmatidiaTissueDockWidget.h  OmmatidiaTissueTreeModel.h  ) #AJGraphSelectionInteractorStyle.h)
 
-set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h DetectVerticesDialog.h VertexListDockWidget.h  EdgeListDockWidget.h GraphPlotterDockWidget.h CellListDockWidget.h AJTrackingFrame.h OmmatidiaTissueDockWidget.h OmmatidiaTissueTreeModel.h  OmmatidiaTissueTreeItem.h)#AJGraphSelectionInteractorStyle.h)
+set( MOC_Hdrs DrosophilaOmmatidiaExplorer.h DetectVerticesDialog.h VertexListDockWidget.h  EdgeListDockWidget.h GraphPlotterDockWidget.h CellListDockWidget.h AJTrackingFrame.h OmmatidiaTissueDockWidget.h OmmatidiaTissueTreeModel.h  )#AJGraphSelectionInteractorStyle.h)
 
 set( UIs DrosophilaOmmatidiaExplorer.ui DetectVerticesDialog.ui ShowVolumeGroupBox.ui VertexListDockWidget.ui  EdgeListDockWidget.ui  GraphPlotterDockWidget.ui CellListDockWidget.ui AJTrackingFrame.ui OmmatidiaTissueDockWidget.ui )
 

@@ -68,8 +68,10 @@ public:
 			auto edge = m_Tissue->GetAJGraph()->GetAJEdge(m_AJEdge);
 			auto cellPairs = edge->GetCellPair();
 			OmmatidiaTissueStandardTreeItem * result = new OmmatidiaTissueStandardTreeItem(CELLLIST,m_Tissue,this);
-			result->AddCell(cellPairs.first);
-			result->AddCell(cellPairs.second);
+			OmmatidiaTissue<3>::CellGraphType::CellVertexHandler cellA = cellPairs.first;
+			result->AddCell(cellA);
+			OmmatidiaTissue<3>::CellGraphType::CellVertexHandler cellB = cellPairs.second;
+			result->AddCell(cellB);
 			return result;
 		}
 		case EDGELIST:
@@ -105,7 +107,7 @@ public:
 					OmmatidiaTissueStandardTreeItem * result = new OmmatidiaTissueStandardTreeItem(VERTEXLIST,this->m_Tissue,this);
 
 					for(auto it = cell->BeginPerimeterAJVertices();it!=cell->EndPerimeterAJVertices();++it){
-						auto vertex = *it;
+						OmmatidiaTissue<3>::AJGraphType::AJVertexHandler vertex = *it;
 						result->AddVertex(vertex);
 					}
 					return result;
@@ -155,7 +157,7 @@ public:
 			{
 				OmmatidiaTissueStandardTreeItem * result = new OmmatidiaTissueStandardTreeItem(CELLLIST,this->m_Tissue,this);
 				for(auto it = vertex->BeginCells();it!=vertex->EndCells();++it){
-					auto cell = *it;
+					OmmatidiaTissue<3>::CellGraphType::CellVertexHandler cell = *it;
 					result->AddCell(cell);
 				}
 				return result;
@@ -257,22 +259,22 @@ public:
 		return 0;
 	}
 
-	virtual void AddVertex(typename OmmatidiaTissue<3>::AJGraphType::AJVertexHandler & vertex){
+	virtual void AddVertex( OmmatidiaTissue<3>::AJGraphType::AJVertexHandler & vertex){
 		m_Vertices.push_back(vertex);
 	}
-	virtual void AddEdge(typename OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
+	virtual void AddEdge( OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
 		m_Edges.push_back(edge);
 	}
-	virtual void AddCell(typename OmmatidiaTissue<3>::CellGraphType::CellVertexHandler & cell){
+	virtual void AddCell( OmmatidiaTissue<3>::CellGraphType::CellVertexHandler & cell){
 		m_Cells.push_back(cell);
 	}
-	virtual void SetAJVertex(typename OmmatidiaTissue<3>::AJGraphType::AJVertexHandler & vertex){
+	virtual void SetAJVertex( OmmatidiaTissue<3>::AJGraphType::AJVertexHandler & vertex){
 		m_AJVertex=vertex;
 	}
-	virtual void SetAJEdge(typename OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
+	virtual void SetAJEdge( OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
 		m_AJEdge=edge;
 	}
-	virtual void SetCell(typename OmmatidiaTissue<3>::CellGraphType::CellVertexHandler & cell){
+	virtual void SetCell( OmmatidiaTissue<3>::CellGraphType::CellVertexHandler & cell){
 		m_Cell=cell;
 	}
 	virtual void SetName(const QString & name){
@@ -291,9 +293,9 @@ public:
 	OmmatidiaTissueStandardTreeItem * m_pParent;
 	OmmatidiaTissue<3>::Pointer m_Tissue;
 	NodeType m_Type;
-	typename OmmatidiaTissue<3>::AJGraphType::AJVertexHandler m_AJVertex;
-	typename OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler m_AJEdge;
-	typename OmmatidiaTissue<3>::CellGraphType::CellVertexHandler m_Cell;
+	OmmatidiaTissue<3>::AJGraphType::AJVertexHandler m_AJVertex;
+	OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler m_AJEdge;
+	OmmatidiaTissue<3>::CellGraphType::CellVertexHandler m_Cell;
 
 	QString m_Name;
 	QVariant m_Value;
