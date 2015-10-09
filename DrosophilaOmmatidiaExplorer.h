@@ -184,6 +184,7 @@ public slots:
 
 // Charting slots
 	virtual void slotPlotCellArea(const CellGraphType::CellVertexHandler & cell);
+	virtual void slotPlotSelectedCellArea();
 
 	virtual void slotPlotEdgeLength(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge);
 	virtual void slotPlotSelectedEdgeLength();

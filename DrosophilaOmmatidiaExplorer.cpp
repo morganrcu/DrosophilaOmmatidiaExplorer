@@ -185,6 +185,7 @@ DrosophilaOmmatidiaExplorer::DrosophilaOmmatidiaExplorer()
     connect(this->m_pUI->actionSelectCell,SIGNAL(toggled(bool)),SLOT(slotCellSelectionToggled(bool)));
 
     connect(this->m_pUI->actionPlotSelectedEdgeLength,SIGNAL(triggered()),SLOT(slotPlotSelectedEdgeLength()));
+    connect(this->m_pUI->actionPlotSelectedCellArea,SIGNAL(triggered()),SLOT(slotPlotSelectedCellArea()));
 
     //connect(this->m_pUI->actionShowEdges,SIGNAL(toggled(bool)),SLOT(slotShowEdges(bool)));
 
@@ -1448,6 +1449,9 @@ void DrosophilaOmmatidiaExplorer::slotDoEdgeMolecularDistribution(){
         m_Project.SetAJGraph(t,edgeDescriptor->GetAJGraph());
     }
 }
+void DrosophilaOmmatidiaExplorer::slotPlotSelectedCellArea(){
+	return slotPlotCellArea(this->m_SelectedCell);
+}
 void DrosophilaOmmatidiaExplorer::slotPlotSelectedEdgeLength(){
 	return slotPlotEdgeLength(this->m_SelectedEdge);
 }
@@ -1522,6 +1526,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
     std::string arrayName("cellArea-" + std::to_string(cellHandler));
     arrCell->SetName(arrayName.c_str());
     arrCell->SetNumberOfTuples(this->m_Project.GetNumberOfFrames());
+    arrCell->FillComponent(0,0.0);
 
     DrosophilaOmmatidiaJSONProject::AJCorrespondenceType::AJSubgraphType cellSubgraph;
 
@@ -1546,6 +1551,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
 			auto cellHandler =vertexSubsetToCellHandler<OmmatidiaTissue<3>,decltype(cellSubgraph)>(tissue,cellSubgraph);
 			auto cell = tissue->GetCellGraph()->GetCell(cellHandler);
 			arrCell->SetTuple1(t,cell->GetArea());
+			std::cout << "A: " << cell->GetArea() << std::endl;
         }else{
         	break;
         }
@@ -1570,7 +1576,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
         	break;
         }
     }
-
+#if 0
     double sum=0;
     double sum2=0;
     for(int t=0;t< arrCell->GetNumberOfTuples();t++){
@@ -1585,10 +1591,10 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
     for(int t=0;t< arrCell->GetNumberOfTuples();t++){
     	arrCell->SetTuple1(t,(arrCell->GetTuple1(t)-mean)/std);
     }
-
+#endif
     //auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
     itk::FixedArray<double,3> color;
-    color[0]=1.0;
+    color[0]=0.0;
     color[1]=1.0;
     color[2]=1.0;
     std::cout << color << std::endl;

@@ -235,6 +235,7 @@
    <addaction name="actionSelectCell"/>
    <addaction name="actionExportMovie"/>
    <addaction name="actionPlotSelectedEdgeLength"/>
+   <addaction name="actionPlotSelectedCellArea"/>
    <addaction name="actionPlotEdgeDistribution"/>
    <addaction name="actionPlotVertexDistribution"/>
    <addaction name="actionVertexMolecularDistribution"/>
@@ -880,6 +881,17 @@
    </property>
    <property name="text">
     <string>Show Tissue Tree</string>
+   </property>
+  </action>
+  <action name="actionPlotSelectedCellArea">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Plot cell area</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot cell area</string>
    </property>
   </action>
  </widget>
