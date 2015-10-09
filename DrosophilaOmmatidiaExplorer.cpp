@@ -1576,7 +1576,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
         	break;
         }
     }
-#if 0
+
     double sum=0;
     double sum2=0;
     for(int t=0;t< arrCell->GetNumberOfTuples();t++){
@@ -1591,7 +1591,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
     for(int t=0;t< arrCell->GetNumberOfTuples();t++){
     	arrCell->SetTuple1(t,(arrCell->GetTuple1(t)-mean)/std);
     }
-#endif
+
     //auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
     itk::FixedArray<double,3> color;
     color[0]=0.0;
@@ -1688,7 +1688,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
         	break;
         }
     }
-#if 0
+
     double sum=0;
     double sum2=0;
     for(int t=0;t< arrEdge->GetNumberOfTuples();t++){
@@ -1702,7 +1702,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
     for(int t=0;t< arrEdge->GetNumberOfTuples();t++){
     	arrEdge->SetTuple1(t,(arrEdge->GetTuple1(t)-mean)/std);
     }
-#endif
+
     auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
     std::cout << color << std::endl;
 
