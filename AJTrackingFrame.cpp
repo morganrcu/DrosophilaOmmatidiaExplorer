@@ -636,6 +636,7 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 	this->m_AfterCellsDrawer.SetVisibility(true);
 
 
+
 	if(frame>0){
 		auto previousCorrespondences = m_Project.GetCorrespondences(m_CurrentFrame-1,m_CurrentFrame);
 
@@ -674,6 +675,12 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 			}
 		}
 	}
+	this->m_IsVertexSelectedBefore=false;
+	this->m_IsVertexSelectedAfter=false;
+	this->m_IsEdgeSelectedBefore=false;
+	this->m_IsEdgeSelectedAfter=false;
+	this->m_IsCellSelectedBefore=false;
+	this->m_IsCellSelectedAfter=false;
 	this->PopulateTable();
 #if 0
 #if 0

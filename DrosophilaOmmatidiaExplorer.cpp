@@ -1595,7 +1595,8 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
 
     this->m_pGraphPlotterDockWidget->AddPlot(arrCell,color,false);
     this->m_pGraphPlotterDockWidget->Draw();
-    }
+}
+
 void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
 
     vtkSmartPointer<vtkDoubleArray> arrEdge =vtkSmartPointer<vtkDoubleArray>::New();
@@ -1603,7 +1604,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
     arrEdge->SetName(arrayName.c_str());
     arrEdge->SetNumberOfTuples(this->m_Project.GetNumberOfFrames());
 
-
+    arrEdge->FillComponent(0,0.0);
     auto sourceHandler=m_CurrentTissue->GetAJGraph()->GetAJEdgeSource(edge);
     auto targetHandler=m_CurrentTissue->GetAJGraph()->GetAJEdgeTarget(edge);
 
@@ -1624,18 +1625,18 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
 
     arrEdge->SetTuple1(m_CurrentFrame,dist);
 
-
+    auto currentSubgraph=edgeSubgraph;
     for(int t=m_CurrentFrame+1;t<this->m_Project.GetNumberOfFrames();t++){
         auto tissue = m_Project.GetTissueDescriptor(t);
         auto correspondences = m_Project.GetCorrespondences(t-1,t);
 
-        auto resultSet = correspondences.FindByAntecessor(edgeSubgraph);
+        auto resultSet = correspondences.FindByAntecessor(currentSubgraph);
         if(resultSet.first!=resultSet.second){
 			auto correspondence = resultSet.first;
 
-			edgeSubgraph = correspondence->GetSuccessor();
+			currentSubgraph = correspondence->GetSuccessor();
 
-			auto vertexIt=edgeSubgraph.BeginVertices();
+			auto vertexIt=currentSubgraph.BeginVertices();
 			auto source = *vertexIt;
 			++vertexIt;
 			auto target = *vertexIt;
@@ -1651,18 +1652,19 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
         }
 
     }
+    currentSubgraph=edgeSubgraph;
 
     for(int t=m_CurrentFrame;t>0;t--){
     	auto tissue = m_Project.GetTissueDescriptor(t-1);
         auto correspondences = m_Project.GetCorrespondences(t-1,t);
 
-        auto resultSet = correspondences.FindBySuccessor(edgeSubgraph);
+        auto resultSet = correspondences.FindBySuccessor(currentSubgraph);
 
         if(resultSet.first!=resultSet.second){
 			auto correspondence = resultSet.first;
 
 
-			edgeSubgraph = correspondence->GetAntecessor();
+			currentSubgraph = correspondence->GetAntecessor();
 
 
 			auto vertexIt=edgeSubgraph.BeginVertices();
@@ -1680,7 +1682,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
         	break;
         }
     }
-
+#if 0
     double sum=0;
     double sum2=0;
     for(int t=0;t< arrEdge->GetNumberOfTuples();t++){
@@ -1694,7 +1696,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
     for(int t=0;t< arrEdge->GetNumberOfTuples();t++){
     	arrEdge->SetTuple1(t,(arrEdge->GetTuple1(t)-mean)/std);
     }
-
+#endif
     auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
     std::cout << color << std::endl;
 
