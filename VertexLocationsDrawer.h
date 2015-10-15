@@ -30,6 +30,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include "Drawer.h"
+#include <vtkColor.h>
 #include <map>
 #include <boost/bimap.hpp>
 
@@ -124,8 +125,8 @@ public:
 
 
     }
-    virtual void SetVertexColor(const typename TVerticesContainer::AJVertexHandler & vertexHandler,double r, double g, double b){
-    	this->m_ActorsToVertices.right.at(vertexHandler)->GetProperty()->SetColor(r,g,b);
+    virtual void SetVertexColor(const typename TVerticesContainer::AJVertexHandler & vertexHandler,const vtkColor3d & color){
+    	this->m_ActorsToVertices.right.at(vertexHandler)->GetProperty()->SetColor(color[0],color[1],color[2]);
     }
 
     virtual vtkSmartPointer<vtkActor> DrawAJVertex(const typename TVerticesContainer::AJVertexHandler & vertexHandler){

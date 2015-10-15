@@ -1,6 +1,7 @@
 #include "AJTrackingFrame.h"
 #include "ui_AJTrackingFrame.h"
 #include <vtkPropPicker.h>
+#include <vtkColor.h>
 //#include "MinCostMaxFlowAJAssociationCommand.h"
 
 class RenderSyncCommand : public vtkCommand{
@@ -636,7 +637,7 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 	this->m_AfterCellsDrawer.SetVisibility(true);
 
 
-
+#if 1
 	if(frame>0){
 		auto previousCorrespondences = m_Project.GetCorrespondences(m_CurrentFrame-1,m_CurrentFrame);
 
@@ -675,6 +676,81 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 			}
 		}
 	}
+#endif
+	std::map<AJCorrespondenceType,vtkColor3d > beforeColors,afterColors;
+
+	for(auto correspondence = this->m_Correspondences.BeginCorrespondences();correspondence!=m_Correspondences.EndCorrespondences();++correspondence){
+		vtkColor3d color;
+		color[0]=double(rand())/RAND_MAX;
+		color[1]=double(rand())/RAND_MAX;
+		color[2]=double(rand())/RAND_MAX;
+		beforeColors[*correspondence]=color;
+
+		auto antecessor = correspondence->GetAntecessor();
+		switch(antecessor.GetOrder()){
+		case 3: //cell
+		{
+			auto cell =vertexSubsetToCellHandler<OmmatidiaTissue<3>,AJSubgraphType>(m_BeforeTissue,antecessor);
+			this->m_BeforeCellsDrawer.SetCellColor(cell,color);
+
+			break;
+		}
+		case 2:
+		{
+			auto vertexIt = antecessor.BeginVertices();
+
+			auto source = *vertexIt;
+			++vertexIt;
+
+			auto target = *vertexIt;
+			auto edge=m_BeforeTissue->GetAJGraph()->GetAJEdgeHandler(source,target);
+			this->m_BeforeEdgesDrawer.SetEdgeColor(edge,color);
+
+
+			break;
+		}
+
+		case 1:
+		{
+			auto vertex = *(antecessor.BeginVertices());
+			this->m_BeforeVertexDrawer.SetVertexColor(vertex,color);
+			break;
+		}
+		}
+		auto successor = correspondence->GetSuccessor();
+
+		switch(successor.GetOrder()){
+				case 3: //cell
+				{
+					auto cell =vertexSubsetToCellHandler<OmmatidiaTissue<3>,AJSubgraphType>(m_AfterTissue,successor);
+					this->m_AfterCellsDrawer.SetCellColor(cell,color);
+
+					break;
+				}
+				case 2:
+				{
+					auto vertexIt = successor.BeginVertices();
+
+					auto source = *vertexIt;
+					++vertexIt;
+
+					auto target = *vertexIt;
+					auto edge=m_AfterTissue->GetAJGraph()->GetAJEdgeHandler(source,target);
+					this->m_AfterEdgesDrawer.SetEdgeColor(edge,color);
+
+
+					break;
+				}
+
+				case 1:
+				{
+					auto vertex = *(successor.BeginVertices());
+					this->m_AfterVertexDrawer.SetVertexColor(vertex,color);
+					break;
+				}
+				}
+	}
+
 	this->m_IsVertexSelectedBefore=false;
 	this->m_IsVertexSelectedAfter=false;
 	this->m_IsEdgeSelectedBefore=false;
@@ -682,6 +758,8 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 	this->m_IsCellSelectedBefore=false;
 	this->m_IsCellSelectedAfter=false;
 	this->PopulateTable();
+	this->m_BeforeRenderWindow->Render();
+	this->m_AfterRenderWindow->Render();
 #if 0
 #if 0
 	for( auto succesorsIt = this->m_Correspondences->BeginSuccesors();succesorsIt!=this->m_Correspondences->EndSuccesors();++succesorsIt){

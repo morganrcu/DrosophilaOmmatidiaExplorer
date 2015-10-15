@@ -23,8 +23,10 @@ public:
     //void SetTemporalReference(const vtkSmartPointer<vtkDoubleArray> & tScale);
     void SetLength(unsigned int samples);
     void AddPlot(const vtkSmartPointer<vtkDoubleArray> & series ,itk::FixedArray<double,3>  & color,bool dashed);
+
 private slots:
 	void slotClear();
+	void slotExportData();
 private:
     Ui::GraphPlotterDockWidget *m_pUI;
     vtkSmartPointer<vtkContextView> m_View;

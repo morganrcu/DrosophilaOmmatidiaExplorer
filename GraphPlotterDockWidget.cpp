@@ -9,6 +9,8 @@
 #include <vtkPlot.h>
 #include <vtkAxis.h>
 #include <vtkPen.h>
+#include <vtkDelimitedTextWriter.h>
+#include <QFileDialog>
 GraphPlotterDockWidget::GraphPlotterDockWidget(QWidget *parent) :
     QDockWidget(parent),
     m_pUI(new Ui::GraphPlotterDockWidget)
@@ -32,6 +34,7 @@ GraphPlotterDockWidget::GraphPlotterDockWidget(QWidget *parent) :
     // Create a table with some points in it...
     m_Table =vtkSmartPointer<vtkTable>::New();
     connect(this->m_pUI->clearButton,SIGNAL(clicked()),SLOT(slotClear()));
+    connect(this->m_pUI->exportDataButton,SIGNAL(clicked()),SLOT(slotExportData()));
 }
 #if 0
 void GraphPlotterDockWidget::SetTemporalReference(const vtkSmartPointer<vtkDoubleArray> & tScale){
@@ -88,6 +91,20 @@ void GraphPlotterDockWidget::Draw(){
     m_View->GetRenderWindow()->Render();
 }
 
+void GraphPlotterDockWidget::slotExportData(){
+
+	vtkSmartPointer<vtkDelimitedTextWriter> writer = vtkSmartPointer<vtkDelimitedTextWriter>::New();
+
+	QFileDialog dialog;
+
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save data"),"/home/jana/untitled.png",tr("Comma Separated Files (*.csv)"));
+	writer->SetFileName(fileName.toStdString().c_str());
+
+	writer->SetInputData(this->m_Table);
+
+	writer->Write();
+
+}
 GraphPlotterDockWidget::~GraphPlotterDockWidget()
 {
     delete m_pUI;

@@ -111,7 +111,7 @@ IF(WITH_GTEST )
 	find_package(GTest REQUIRED)
 	include_directories(${GTEST_INCLUDE_DIR})
 ENDIF(WITH_GTEST)
-#add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
+add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
 
 #add_executable(MetaheuristicTissueAssociationCommandTest MetaheuristicTissueAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
 #target_link_libraries(MetaheuristicTissueAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES})
@@ -126,7 +126,7 @@ ENDIF(WITH_GTEST)
 #add_executable(S2LLEEmbeddingTest S2LLEEmbeddingTest.cpp)
 #target_link_libraries(S2LLEEmbeddingTest ${ITK_LIBRARIES})
 
-#target_link_libraries(MinCostMaxFlowAJAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
+target_link_libraries(MinCostMaxFlowAJAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
 					
 					
 #add_test(

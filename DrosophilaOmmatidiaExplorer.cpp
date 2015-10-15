@@ -1796,10 +1796,56 @@ void DrosophilaOmmatidiaExplorer::PlotDescriptor(const std::vector<itk::Array<do
 void DrosophilaOmmatidiaExplorer::slotPlotSelectedEdgeMolecularDistribution(){
 	this->slotPlotEdgeMolecularDistribution(m_SelectedEdge);
 }
-void DrosophilaOmmatidiaExplorer::slotPlotEdgeMolecularDistribution(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
-#if 0
+void DrosophilaOmmatidiaExplorer::slotPlotEdgeMolecularDistribution(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edgeHandler){
     std::vector<itk::Array<double> > descriptorSeries;
     int T = m_Project.GetNumberOfFrames();
+
+    auto sourceHandler=m_CurrentAJGraph->GetAJEdgeSource(edgeHandler);
+    auto targetHandler=m_CurrentAJGraph->GetAJEdgeTarget(edgeHandler);
+
+    DrosophilaOmmatidiaJSONProject::AJCorrespondenceType::AJSubgraphType edgeSubgraph;
+
+
+
+    edgeSubgraph.AddEdge(edgeHandler);
+    edgeSubgraph.AddVertex(sourceHandler);
+    edgeSubgraph.AddVertex(targetHandler);
+
+
+	auto edge = m_CurrentAJGraph->GetAJEdge(edgeHandler);
+	descriptorSeries.push_back(edge->GetDescriptor());
+
+    auto currentSubgraph=edgeSubgraph;
+    for(int t=m_CurrentFrame+1;t<this->m_Project.GetNumberOfFrames();t++){
+        auto tissue = m_Project.GetTissueDescriptor(t);
+        auto correspondences = m_Project.GetCorrespondences(t-1,t);
+
+        auto resultSet = correspondences.FindByAntecessor(currentSubgraph);
+        if(resultSet.first!=resultSet.second){
+			auto correspondence = resultSet.first;
+
+			currentSubgraph = correspondence->GetSuccessor();
+
+			auto vertexIt=currentSubgraph.BeginVertices();
+			auto source = *vertexIt;
+			++vertexIt;
+			auto target = *vertexIt;
+
+			auto edgeHandler = m_CurrentAJGraph->GetAJEdgeHandler(source,target);
+			auto edge = m_CurrentAJGraph->GetAJEdge(edgeHandler);
+			descriptorSeries.push_back(edge->GetDescriptor());
+
+        }else{
+        	break;
+        }
+
+    }
+    auto color = this->m_EdgesDrawer.GetEdgeColor(edgeHandler);
+
+    std::string arrayName("edgeDistribution-" + std::to_string(this->m_CurrentAJGraph->GetAJEdgeSource(edgeHandler)) + "-" + std::to_string(this->m_CurrentAJGraph->GetAJEdgeTarget(edgeHandler)));
+
+    this->PlotDescriptor(descriptorSeries,color,arrayName);
+#if 0
 
      DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler source= m_CurrentAJGraph->GetAJEdgeSource(edge);
      DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::AJVertexHandler target= m_CurrentAJGraph->GetAJEdgeTarget(edge);

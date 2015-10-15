@@ -103,6 +103,36 @@ public:
 					result->SetValue(QVariant(cell->GetPosition()[2]));
 					return result;
 				case 3:
+					result = new  OmmatidiaTissueStandardTreeItem(PROPERTY,m_Tissue,this);
+
+					result->SetName(QString("area"));
+					result->SetValue(QVariant(cell->GetArea()));
+					return result;
+				case 4:
+					result = new  OmmatidiaTissueStandardTreeItem(PROPERTY,m_Tissue,this);
+
+					result->SetName(QString("xx"));
+					result->SetValue(QVariant(cell->GetXX()));
+					return result;
+				case 5:
+					result = new  OmmatidiaTissueStandardTreeItem(PROPERTY,m_Tissue,this);
+
+					result->SetName(QString("xy"));
+					result->SetValue(QVariant(cell->GetXY()));
+					return result;
+				case 6:
+					result = new  OmmatidiaTissueStandardTreeItem(PROPERTY,m_Tissue,this);
+
+					result->SetName(QString("yy"));
+					result->SetValue(QVariant(cell->GetXY()));
+					return result;
+				case 7:
+					result = new  OmmatidiaTissueStandardTreeItem(PROPERTY,m_Tissue,this);
+
+					result->SetName(QString("perimeter"));
+					result->SetValue(QVariant(cell->GetPerimeterLength()));
+					return result;
+				case 8:
 				{
 					OmmatidiaTissueStandardTreeItem * result = new OmmatidiaTissueStandardTreeItem(VERTEXLIST,this->m_Tissue,this);
 
@@ -112,7 +142,7 @@ public:
 					}
 					return result;
 				}
-				case 4:
+				case 9:
 				{
 					OmmatidiaTissueStandardTreeItem * result = new OmmatidiaTissueStandardTreeItem(EDGELIST,this->m_Tissue,this);
 
@@ -121,6 +151,15 @@ public:
 						result->AddEdge(edge);
 					}
 
+					return result;
+				}
+				case 10:
+				{
+					OmmatidiaTissueStandardTreeItem * result = new OmmatidiaTissueStandardTreeItem(CELLLIST,this->m_Tissue,this);
+					for(auto it = m_Tissue->GetCellGraph()->AdjacentCellsBegin(m_Cell);it!= m_Tissue->GetCellGraph()->AdjacentCellsEnd(m_Cell);++it){
+						OmmatidiaTissue<3>::CellGraphType::CellVertexHandler cell = *it;
+						result->AddCell(cell);
+					}
 					return result;
 				}
 			}
@@ -196,7 +235,7 @@ public:
 		case EDGELIST:
 			return m_Edges.size();
 		case CELL:
-			return 5;
+			return 11;
 		case CELLLIST:
 			return m_Cells.size();
 		case VERTEX:

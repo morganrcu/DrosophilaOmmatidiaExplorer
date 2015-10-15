@@ -27,7 +27,7 @@
 #include <vtkTriangleFilter.h>
 #include <boost/bimap.hpp>
 #include "Drawer.h"
-
+#include <vtkColor.h>
 template<class CellContainer, class AJVerticesContainer> class CellDrawer: public ttt::Drawer {
 
 	typedef typename CellContainer::CellVertexHandler CellVertexHandler;
@@ -229,8 +229,8 @@ private:
 		return color;
 	}
 public:
-	virtual void UpdateCellColor(const typename CellContainer::CellVertexHandler & cell){
-		std::vector<double> color(3);
+	virtual void SetCellColor(const typename CellContainer::CellVertexHandler & cell, const vtkColor3d & color){
+//		std::vector<double> color(3);
 
 		this->m_CellToActor.left.at(cell)->GetProperty()->SetColor(color[0],color[1],color[2]);
 

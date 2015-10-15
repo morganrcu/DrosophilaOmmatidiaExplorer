@@ -118,7 +118,7 @@ public:
 		} else {
 			auto dualEdge = m_Dual->AddCellEdge(existing_face, m_CurrentCellVertex);
 			m_TissueDescriptor->GetAJGraph()->GetAJEdge(e)->SetCellPair(std::pair<unsigned long, unsigned long>(existing_face, m_CurrentCellVertex));
-			m_TissueDescriptor->AddAJEdgeToCellEdgeMapping(e, dualEdge);
+			//m_TissueDescriptor->AddAJEdgeToCellEdgeMapping(e, dualEdge);
 		}
 	}
 
@@ -197,9 +197,8 @@ void create_dual_graph(typename InputGraph::Pointer & g, typename OutputGraph::P
 }
 
 template<class TAJGraph, class TTissueDescriptor> void AJGraphToTissueDescriptor<TAJGraph, TTissueDescriptor>::Compute() {
-#if 0
 	//1. Compute embedding of the AJGraph from R3 to S2
-
+#if 0
 	{
 
 		vnl_matrix<double> Dgeodesic(this->m_AJGraph->GetNumVertices(),this->m_AJGraph->GetNumVertices());
@@ -285,6 +284,8 @@ template<class TAJGraph, class TTissueDescriptor> void AJGraphToTissueDescriptor
 		Dgeodesic = Dgeodesic/sphereRadius;
 		D=D/sphereRadius;
 #endif
+
+
 #if 0
 	//
 
@@ -392,6 +393,9 @@ template<class TAJGraph, class TTissueDescriptor> void AJGraphToTissueDescriptor
 	//clear dfull
 
 	}
+
+
+#endif
 	//
 	typename boost::property_map<typename TAJGraph::BoostGraphType, boost::edge_index_t>::type e_index = boost::get(boost::edge_index,
 			m_AJGraph->GetBoostGraph());
@@ -825,7 +829,7 @@ template<class TAJGraph, class TTissueDescriptor> void AJGraphToTissueDescriptor
 			cell->SetPosition(centroid3D);
 		}
 	}
-#endif
+
 }
 
 #endif /* AJGRAPHTOTISSUEDESCRIPTOR_HXX_ */

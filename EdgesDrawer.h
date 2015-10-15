@@ -31,7 +31,7 @@
 
 #include "Drawer.h"
 #include <map>
-
+#include <vtkColor.h>
 template<class TEdgesContainer> class EdgesDrawer : public ttt::Drawer {
 public:
 
@@ -174,7 +174,9 @@ public:
     virtual itk::FixedArray<double,3> GetEdgeColor(const typename TEdgesContainer::AJEdgeHandler & edgeHandler){
     	return m_Edges2Colors[edgeHandler];
     }
-
+    virtual void SetEdgeColor(const typename TEdgesContainer::AJEdgeHandler & edgeHandler,const vtkColor3d & color){
+     	m_EdgesToActors.left.at(edgeHandler)->GetProperty()->SetColor(color[0],color[1],color[2]);
+     }
     virtual void Draw(){
         this->Reset();
 
