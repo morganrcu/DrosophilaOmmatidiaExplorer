@@ -1617,6 +1617,30 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
     this->m_pGraphPlotterDockWidget->Draw();
 }
 
+template<class TTissue> void edgeLengthDistribution(const typename TTissue::Pointer & tissue,double * mean,double * std){
+
+	double sum=0;
+	double sum2=0;
+	int total=0;
+	for(auto it=tissue->GetAJGraph()->EdgesBegin();it!=tissue->GetAJGraph()->EdgesEnd();++it){
+	    auto sourceHandler=tissue->GetAJGraph()->GetAJEdgeSource(*it);
+	    auto targetHandler=tissue->GetAJGraph()->GetAJEdgeTarget(*it);
+
+	    auto sourceLocation = tissue->GetAJGraph()->GetAJVertex(sourceHandler)->GetPosition();
+	    auto targetLocation = tissue->GetAJGraph()->GetAJVertex(targetHandler)->GetPosition();
+	    auto diff =  sourceLocation - targetLocation;
+
+	    double dist = diff.GetNorm();
+
+	    sum+=dist;
+	    sum2+=dist*dist;
+
+	    total++;
+	}
+
+	*mean=sum/total;
+	*std=sum2 - *mean * *mean;
+}
 void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
 
     vtkSmartPointer<vtkDoubleArray> arrEdge =vtkSmartPointer<vtkDoubleArray>::New();
@@ -1643,7 +1667,10 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
 
     double dist = diff.GetNorm();
 
-    arrEdge->SetTuple1(m_CurrentFrame,dist);
+    double avgEdge,stdEdge;
+    edgeLengthDistribution<OmmatidiaTissue<3> >(m_CurrentTissue,&avgEdge,&stdEdge);
+    arrEdge->SetTuple1(m_CurrentFrame,(dist-avgEdge)/stdEdge);
+
 
     auto currentSubgraph=edgeSubgraph;
     for(int t=m_CurrentFrame+1;t<this->m_Project.GetNumberOfFrames();t++){
@@ -1666,7 +1693,9 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
 			auto diff =  sourceLocation - targetLocation;
 
 			double dist = diff.GetNorm();
-			arrEdge->SetTuple1(t,dist);
+			double avgEdge,stdEdge;
+			edgeLengthDistribution<OmmatidiaTissue<3> >(tissue,&avgEdge,&stdEdge);
+			arrEdge->SetTuple1(t,(dist-avgEdge)/stdEdge);
         }else{
         	break;
         }
@@ -1697,7 +1726,9 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
 			auto diff =  sourceLocation - targetLocation;
 
 			double dist = diff.GetNorm();
-			arrEdge->SetTuple1(t,dist);
+			double avgEdge,stdEdge;
+			edgeLengthDistribution<OmmatidiaTissue<3> >(tissue,&avgEdge,&stdEdge);
+			arrEdge->SetTuple1(t,(dist-avgEdge)/stdEdge);
         }else{
         	break;
         }
