@@ -1570,7 +1570,21 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
 			cellSubgraph = correspondence->GetAntecessor();
 			auto cellHandler =vertexSubsetToCellHandler<OmmatidiaTissue<3>,decltype(cellSubgraph)>(tissue,cellSubgraph);
 			auto cell = tissue->GetCellGraph()->GetCell(cellHandler);
-			arrCell->SetTuple1(t,cell->GetArea());
+
+
+			vnl_matrix_fixed<double,2,2> momentMatrix;
+
+			double den = 4*(cell->GetXX()*cell->GetYY()-cell->GetXY()*cell->GetXY());
+			momentMatrix(0,0)=cell->GetXX()/den;
+			momentMatrix(1,1)=cell->GetYY()/den;
+			momentMatrix(0,1)=-cell->GetXY()/den;
+			momentMatrix(1,0)=-cell->GetXY()/den;
+
+			vnl_symmetric_eigensystem<double> eigen(momentMatrix);
+
+			double aspectRatio = eigen.get_eigenvalue(0)/eigen.get_eigenvalue(1);
+
+			arrCell->SetTuple1(t,aspectRatio);
 
         }else{
         	break;
