@@ -143,6 +143,10 @@ private:
 
 	std::vector<AJCorrespondenceType> m_PlottedCorrespondences;
 
+	std::map<AJSubgraphType,vtkColor3d > m_BeforeColors,m_AfterColors,m_Colors;
+
+	bool m_Forward;
+	bool m_Backward;
 };
 
 #endif // AJTRACKINGFRAME_H

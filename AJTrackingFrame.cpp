@@ -599,6 +599,19 @@ void AJTrackingFrame::slotSelectCellAfter(){
 }
 void AJTrackingFrame::slotFrameChanged(int frame){
 
+	if(frame==m_CurrentFrame+1){
+		m_Forward=true;
+		m_Backward=false;
+		m_Colors=m_AfterColors;
+	}else if(frame==m_CurrentFrame-1){
+		m_Forward=false;
+		m_Backward=true;
+		m_Colors=m_BeforeColors;
+	}else{
+		m_Forward=false;
+		m_Backward=false;
+		m_Colors.clear();
+	}
 
 	this->m_CurrentFrame=frame;
 
@@ -691,16 +704,25 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 		}
 	}
 #endif
-	std::map<AJCorrespondenceType,vtkColor3d > beforeColors,afterColors;
+
 
 	for(auto correspondence = this->m_Correspondences.BeginCorrespondences();correspondence!=m_Correspondences.EndCorrespondences();++correspondence){
+
 		vtkColor3d color;
-		color[0]=double(rand())/RAND_MAX;
-		color[1]=double(rand())/RAND_MAX;
-		color[2]=double(rand())/RAND_MAX;
-		beforeColors[*correspondence]=color;
+
+		if(m_Forward && m_Colors.find(correspondence->GetAntecessor())!=m_Colors.end()){
+			color=m_Colors[correspondence->GetAntecessor()];
+
+		}else if(m_Backward && m_Colors.find(correspondence->GetSuccessor())!=m_Colors.end()){
+			color=m_Colors[correspondence->GetSuccessor()];
+		}else{
+			color[0]=double(rand())/RAND_MAX;
+			color[1]=double(rand())/RAND_MAX;
+			color[2]=double(rand())/RAND_MAX;
+		}
 
 		auto antecessor = correspondence->GetAntecessor();
+		m_BeforeColors[antecessor]=color;
 		switch(antecessor.GetOrder()){
 		case 3: //cell
 		{
@@ -732,7 +754,7 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 		}
 		}
 		auto successor = correspondence->GetSuccessor();
-
+		m_AfterColors[successor]=color;
 		switch(successor.GetOrder()){
 				case 3: //cell
 				{
