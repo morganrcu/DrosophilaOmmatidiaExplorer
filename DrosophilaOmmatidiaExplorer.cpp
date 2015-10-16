@@ -1419,7 +1419,7 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexMolecularDistribution(){
 
          DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer molecular =m_Project.GetMolecularImage(t);
         vertexDescriptor->SetMolecularImage(molecular);
-        vertexDescriptor->SetRadius(10*molecular->GetSpacing()[0]); //TODO
+        vertexDescriptor->SetRadius(3*molecular->GetSpacing()[0]); //TODO
         vertexDescriptor->SetAJGraph(ajgraph);
         vertexDescriptor->Compute();
 
@@ -1639,7 +1639,7 @@ template<class TTissue> void edgeLengthDistribution(const typename TTissue::Poin
 	}
 
 	*mean=sum/total;
-	*std=sum2 - *mean * *mean;
+	*std=sum2/total - *mean * *mean;
 }
 void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::AJGraphType::AJEdgeHandler & edge){
 
@@ -1862,7 +1862,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeMolecularDistribution(const Ommati
 
     auto currentSubgraph=edgeSubgraph;
     for(int t=m_CurrentFrame+1;t<this->m_Project.GetNumberOfFrames();t++){
-        auto tissue = m_Project.GetTissueDescriptor(t);
+        auto ajgraph = m_Project.GetAJGraph(t);
         auto correspondences = m_Project.GetCorrespondences(t-1,t);
 
         auto resultSet = correspondences.FindByAntecessor(currentSubgraph);
@@ -1876,8 +1876,8 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeMolecularDistribution(const Ommati
 			++vertexIt;
 			auto target = *vertexIt;
 
-			auto edgeHandler = m_CurrentAJGraph->GetAJEdgeHandler(source,target);
-			auto edge = m_CurrentAJGraph->GetAJEdge(edgeHandler);
+			auto edgeHandler = ajgraph->GetAJEdgeHandler(source,target);
+			auto edge = ajgraph->GetAJEdge(edgeHandler);
 			descriptorSeries.push_back(edge->GetDescriptor());
 
         }else{
