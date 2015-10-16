@@ -979,7 +979,7 @@ void DrosophilaOmmatidiaExplorer::slotDoVertexTracking(){
 
 void DrosophilaOmmatidiaExplorer::slotDoCells(){
 
-#if 0
+
 	typedef AJGraphToTissueDescriptor<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,
 					   typename DrosophilaOmmatidiaJSONProject::TissueType> CellFilterType;
 
@@ -988,8 +988,8 @@ void DrosophilaOmmatidiaExplorer::slotDoCells(){
 	cellFilter->SetAJGraph(m_Project.GetAJGraph(m_CurrentFrame));
 	cellFilter->Compute();
 
-	//m_Project.SetCellGraph(m_CurrentFrame,cellFilter->GetCellGraph());
-#endif
+	m_Project.SetTissueDescriptor(m_CurrentFrame,cellFilter->GetTissueDescriptor());
+
 
 }
 

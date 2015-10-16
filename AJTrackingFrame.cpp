@@ -647,13 +647,22 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 			switch(successor.GetOrder()){
 				case 3: //cell
 				{
+					vtkColor3d color;
+					color[0]=0.0;
+					color[1]=0.0;
+					color[2]=0.0;
 					auto cell =vertexSubsetToCellHandler<OmmatidiaTissue<3>,AJSubgraphType>(m_BeforeTissue,successor);
-					this->m_BeforeCellsDrawer.HighlightCell(cell);
+					this->m_BeforeCellsDrawer.SetCellColor(cell,color);
 
 					break;
 				}
 				case 2:
 				{
+					vtkColor3d color;
+					color[0]=0.0;
+					color[1]=0.0;
+					color[2]=0.0;
+
 					auto vertexIt = successor.BeginVertices();
 
 					auto source = *vertexIt;
@@ -661,7 +670,7 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 
 					auto target = *vertexIt;
 					auto edge=m_BeforeTissue->GetAJGraph()->GetAJEdgeHandler(source,target);
-					this->m_BeforeEdgesDrawer.HighlightEdge(edge);
+					this->m_BeforeEdgesDrawer.SetEdgeColor(edge,color);
 
 
 					break;
@@ -669,8 +678,13 @@ void AJTrackingFrame::slotFrameChanged(int frame){
 
 				case 1:
 				{
+					vtkColor3d color;
+					color[0]=0.0;
+					color[1]=0.0;
+					color[2]=0.0;
+
 					auto vertex = *(successor.BeginVertices());
-					this->m_BeforeVertexDrawer.HighlightAJVertex(vertex);
+					this->m_BeforeVertexDrawer.SetVertexColor(vertex,color);
 					break;
 				}
 			}
