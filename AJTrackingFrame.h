@@ -42,8 +42,11 @@ public:
     void setSelectedEdgeBefore(const EdgeType & edge);
     void setSelectedVertexAfter(const VertexType & vertex);
     void setSelectedVertexBefore(const VertexType & vertex);
+    void setFrame(int frame);
 public slots:
 
+	void slotFrameForward();
+	void slotFrameBackward();
 	void slotFrameChanged(int frame);
 	void slotComputeCorrespondences();
 

@@ -17,6 +17,7 @@ public:
 		}
 	}
 };
+
 AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject & project) :
     QDialog(parent),
 	m_pUI(new Ui::AJTrackingFrame),
@@ -69,8 +70,14 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 	connect(this->m_pUI->actionSelectEdgeBefore,SIGNAL(triggered()),SLOT(slotSelectEdgeBefore()));
 	connect(this->m_pUI->actionSelectEdgeAfter,SIGNAL(triggered()),SLOT(slotSelectEdgeAfter()));
 
+	//this->m_pUI->actionSelectCellBefore->setShortcutContext(Qt::ApplicationShortcut);
+	//this->m_pUI->actionSelectCellAfter->setShortcutContext(Qt::ApplicationShortcut);
+
 	connect(this->m_pUI->actionSelectCellBefore,SIGNAL(triggered()),SLOT(slotSelectCellBefore()));
 	connect(this->m_pUI->actionSelectCellAfter,SIGNAL(triggered()),SLOT(slotSelectCellAfter()));
+
+	connect(this->m_pUI->actionFrameForward,SIGNAL(triggered()),SLOT(slotFrameForward()));
+	connect(this->m_pUI->actionFrameBackward,SIGNAL(triggered()),SLOT(slotFrameBackward()));
 
 	connect(this->m_pUI->actionAddCorrespondence,SIGNAL(triggered()),SLOT(slotAddCorrespondence()));
 
@@ -79,7 +86,16 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 	connect(this->m_pUI->correspondencesTableWidget,SIGNAL(itemSelectionChanged()),SLOT(slotCorrespondenceSelectionChanged()));
 	this->slotFrameChanged(0);
 
-
+	this->addAction(this->m_pUI->actionSelectVertexAfter);
+	this->addAction(this->m_pUI->actionSelectVertexBefore);
+	this->addAction(this->m_pUI->actionSelectEdgeBefore);
+	this->addAction(this->m_pUI->actionSelectEdgeAfter);
+	this->addAction(this->m_pUI->actionSelectCellAfter);
+	this->addAction(this->m_pUI->actionSelectCellBefore);
+	this->addAction(this->m_pUI->actionAddCorrespondence);
+	this->addAction(this->m_pUI->actionDeleteCorrespondence);
+	this->addAction(this->m_pUI->actionFrameForward);
+	this->addAction(this->m_pUI->actionFrameBackward);
 	m_PointWidget=vtkSmartPointer<vtkPointWidget>::New();
 	m_QtToVTKConnections=vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
@@ -121,6 +137,18 @@ template<class TTissueDescriptor,class TAJSubgraph>  typename TTissueDescriptor:
 					);
 	assert(result!=tissue->GetCellGraph()->CellsEnd());
 	return *result;
+}
+void AJTrackingFrame::slotFrameForward(){
+	this->setFrame(m_CurrentFrame+1);
+}
+void AJTrackingFrame::slotFrameBackward(){
+	this->setFrame(m_CurrentFrame-1);
+}
+void AJTrackingFrame::setFrame(int frame){
+	this->slotFrameChanged(frame);
+	this->m_pUI->frameSlider->blockSignals(true);
+	this->m_pUI->frameSlider->setValue(frame);
+	this->m_pUI->frameSlider->blockSignals(false);
 }
 void AJTrackingFrame::slotCorrespondenceSelectionChanged(){
 
