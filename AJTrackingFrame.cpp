@@ -115,6 +115,7 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 }
 
 
+
 AJTrackingFrame::~AJTrackingFrame()
 {
     delete m_pUI;
