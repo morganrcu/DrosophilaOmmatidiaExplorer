@@ -8,29 +8,27 @@
 #ifndef DISTANCEPOINTTOLINE_H_
 #define DISTANCEPOINTTOLINE_H_
 
-
  template<class TPoint> double distancePointToLine(const TPoint & x,const TPoint & a, const TPoint & b){
 
+	auto ba = b - a;
+	auto xa = x - a;
+	auto xb = x - b;
 
-	auto ax = x - a;
-	double normAX = ax.GetNorm();
-	if (normAX == 0)
-		return 0;
-	auto ab = b - a;
-	double r = ab * ax;
+	double c1 = ba*xa;
 
-	r /= ax.GetNorm();
-
-	double dist;
-	if (r < 0) {
-		dist = ax.GetNorm();
-	} else if (r > 1) {
-		itk::Vector<double, 3> xb = b - x;
-		dist = xb.GetNorm();
-	} else {
-		dist = sqrt(fabs(pow(ax.GetNorm(), 2) - r * pow(ab.GetNorm(), 2)));
+	if(c1 <=0){
+		return xa.GetNorm();
 	}
-	return dist;
+
+	double c2 = ba*ba;
+
+	if(c2<=c1){
+		return xb.GetNorm();
+	}
+
+	double w = c1/c2;
+	TPoint Pb = a + w*ba;
+	return (x-Pb).GetNorm();
 }
 
 #endif /* DISTANCEPOINTTOLINE_H_ */

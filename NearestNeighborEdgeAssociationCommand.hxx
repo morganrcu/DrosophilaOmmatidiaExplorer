@@ -25,10 +25,12 @@ template<class TEdge,class TTissue> double haussdorfDistanceEdgeToEdge(const TEd
 	auto targetB =tissueEdgeB->GetAJGraph()->GetAJEdgeTarget(edgeB);
 	auto positionTargetB =tissueEdgeB->GetAJGraph()->GetAJVertex(targetB)->GetPosition();
 
-	return std::max(distancePointToLine(positionSourceA,positionSourceB,positionTargetB),
-			std::max(distancePointToLine(positionTargetA,positionSourceB,positionTargetB),
+
+	return std::max(std::max(distancePointToLine(positionSourceA,positionSourceB,positionTargetB),
+							 distancePointToLine(positionTargetA,positionSourceB,positionTargetB)),
 					std::max(distancePointToLine(positionSourceB,positionSourceA,positionTargetA),
-							distancePointToLine(positionTargetB,positionSourceA,positionTargetA))));
+							 distancePointToLine(positionTargetB,positionSourceA,positionTargetA))
+					);
 }
 
 
