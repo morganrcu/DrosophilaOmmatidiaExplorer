@@ -982,7 +982,7 @@ void DrosophilaOmmatidiaExplorer::slotDoCells(){
 	typedef AJGraphToTissueDescriptor<typename DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,
 					   typename DrosophilaOmmatidiaJSONProject::TissueType> CellFilterType;
 
-	typename CellFilterType::Pointer cellFilter = CellFilterType::New();
+	CellFilterType::Pointer cellFilter = CellFilterType::New();
 
 	cellFilter->SetAJGraph(m_Project.GetAJGraph(m_CurrentFrame));
 	cellFilter->Compute();
