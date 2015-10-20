@@ -11,7 +11,6 @@
 
 
 #include <AJCorrespondenceSet.h>
-#include "CellCorrespondence.h"
 
 
 
