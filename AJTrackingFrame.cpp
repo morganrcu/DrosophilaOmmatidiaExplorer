@@ -2,6 +2,8 @@
 #include "ui_AJTrackingFrame.h"
 #include <vtkPropPicker.h>
 #include <vtkColor.h>
+#include "NearestNeighborCellAssociationCommand.h"
+#include "NearestNeighborEdgeAssociationCommand.h"
 //#include "MinCostMaxFlowAJAssociationCommand.h"
 
 class RenderSyncCommand : public vtkCommand{
@@ -84,6 +86,9 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 	connect(this->m_pUI->actionDeleteCorrespondence,SIGNAL(triggered()),SLOT(slotDeleteSelectedCorrespondences()));
 
 	connect(this->m_pUI->correspondencesTableWidget,SIGNAL(itemSelectionChanged()),SLOT(slotCorrespondenceSelectionChanged()));
+
+
+	connect(this->m_pUI->actionGuessCorrespondence,SIGNAL(triggered()),SLOT(slotGuessCorrespondence()));
 	this->slotFrameChanged(0);
 
 	this->addAction(this->m_pUI->actionSelectVertexAfter);
@@ -96,6 +101,7 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 	this->addAction(this->m_pUI->actionDeleteCorrespondence);
 	this->addAction(this->m_pUI->actionFrameForward);
 	this->addAction(this->m_pUI->actionFrameBackward);
+	this->addAction(this->m_pUI->actionGuessCorrespondence);
 	m_PointWidget=vtkSmartPointer<vtkPointWidget>::New();
 	m_QtToVTKConnections=vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
@@ -107,6 +113,7 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 	this->m_IsCellSelectedAfter=false;
 
 }
+
 
 AJTrackingFrame::~AJTrackingFrame()
 {
@@ -138,6 +145,59 @@ template<class TTissueDescriptor,class TAJSubgraph>  typename TTissueDescriptor:
 	assert(result!=tissue->GetCellGraph()->CellsEnd());
 	return *result;
 }
+
+void AJTrackingFrame::slotGuessCorrespondence(){
+
+	if(this->m_IsCellSelectedBefore){
+		typedef NearestNeighborCellAssociationCommand<OmmatidiaTissue<3>> CellAssociator;
+
+		CellAssociator associator;
+
+		associator.SetCell0(this->m_CellSelectedBefore);
+		associator.SetTissue0(this->m_BeforeTissue);
+		associator.SetTissue1(this->m_AfterTissue);
+		associator.Do();
+
+		auto cell1=associator.GetCell1();
+
+		this->setSelectedCellAfter(cell1);
+		this->m_AfterRenderWindow->Render();
+	}
+	if(this->m_IsEdgeSelectedBefore){
+		typedef NearestNeighborEdgeAssociationCommand<OmmatidiaTissue<3>> EdgeAssociator;
+
+		EdgeAssociator associator;
+
+		associator.SetEdge0(this->m_EdgeSelectedBefore);
+		associator.SetTissue0(this->m_BeforeTissue);
+		associator.SetTissue1(this->m_AfterTissue);
+		associator.Do();
+
+		auto edge1=associator.GetEdge1();
+
+		this->setSelectedEdgeAfter(edge1);
+		this->m_AfterRenderWindow->Render();
+	}
+	if(this->m_IsVertexSelectedBefore){
+
+		auto vertexPosition = m_BeforeTissue->GetAJGraph()->GetAJVertex(m_VertexSelectedBefore)->GetPosition();
+
+		double minDist = std::numeric_limits<double>::max();
+		VertexType vertex1;
+		for (auto vertexIt = m_AfterTissue->GetAJGraph()->VerticesBegin();vertexIt!=m_AfterTissue->GetAJGraph()->VerticesEnd();++vertexIt){
+			auto pos1= m_AfterTissue->GetAJGraph()->GetAJVertex(*vertexIt)->GetPosition();
+			double dist = (vertexPosition-pos1).GetNorm();
+			if(dist<minDist){
+				minDist=dist;
+				vertex1=*vertexIt;
+			}
+		}
+
+		this->setSelectedVertexAfter(vertex1);
+		this->m_AfterRenderWindow->Render();
+	}
+}
+
 void AJTrackingFrame::slotFrameForward(){
 	this->setFrame(m_CurrentFrame+1);
 }

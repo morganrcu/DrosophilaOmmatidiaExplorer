@@ -44,7 +44,7 @@ public:
     void setSelectedVertexBefore(const VertexType & vertex);
     void setFrame(int frame);
 public slots:
-
+	void slotGuessCorrespondence();
 	void slotFrameForward();
 	void slotFrameBackward();
 	void slotFrameChanged(int frame);

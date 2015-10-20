@@ -102,7 +102,23 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="0" column="2">
+        <widget class="QPushButton" name="guessButton">
+         <property name="font">
+          <font>
+           <underline>false</underline>
+           <strikeout>false</strikeout>
+          </font>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Guess</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
         <widget class="QGroupBox" name="afterGroupBox">
          <property name="title">
           <string>t</string>
@@ -158,14 +174,14 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="1" column="0" colspan="4">
         <widget class="QPushButton" name="addCorrespondenceButton">
          <property name="text">
           <string>Add</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
+       <item row="2" column="0" colspan="4">
         <widget class="QPushButton" name="computeEstimationsButton">
          <property name="text">
           <string>Guess Correspondences</string>
@@ -310,6 +326,17 @@
     <string>Left</string>
    </property>
   </action>
+  <action name="actionGuessCorrespondence">
+   <property name="text">
+    <string>actionGuessCorrespondence</string>
+   </property>
+   <property name="toolTip">
+    <string>Guess </string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -451,6 +478,22 @@
     <hint type="sourcelabel">
      <x>861</x>
      <y>900</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>guessButton</sender>
+   <signal>clicked()</signal>
+   <receiver>actionGuessCorrespondence</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>556</x>
+     <y>170</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>
