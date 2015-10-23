@@ -49,7 +49,7 @@ protected:
 	EdgeMolecularDistributionDescriptor();
 
 
-        ~EdgeMolecularDistributionDescriptor();
+	~EdgeMolecularDistributionDescriptor();
 
 private:
 
