@@ -35,7 +35,7 @@
 #include "PredictAJGraph.h"
 
 #include "VertexMolecularDistributionDescriptor.h"
-#include "EdgeMolecularDistributionDescriptor.h"
+#include "TotalEdgeMolecularDistributionDescriptor.h"
 #include <vtkContextView.h>
 #include <vtkContextScene.h>
 #include <vtkChartXY.h>
@@ -1432,14 +1432,14 @@ void DrosophilaOmmatidiaExplorer::slotDoEdgeMolecularDistribution(){
     for(unsigned int t=0;t<m_Project.GetNumberOfFrames();t++){
          DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType::Pointer ajgraph= m_Project.GetAJGraph(t);
 
-        typedef EdgeMolecularDistributionDescriptor<typename  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,typename DrosophilaOmmatidiaJSONProject::MolecularImageType> EdgeMolecularDistributionDescriptorType;
+        typedef TotalEdgeMolecularDistributionDescriptor<typename  DrosophilaOmmatidiaJSONProject::AdherensJunctionGraphType,typename DrosophilaOmmatidiaJSONProject::MolecularImageType> EdgeMolecularDistributionDescriptorType;
 
          EdgeMolecularDistributionDescriptorType::Pointer edgeDescriptor = EdgeMolecularDistributionDescriptorType::New();
 
          DrosophilaOmmatidiaJSONProject::MolecularImageType::Pointer molecularImage=m_Project.GetMolecularImage(t);
         edgeDescriptor->SetMolecularImage(molecularImage);
-        edgeDescriptor->SetRadius(2.0*molecularImage->GetSpacing()[0]); //TODO
-        edgeDescriptor->SetNumberOfSegments(4);
+        edgeDescriptor->SetRadius(4.0*molecularImage->GetSpacing()[0]); //TODO
+        //edgeDescriptor->SetNumberOfSegments(4);
 
         edgeDescriptor->SetAJGraph(ajgraph);
         edgeDescriptor->Compute();
@@ -1589,7 +1589,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
         	break;
         }
     }
-
+#if 0
     double sum=0;
     double sum2=0;
     for(int t=0;t< arrCell->GetNumberOfTuples();t++){
@@ -1604,7 +1604,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
     for(int t=0;t< arrCell->GetNumberOfTuples();t++){
     	arrCell->SetTuple1(t,(arrCell->GetTuple1(t)-mean)/std);
     }
-
+#endif
     //auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
     itk::FixedArray<double,3> color;
     color[0]=0.0;
@@ -1668,7 +1668,8 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
 
     double avgEdge,stdEdge;
     edgeLengthDistribution<OmmatidiaTissue<3> >(m_CurrentTissue,&avgEdge,&stdEdge);
-    arrEdge->SetTuple1(m_CurrentFrame,(dist-avgEdge)/stdEdge);
+    //arrEdge->SetTuple1(m_CurrentFrame,(dist-avgEdge)/stdEdge);
+	arrEdge->SetTuple1(m_CurrentFrame, dist);
 
 
     auto currentSubgraph=edgeSubgraph;
@@ -1694,7 +1695,8 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
 			double dist = diff.GetNorm();
 			double avgEdge,stdEdge;
 			edgeLengthDistribution<OmmatidiaTissue<3> >(tissue,&avgEdge,&stdEdge);
-			arrEdge->SetTuple1(t,(dist-avgEdge)/stdEdge);
+			//arrEdge->SetTuple1(t,(dist-avgEdge)/stdEdge);
+			arrEdge->SetTuple1(t, dist);
         }else{
         	break;
         }
@@ -1727,12 +1729,13 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
 			double dist = diff.GetNorm();
 			double avgEdge,stdEdge;
 			edgeLengthDistribution<OmmatidiaTissue<3> >(tissue,&avgEdge,&stdEdge);
-			arrEdge->SetTuple1(t,(dist-avgEdge)/stdEdge);
+			//arrEdge->SetTuple1(t,(dist-avgEdge)/stdEdge);
+			arrEdge->SetTuple1(t, dist);
         }else{
         	break;
         }
     }
-
+#if 0
     double sum=0;
     double sum2=0;
     for(int t=0;t< arrEdge->GetNumberOfTuples();t++){
@@ -1746,7 +1749,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotEdgeLength(const OmmatidiaTissue<3>::A
     for(int t=0;t< arrEdge->GetNumberOfTuples();t++){
     	arrEdge->SetTuple1(t,(arrEdge->GetTuple1(t)-mean)/std);
     }
-
+#endif
     auto color = this->m_EdgesDrawer.GetEdgeColor(edge);
     std::cout << color << std::endl;
 

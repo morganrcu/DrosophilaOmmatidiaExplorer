@@ -186,6 +186,7 @@ template<class TMolecularImage> itk::Array<double> SeedBasedMolecularDistributio
     	distribution[cluster]+= this->m_MolecularImage->GetPixel(index);
     	volume[cluster]++;
     }
+	//std::cout << volume << " " << distribution;
     for(int i=0;i<m_NumberOfClusters;i++){
     	if(volume[i]>0){
     		distribution[i]=distribution[i]/volume[i];
@@ -193,7 +194,7 @@ template<class TMolecularImage> itk::Array<double> SeedBasedMolecularDistributio
     		distribution[i]=0;
     	}
     }
-
+	//std::cout << " " << distribution << std::endl;
 return distribution;
 
 }

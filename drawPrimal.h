@@ -7,8 +7,6 @@
 
 #ifndef DRAWPRIMAL_H_
 #define DRAWPRIMAL_H_
-
-#include <OmmatidiaTissue.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
@@ -16,8 +14,10 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkLineSource.h>
 #include <vtkProperty.h>
+#include <vtkSmartPointer.h>
+#include <OmmatidiaTissue.h>
 void drawPrimal(const OmmatidiaTissue<3>::Pointer & descriptor,const vtkSmartPointer<vtkRenderer> & renderer){
-
+#if 1
 	vtkSmartPointer<vtkRenderWindow> renWin = vtkSmartPointer<vtkRenderWindow>::New();
 
 	renWin->AddRenderer(renderer);
@@ -91,5 +91,6 @@ void drawPrimal(const OmmatidiaTissue<3>::Pointer & descriptor,const vtkSmartPoi
 
 	renWin->Render();
 	iren->Start();
+#endif
 };
 #endif /* DRAWPRIMAL_H_ */

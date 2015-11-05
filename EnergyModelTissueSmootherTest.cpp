@@ -1,44 +1,65 @@
 //#include <gtest/gtest.h>
+
+
+
+//#include <vtkRenderWindow.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkRenderWindowInteractor.h>
+//#include <vtkLineSource.h>
+//#include <vtkPolyDataMapper.h>
+//#include <vtkSphereSource.h>
+//#include <vnl/vnl_sample.h>
+//TEST(MinCostMaxFlowAJAssociationCommand,GeneralTest){
+#include <vtkSmartPointer.h>
+#include <vtkRenderer.h>
+#include "drawPrimal.h"
+
 #include "DrosophilaOmmatidiaJSONProject.h"
 
 #include "tttEnergyModelTissueSmoother.h"
-
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkSmartPointer.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkLineSource.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkSphereSource.h>
-#include <vnl/vnl_sample.h>
-//TEST(MinCostMaxFlowAJAssociationCommand,GeneralTest){
 int main(){
 	DrosophilaOmmatidiaJSONProject project;
-	project.Open("/home/morgan/dataset/eyes/aCat-LifeR Movies/mhas/26aCATLifeRx3/");
+	//project.Open("/home/morgan/dataset/eyes/aCat-LifeR Movies/mhas/26aCATLifeRx3/");
+	project.Open("\\\\rstore1\\tusm_lab_hatini_confocal01$\\data4stevepaper\\26aCATLifeRx3\\");
 
 
-	typedef EnergyModelTissueSmoother<typename DrosophilaOmmatidiaJSONProject::TissueType, typename DrosophilaOmmatidiaJSONProject::PlatenessImageType> SmootherType;
+	
+	
+	for (int frame = 0; frame < project.GetNumberOfFrames(); frame++){
+		typedef EnergyModelTissueSmoother<typename DrosophilaOmmatidiaJSONProject::TissueType, typename DrosophilaOmmatidiaJSONProject::PlatenessImageType> SmootherType;
 
-	SmootherType smoother ;
-	int frame=0;
-	auto tissue = project.GetTissueDescriptor(frame);
+		SmootherType smoother;
+		auto tissue = project.GetTissueDescriptor(frame);
+		vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+
+		//drawPrimal(tissue, renderer);
+
 #if 0
-	for(auto itVertices=tissue->GetAJGraph()->VerticesBegin();itVertices!=tissue->GetAJGraph()->VerticesEnd();++itVertices ){
-		auto position = tissue->GetAJGraph()->GetAJVertex(*itVertices)->GetPosition();
+		for(auto itVertices=tissue->GetAJGraph()->VerticesBegin();itVertices!=tissue->GetAJGraph()->VerticesEnd();++itVertices ){
+			auto position = tissue->GetAJGraph()->GetAJVertex(*itVertices)->GetPosition();
 
-		position[0]+=vnl_sample_normal(0,0.0003);
-		position[1]+=vnl_sample_normal(0,0.0003);
-		position[2]+=vnl_sample_normal(0,0.0003);
-		tissue->GetAJGraph()->GetAJVertex(*itVertices)->SetPosition(position);
-	}
+			position[0]+=vnl_sample_normal(0,0.0003);
+			position[1]+=vnl_sample_normal(0,0.0003);
+			position[2]+=vnl_sample_normal(0,0.0003);
+			tissue->GetAJGraph()->GetAJVertex(*itVertices)->SetPosition(position);
+		}
 #endif
-	smoother.SetInputTissue(tissue);
+		smoother.SetInputTissue(tissue);
 
-	auto plateness= project.GetPlatenessImage(frame);
-	auto vertexness= project.GetVertexnessImage(frame);
-	smoother.SetPlatenessImage(plateness);
-	smoother.SetVertexnessImage(vertexness);
-	smoother.DoADMM();
+		auto plateness = project.GetPlatenessImage(frame);
+		auto vertexness = project.GetVertexnessImage(frame);
+		smoother.SetPlatenessImage(plateness);
+		smoother.SetVertexnessImage(vertexness);
+		smoother.DoADMM();
+		auto tissue1 = smoother.GetOutputTissue();
+		project.SetTissueDescriptor(frame, tissue1);
+		project.SetAJGraph(frame, tissue1->GetAJGraph());
+		//drawPrimal(tissue1, renderer);
+
+	}
+
+	
+
 };
 #if 0
 int main(int argc, char **argv) {
