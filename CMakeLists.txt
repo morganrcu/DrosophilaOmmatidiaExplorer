@@ -115,7 +115,7 @@ ENDIF(WITH_GTEST)
 #target_link_libraries(MinCostMaxFlowAJAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
 
 add_executable(EnergyModelTissueSmootherTest EnergyModelTissueSmootherTest.cpp DrosophilaOmmatidiaJSONProject.cpp)
-target_link_libraries(EnergyModelTissueSmootherTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
+target_link_libraries(EnergyModelTissueSmootherTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} 	)
  
 #add_executable(MetaheuristicTissueAssociationCommandTest MetaheuristicTissueAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
 #target_link_libraries(MetaheuristicTissueAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES})
