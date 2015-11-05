@@ -90,7 +90,7 @@ DrosophilaOmmatidiaJSONProject::PlatenessImageType::Pointer DrosophilaOmmatidiaJ
 
 	std::string fileName = buffer.str();
 	this->ReadFrame<PlatenessImageType>(platenessImage, fileName);
-	platenessImage->SetSpacing(m_Spacing);
+	//platenessImage->SetSpacing(m_Spacing);
 	return platenessImage;
 }
 

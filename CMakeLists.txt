@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(DrosophilaOmmatidiaExplorer)
 
 
-add_definitions("-std=c++11 -fpermissive ")
+add_definitions("-std=c++11 -fpermissive")
 #add_definitions("-std=c++11 -fpermissive -O3")
 set(CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
@@ -31,7 +31,7 @@ find_package(VTK 6.3 COMPONENTS
   #vtkRenderingFreeType${VTK_RENDERING_BACKEND}
   #vtkRenderingVolume${VTK_RENDERING_BACKEND}
   vtkRenderingVolume
-  vtkRenderingVolumeOpenGL
+  vtkRenderingVolume${VTK_RENDERING_BACKEND}
   vtkViewsQt
   
   vtkjsoncpp
@@ -111,8 +111,12 @@ IF(WITH_GTEST )
 	find_package(GTest REQUIRED)
 	include_directories(${GTEST_INCLUDE_DIR})
 ENDIF(WITH_GTEST)
-add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
+#add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
+#target_link_libraries(MinCostMaxFlowAJAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
 
+add_executable(EnergyModelTissueSmootherTest EnergyModelTissueSmootherTest.cpp DrosophilaOmmatidiaJSONProject.cpp)
+target_link_libraries(EnergyModelTissueSmootherTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
+ 
 #add_executable(MetaheuristicTissueAssociationCommandTest MetaheuristicTissueAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
 #target_link_libraries(MetaheuristicTissueAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES})
 
@@ -126,7 +130,7 @@ add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociatio
 #add_executable(S2LLEEmbeddingTest S2LLEEmbeddingTest.cpp)
 #target_link_libraries(S2LLEEmbeddingTest ${ITK_LIBRARIES})
 
-target_link_libraries(MinCostMaxFlowAJAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
+
 					
 					
 #add_test(
