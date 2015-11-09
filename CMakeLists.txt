@@ -10,7 +10,7 @@ add_definitions("-std=c++11 -fpermissive -Wno-static-float-init")
 set(CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})

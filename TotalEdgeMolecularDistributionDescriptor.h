@@ -13,7 +13,7 @@ template<class TAJGraph, class TMolecularImage> class TotalEdgeMolecularDistribu
 public:
 
 	typedef TotalEdgeMolecularDistributionDescriptor Self;
-	typedef SeedBasedMolecularDistributionDescriptor Superclass;
+	typedef SeedBasedMolecularDistributionDescriptor<TMolecularImage> Superclass;
 	typedef itk::SmartPointer<Self> Pointer;
 
 
