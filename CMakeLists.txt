@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(DrosophilaOmmatidiaExplorer)
 
 
-add_definitions("-std=c++11 -fpermissive -Wno-static-float-init")
+add_definitions("-std=c++11 -fpermissive ")
 #add_definitions("-std=c++11 -fpermissive -O3")
 set(CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
