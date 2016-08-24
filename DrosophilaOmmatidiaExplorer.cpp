@@ -1260,6 +1260,8 @@ void DrosophilaOmmatidiaExplorer::DrawAJVertices(int frame){
         this->m_pVertexListDockWidget->Draw();
 
 
+		auto original = this->m_Project.GetOriginalImage(frame);
+		this->m_EdgesDrawer.SetEdgesRadius(original->GetSpacing()[0]*4);
         this->m_EdgesDrawer.SetEdgesContainer(this->m_CurrentAJGraph);
         this->m_EdgesDrawer.Draw();
         this->m_EdgesDrawer.SetVisibility(this->m_pUI->showAJVerticesCheckBox->isChecked());
@@ -1535,8 +1537,21 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
     	cellSubgraph.AddVertex(*it);
     }
 
-    arrCell->SetTuple1(m_CurrentFrame,cell->GetArea());
+    //arrCell->SetTuple1(m_CurrentFrame,cell->GetArea());
+	vnl_matrix_fixed<double, 2, 2> momentMatrix;
 
+	double den = 4 * (cell->GetXX()*cell->GetYY() - cell->GetXY()*cell->GetXY());
+	momentMatrix(0, 0) = cell->GetXX() / den;
+	momentMatrix(1, 1) = cell->GetYY() / den;
+	momentMatrix(0, 1) = -cell->GetXY() / den;
+	momentMatrix(1, 0) = -cell->GetXY() / den;
+
+	std::cout << momentMatrix << std::endl;
+	vnl_symmetric_eigensystem<double> eigen(momentMatrix);
+
+	double aspectRatio = eigen.get_eigenvalue(0) / eigen.get_eigenvalue(1);
+
+	arrCell->SetTuple1(0, aspectRatio);
 
     for(int t=m_CurrentFrame+1;t<this->m_Project.GetNumberOfFrames();t++){
         auto tissue = m_Project.GetTissueDescriptor(t);
@@ -1549,8 +1564,23 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
 			cellSubgraph = correspondence->GetSuccessor();
 			auto cellHandler =vertexSubsetToCellHandler<OmmatidiaTissue<3>,decltype(cellSubgraph)>(tissue,cellSubgraph);
 			auto cell = tissue->GetCellGraph()->GetCell(cellHandler);
-			arrCell->SetTuple1(t,cell->GetArea());
-			std::cout << "A: " << cell->GetArea() << std::endl;
+			
+
+			vnl_matrix_fixed<double, 2, 2> momentMatrix;
+
+			double den = 4 * (cell->GetXX()*cell->GetYY() - cell->GetXY()*cell->GetXY());
+			momentMatrix(0, 0) = cell->GetXX() / den;
+			momentMatrix(1, 1) = cell->GetYY() / den;
+			momentMatrix(0, 1) = -cell->GetXY() / den;
+			momentMatrix(1, 0) = -cell->GetXY() / den;
+
+			std::cout << momentMatrix << std::endl;
+			vnl_symmetric_eigensystem<double> eigen(momentMatrix);
+
+			double aspectRatio = eigen.get_eigenvalue(0) / eigen.get_eigenvalue(1);
+
+			arrCell->SetTuple1(t, aspectRatio);
+
         }else{
         	break;
         }
@@ -1579,6 +1609,7 @@ void DrosophilaOmmatidiaExplorer::slotPlotCellArea(const OmmatidiaTissue<3>::Cel
 			momentMatrix(0,1)=-cell->GetXY()/den;
 			momentMatrix(1,0)=-cell->GetXY()/den;
 
+			std::cout << momentMatrix << std::endl;
 			vnl_symmetric_eigensystem<double> eigen(momentMatrix);
 
 			double aspectRatio = eigen.get_eigenvalue(0)/eigen.get_eigenvalue(1);

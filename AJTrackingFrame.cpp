@@ -48,10 +48,12 @@ AJTrackingFrame::AJTrackingFrame(QWidget *parent, DrosophilaOmmatidiaJSONProject
 	this->m_AfterRenderWindow->AddRenderer(this->m_AfterRenderer);
 
 	this->m_BeforeEdgesDrawer.SetRenderer(this->m_BeforeRenderer);
+	this->m_BeforeEdgesDrawer.SetEdgesRadius(0.0005);
 	this->m_BeforeVertexDrawer.SetRenderer(this->m_BeforeRenderer);
 	this->m_BeforeCellsDrawer.SetRenderer(this->m_BeforeRenderer);
 
 	this->m_AfterEdgesDrawer.SetRenderer(this->m_AfterRenderer);
+	this->m_AfterEdgesDrawer.SetEdgesRadius(0.0005);
 	this->m_AfterVertexDrawer.SetRenderer(this->m_AfterRenderer);
 	this->m_AfterCellsDrawer.SetRenderer(this->m_AfterRenderer);
 	this->m_Camera= vtkSmartPointer<vtkCamera>::New();
