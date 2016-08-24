@@ -47,6 +47,7 @@ private:
 
     std::map<typename TEdgesContainer::AJEdgeHandler, itk::FixedArray<double,3> > m_Edges2Colors;
 
+	double m_Radius;
 
 public:
     EdgesDrawer(){
@@ -68,7 +69,9 @@ public:
         m_EdgesContainer=edgesContainer;
     }
 
-
+	inline void SetEdgesRadius(double radius){
+		m_Radius = radius;
+	}
     typename TEdgesContainer::AJEdgeHandler GetEdgeFromActor(const vtkSmartPointer<vtkActor> & actor){
 
     	return m_EdgesToActors.right.at(actor);
@@ -134,7 +137,7 @@ public:
          vtkSmartPointer<vtkTubeFilter> tubeFilter =
            vtkSmartPointer<vtkTubeFilter>::New();
          tubeFilter->SetInputConnection(lineSource->GetOutputPort());
-         tubeFilter->SetRadius(0.00025); //default is .5
+         tubeFilter->SetRadius(m_Radius); //default is .5
          tubeFilter->SetNumberOfSides(50);
          tubeFilter->Update();
 

@@ -464,8 +464,8 @@ public:
 
 //		drawPrimal(x0,renderer);
 		//0. Init lagrange mutipliers
-		std::for_each(x0->GetAJGraph()->VerticesBegin(),x0->GetAJGraph()->VerticesEnd(),[&](const typename TTissue::AJGraphType::AJVertexHandler & vertexHandler){
-			std::for_each(x0->GetAJGraph()->BeginOutEdges(vertexHandler),x0->GetAJGraph()->EndOutEdges(vertexHandler),[&](const  typename TTissue::AJGraphType::AJEdgeHandler & edgeHandler){
+		std::for_each(x0->GetAJGraph()->VerticesBegin(),x0->GetAJGraph()->VerticesEnd(),[&](const AJVertexHandler & vertexHandler){
+			std::for_each(x0->GetAJGraph()->BeginOutEdges(vertexHandler),x0->GetAJGraph()->EndOutEdges(vertexHandler),[&](const  AJEdgeHandler & edgeHandler){
 				LagrangeMultiplierType multiplier;
 				multiplier.Fill(0.0);
 				lagrangeEdgeLengths[vertexHandler][edgeHandler]=multiplier;
@@ -514,7 +514,7 @@ public:
 				auto sourcePosition = source->GetPosition() + lagrangePlateness[sourceHandler][edgeHandler];
 				auto targetPosition = target->GetPosition() + lagrangePlateness[targetHandler][edgeHandler];;
 
-				typename PlatenessImageType::IndexType sourceIndex,targetIndex;
+				PlatenessImageType::IndexType sourceIndex,targetIndex;
 
 				m_PlatenessImage->TransformPhysicalPointToIndex(sourcePosition,sourceIndex);
 				m_PlatenessImage->TransformPhysicalPointToIndex(targetPosition,targetIndex);
@@ -1007,7 +1007,7 @@ public:
 				auto sourcePosition = zPlateness[sourceHandler][edgeHandler];//source->GetPosition() + lagrangePlateness[sourceHandler][edgeHandler];
 				auto targetPosition = zPlateness[targetHandler][edgeHandler];//target->GetPosition() + lagrangePlateness[targetHandler][edgeHandler];;
 
-				typename PlatenessImageType::IndexType sourceIndex,targetIndex;
+				PlatenessImageType::IndexType sourceIndex,targetIndex;
 
 				m_PlatenessImage->TransformPhysicalPointToIndex(sourcePosition,sourceIndex);
 				m_PlatenessImage->TransformPhysicalPointToIndex(targetPosition,targetIndex);
