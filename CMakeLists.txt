@@ -10,7 +10,7 @@ add_definitions("-std=c++11 -fpermissive -Wno-static-float-init")
 set(CXX_STANDARD 11)
 set(CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
@@ -22,7 +22,7 @@ INCLUDE(${ITK_USE_FILE})
 #include_directories (/usr/include/eigen3)
 
 
-find_package(VTK 6.3 COMPONENTS
+find_package(VTK 7.1 COMPONENTS
   vtkCommonCore
   vtkFiltersCore
   vtkInfovisCore
@@ -36,7 +36,7 @@ find_package(VTK 6.3 COMPONENTS
   
   vtkjsoncpp
   vtkChartsCore
-  vtkRenderingContext${VTK_RENDERING_BACKEND}
+  #vtkRenderingContext${VTK_RENDERING_BACKEND}
   vtkViewsContext2D
   #vtkIOFFMPEG
 
@@ -93,11 +93,11 @@ set(CMAKE_AUTOMOC ON)
 #add_executable(VertexMolecularDistributionTest VertexMolecularDistributionTest.cpp  )
 #  target_link_libraries(VertexMolecularDistributionTest ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
-add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
+#add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
 
-qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
+#qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
 #target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES} Cbc OsiClp Osi CoinUtils)
-target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+#target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 
 #install(TARGETS DrosophilaOmmatidiaExplorer DESTINATION bin  COMPONENT Runtime)
@@ -114,8 +114,8 @@ ENDIF(WITH_GTEST)
 #add_executable(MinCostMaxFlowAJAssociationCommandTest MinCostMaxFlowAJAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
 #target_link_libraries(MinCostMaxFlowAJAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} Cbc OsiClp Osi CoinUtils	)
 
-add_executable(EnergyModelTissueSmootherTest EnergyModelTissueSmootherTest.cpp DrosophilaOmmatidiaJSONProject.cpp)
-target_link_libraries(EnergyModelTissueSmootherTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} 	)
+#add_executable(EnergyModelTissueSmootherTest EnergyModelTissueSmootherTest.cpp DrosophilaOmmatidiaJSONProject.cpp)
+#target_link_libraries(EnergyModelTissueSmootherTest ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${GTEST_LIBRARY} 	)
  
 #add_executable(MetaheuristicTissueAssociationCommandTest MetaheuristicTissueAssociationCommandTest.cpp DrosophilaOmmatidiaJSONProject.cpp )
 #target_link_libraries(MetaheuristicTissueAssociationCommandTest ${ITK_LIBRARIES} ${VTK_LIBRARIES})
@@ -137,3 +137,10 @@ target_link_libraries(EnergyModelTissueSmootherTest ${ITK_LIBRARIES} ${VTK_LIBRA
     #NAME MinCostMaxFlowAJAssociationCommandTest
     #COMMAND MinCostMaxFlowAJAssociationCommandTest
 #)
+
+
+
+add_executable(GraphStats GraphStats.cpp DrosophilaOmmatidiaJSONProject.cpp )
+target_link_libraries(GraphStats ${ITK_LIBRARIES} jsoncpp)
+
+

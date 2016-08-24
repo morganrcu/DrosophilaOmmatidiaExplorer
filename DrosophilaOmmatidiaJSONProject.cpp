@@ -7,6 +7,8 @@
 #include <itkImageFileWriter.h>
 #include <FeatureContainer.h>
 #include <itkMetaImageIO.h>
+
+
 DrosophilaOmmatidiaJSONProject::DrosophilaOmmatidiaJSONProject() {
 	m_Level = 3;
 }
@@ -648,6 +650,7 @@ DrosophilaOmmatidiaJSONProject::TissueType::Pointer DrosophilaOmmatidiaJSONProje
 		int perimeterEdgesLength = root["Cells"][i]["PerimeterVertices"].size();
 
 		for (int k = 0; k < perimeterVerticesLength; k++) {
+
 			newCell->AddAJEdgeToPerimeter(tissue->GetAJGraph()->GetAJEdgeHandler(root["Cells"][i]["PerimeterEdges"][k][0].asUInt64(),root["Cells"][i]["PerimeterEdges"][k][1].asUInt64()));
 		}
 		if (root["Cells"][i].isMember("type")) {

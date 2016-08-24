@@ -50,7 +50,8 @@
 #include <vtkWindowToImageFilter.h>
 #include <vtkPNGWriter.h>
 #include <string>
-#ifdef USE_FFMPEG
+#include <vnl/algo/vnl_symmetric_eigensystem.h>
+#ifdef +
 #include <vtkFFMPEGWriter.h>
 #endif
 

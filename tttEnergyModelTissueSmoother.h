@@ -129,14 +129,52 @@ public:
         m_InputImage->TransformIndexToPhysicalPoint(m_TargetIndex,targetPoint);
         m_InputImage->TransformIndexToPhysicalPoint(m_Origins->GetPixel(m_TargetIndex),previousPoint);
 
-        auto vector = targetPoint - previousPoint;
-        auto norm = vector.GetNorm();
+
+        double proxValue= m_Cost;
+
+        bool proxFound=false;
+
+
+        m_Proximal=m_TargetIndex;
+
+
+        while(!proxFound){
+        	proxFound=true;
+        	auto currentIndex = m_Proximal;
+        	itk::Offset<3> offset;
+        	for(offset[0] =-1;offset[0]<2;offset[0]++){
+        		for(offset[1] =-1;offset[1]<2;offset[1]++){
+        			for(offset[2] =-1;offset[2]<2;offset[2]++){
+        				if(offset[0]==0 && offset[1]==0 && offset[2]==0) continue;
+        				auto neighIndex= currentIndex+offset;
+        				if(m_LevelSetImage->GetLargestPossibleRegion().IsInside(neighIndex)){
+
+            				PointType neighPoint;
+            		        m_InputImage->TransformIndexToPhysicalPoint(neighIndex,neighPoint);
+
+        					auto neighProximalCost = m_LevelSetImage->GetPixel(neighIndex) + 0.5*(neighPoint-targetPoint).GetSquaredNorm();
+
+        					if(neighProximalCost<proxValue){
+        						proxValue=neighProximalCost;
+        						proxFound=false;
+        						m_Proximal=neighIndex;
+        					}
+        				}
+        			}
+        		}
+        	}
+        }
+        //std::cout << m_TargetIndex << " " << m_Proximal << std::endl;
+
+        //auto vector = targetPoint - previousPoint;
+        //auto norm = vector.GetNorm();
         //m_TargetGradient[0]=(m_LevelSetImage->GetPixel(m_TargetIndex)-m_LevelSetImage->GetPixel(m_Origins->GetPixel(m_TargetIndex)))/(targetPoint[0]-previousPoint[0]);
         //m_TargetGradient[1]=(m_LevelSetImage->GetPixel(m_TargetIndex)-m_LevelSetImage->GetPixel(m_Origins->GetPixel(m_TargetIndex)))/(targetPoint[1]-previousPoint[1]);
         //m_TargetGradient[2]=(m_LevelSetImage->GetPixel(m_TargetIndex)-m_LevelSetImage->GetPixel(m_Origins->GetPixel(m_TargetIndex)))/(targetPoint[2]-previousPoint[2]);
-        auto targetValue = m_LevelSetImage->GetPixel(m_TargetIndex);
-        auto previousValue = m_LevelSetImage->GetPixel(m_Origins->GetPixel(m_TargetIndex));
-        m_Proximal=m_Origins->GetPixel(m_TargetIndex);
+
+        //auto targetValue = m_LevelSetImage->GetPixel(m_TargetIndex);
+        //auto previousValue = m_LevelSetImage->GetPixel(m_Origins->GetPixel(m_TargetIndex));
+        //m_Proximal=m_Origins->GetPixel(m_TargetIndex);
         //m_TargetGradient=vector*(targetValue-previousValue)/norm;
 
         //if(m_TargetGradient[0]>10){
@@ -457,7 +495,7 @@ public:
 
 		int it=0;
 
-		int MaxIt=200;
+		int MaxIt=5000;
 		PathCost<PlatenessImageType> pathCost;
 		pathCost.SetInputImage(m_PlatenessImage);
 		pathCost.Init();
@@ -966,8 +1004,8 @@ public:
 				auto source = x0->GetAJGraph()->GetAJVertex(sourceHandler);
 				auto target = x0->GetAJGraph()->GetAJVertex(targetHandler);
 
-				auto sourcePosition = source->GetPosition() + lagrangePlateness[sourceHandler][edgeHandler];
-				auto targetPosition = target->GetPosition() + lagrangePlateness[targetHandler][edgeHandler];;
+				auto sourcePosition = zPlateness[sourceHandler][edgeHandler];//source->GetPosition() + lagrangePlateness[sourceHandler][edgeHandler];
+				auto targetPosition = zPlateness[targetHandler][edgeHandler];//target->GetPosition() + lagrangePlateness[targetHandler][edgeHandler];;
 
 				typename PlatenessImageType::IndexType sourceIndex,targetIndex;
 
@@ -999,6 +1037,12 @@ public:
 				}else{
 
 				}
+
+				f=f+lagrangePlateness[sourceHandler][edgeHandler]*(source->GetPosition()-sourcePosition);
+				f=f+lagrangePlateness[targetHandler][edgeHandler]*(target->GetPosition()-targetPosition);
+
+				f=f+0.5*(source->GetPosition()-sourcePosition).GetSquaredNorm();
+				f=f+0.5*(target->GetPosition()-targetPosition).GetSquaredNorm();
 			});
 
 			//Compute F

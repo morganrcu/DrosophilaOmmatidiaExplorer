@@ -29,23 +29,23 @@ public:
 
         double result = 0;
         // Find the smallest eigenvalue
-        double smallest = vnl_math_abs(eigenValue[0]);
+        double smallest = itk::Math::abs(eigenValue[0]);
         double Lambda1 = eigenValue[0];
         for (unsigned int i = 1; i <= 2; i++) {
-            if (vnl_math_abs(eigenValue[i]) < smallest) {
+            if ( itk::Math::abs(eigenValue[i]) < smallest) {
                 Lambda1 = eigenValue[i];
-                smallest = vnl_math_abs(eigenValue[i]);
+                smallest =  itk::Math::abs(eigenValue[i]);
             }
         }
 
         // Find the largest eigenvalue
-        double largest = vnl_math_abs(eigenValue[0]);
+        double largest =  itk::Math::abs(eigenValue[0]);
         double Lambda3 = eigenValue[0];
 
         for (unsigned int i = 1; i <= 2; i++) {
-            if (vnl_math_abs(eigenValue[i] > largest)) {
+            if ( itk::Math::abs(eigenValue[i] > largest)) {
                 Lambda3 = eigenValue[i];
-                largest = vnl_math_abs(eigenValue[i]);
+                largest =  itk::Math::abs(eigenValue[i]);
             }
         }
 
