@@ -51,7 +51,7 @@
 #include <vtkPNGWriter.h>
 #include <string>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
-#ifdef +
+#ifdef FFMPEG
 #include <vtkFFMPEGWriter.h>
 #endif
 

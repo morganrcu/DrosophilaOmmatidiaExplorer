@@ -93,10 +93,10 @@ set(CMAKE_AUTOMOC ON)
 #add_executable(VertexMolecularDistributionTest VertexMolecularDistributionTest.cpp  )
 #  target_link_libraries(VertexMolecularDistributionTest ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
-#add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
+add_executable(DrosophilaOmmatidiaExplorer MACOSX_BUNDLE  ${Srcs} ${Hdrs} ${UI_Srcs} ${MOC_Hdrs} ${QRC_Srcs} )
 
-#qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
-#target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES} Cbc OsiClp Osi CoinUtils)
+qt5_use_modules(DrosophilaOmmatidiaExplorer Core Gui Widgets)
+target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES} Cbc OsiClp Osi CoinUtils)
 #target_link_libraries(DrosophilaOmmatidiaExplorer ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 
@@ -140,7 +140,7 @@ ENDIF(WITH_GTEST)
 
 
 
-add_executable(GraphStats GraphStats.cpp DrosophilaOmmatidiaJSONProject.cpp )
-target_link_libraries(GraphStats ${ITK_LIBRARIES} jsoncpp)
+#add_executable(GraphStats GraphStats.cpp DrosophilaOmmatidiaJSONProject.cpp )
+#target_link_libraries(GraphStats ${ITK_LIBRARIES} jsoncpp)
 
 

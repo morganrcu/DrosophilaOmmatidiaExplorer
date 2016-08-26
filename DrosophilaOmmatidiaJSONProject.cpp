@@ -78,7 +78,17 @@ DrosophilaOmmatidiaJSONProject::OriginalImageType::Pointer DrosophilaOmmatidiaJS
 	buffer << "original_L" << m_Level << "_T" << m_FirstFrame + frame << ".mha";
 
 	std::string fileName = buffer.str();
-	this->ReadFrame<OriginalImageType>(originalImage, fileName);
+	try{
+		this->ReadFrame<OriginalImageType>(originalImage, fileName);
+	}catch(itk::ExceptionObject & e){
+		std::stringstream buffer("");
+			buffer << "observed_L" << m_Level << "_T" << m_FirstFrame + frame << ".mha";
+
+			std::string fileName = buffer.str();
+			this->ReadFrame<OriginalImageType>(originalImage, fileName);
+	}
+
+
 	m_Spacing = originalImage->GetSpacing();
 	return originalImage;
 }

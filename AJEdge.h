@@ -12,6 +12,8 @@ public:
     typedef itk::DataObject Superclass;
     typedef itk::SmartPointer<Self> Pointer;
 
+    typedef itk::Point<double,3> PointType;
+
     typedef itk::Array<double> DescriptorType;
 
     itkNewMacro(Self)
@@ -27,6 +29,7 @@ public:
 		return m_Cells;
 	}
 
+
 protected:
 	AJEdge(){
 
@@ -40,6 +43,7 @@ private:
 
     std::pair<TCellVertex,TCellVertex> m_Cells;
 
+    std::vector<PointType> m_ExactPath;
 };
 
 #endif // AJVERTEX_H
